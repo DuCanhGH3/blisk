@@ -1,5 +1,5 @@
 {
-  "name": "perdrift",
+  "name": "blisk",
   "version": "0.0.1",
   "private": true,
   "type": "module",
@@ -30,6 +30,8 @@
     "@typescript-eslint/parser": "7.7.1",
     "argon2": "0.40.1",
     "autoprefixer": "10.4.19",
+    "embla-carousel": "8.0.4",
+    "embla-carousel-svelte": "8.0.4",
     "eslint": "8.56.0",
     "eslint-config-prettier": "9.1.0",
     "eslint-plugin-svelte": "2.38.0",

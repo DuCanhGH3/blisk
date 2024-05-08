@@ -42,7 +42,7 @@
   <div class="mx-auto max-w-7xl px-2 py-2 md:px-6 lg:px-8">
     <div class="relative flex items-center justify-between overflow-x-clip">
       <div class="flex items-center gap-2 md:block md:items-start md:py-2">
-        <a class="shrink-0 font-mono text-base uppercase tracking-widest" href="/" aria-label="Go to home">PERDRIFT</a>
+        <a class="shrink-0 font-mono text-base" href="/" aria-label="Go to home">blisk</a>
       </div>
       <div class="flex flex-row-reverse items-center gap-[5px] md:flex-row">
         <details bind:this={mobileMenu} class="details-anim relative ml-3 md:hidden" id="nav-mobile-menu">
