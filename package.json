@@ -31,6 +31,7 @@
     "argon2": "0.40.1",
     "autoprefixer": "10.4.19",
     "embla-carousel": "8.0.4",
+    "embla-carousel-autoplay": "8.0.4",
     "embla-carousel-svelte": "8.0.4",
     "eslint": "8.56.0",
     "eslint-config-prettier": "9.1.0",

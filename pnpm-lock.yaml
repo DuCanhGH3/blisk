@@ -59,6 +59,9 @@ importers:
       embla-carousel:
         specifier: 8.0.4
         version: 8.0.4
+      embla-carousel-autoplay:
+        specifier: 8.0.4
+        version: 8.0.4(embla-carousel@8.0.4)
       embla-carousel-svelte:
         specifier: 8.0.4
         version: 8.0.4(svelte@5.0.0-next.115)
@@ -1467,6 +1470,11 @@ packages:
 
   electron-to-chromium@1.4.748:
     resolution: {integrity: sha512-VWqjOlPZn70UZ8FTKUOkUvBLeTQ0xpty66qV0yJcAGY2/CthI4xyW9aEozRVtuwv3Kpf5xTesmJUcPwuJmgP4A==}
+
+  embla-carousel-autoplay@8.0.4:
+    resolution: {integrity: sha512-Ilmgn+d09o2M23yvl4cYwfO8VnZi7YXQl9UGYIflLGhtFaZW9PKU67TaW8teRjaDhS3I+uz3osBFDO407YPjfQ==}
+    peerDependencies:
+      embla-carousel: 8.0.4
 
   embla-carousel-reactive-utils@8.0.4:
     resolution: {integrity: sha512-7lWM+8hanIF2roTAjxwfqfr0+VTbr9rYVlAs0r5PwPOVpz1G3/+bRelgAYvwcfWVm5Vydo2pKXVfFOPQjznF7w==}
@@ -4447,6 +4455,10 @@ snapshots:
       safe-buffer: 5.2.1
 
   electron-to-chromium@1.4.748: {}
+
+  embla-carousel-autoplay@8.0.4(embla-carousel@8.0.4):
+    dependencies:
+      embla-carousel: 8.0.4
 
   embla-carousel-reactive-utils@8.0.4(embla-carousel@8.0.4):
     dependencies:

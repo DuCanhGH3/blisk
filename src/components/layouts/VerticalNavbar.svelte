@@ -8,6 +8,7 @@
   import NavLink from "./NavLink.svelte";
   import NavToggleScheme from "./NavToggleScheme.svelte";
   import { LOGGED_IN_LINKS, LOGGED_OUT_LINKS, GENERAL_LINKS } from "./navbar-constants";
+  import NavUsermenu from "./NavUsermenu.svelte";
 
   interface NavbarProps {
     user: Pick<User, "name"> | null;
@@ -56,7 +57,7 @@
   <nav class="z-[50] h-fit transition-colors-opacity duration-100">
     <div class="relative mx-auto flex flex-row justify-between overflow-x-clip md:flex-col">
       <div class="flex items-center gap-2 md:block md:items-start md:py-2">
-        <a class="shrink-0 font-mono text-base px-3 py-2" href="/" aria-label="Go to home">blisk</a>
+        <a class="shrink-0 select-none px-3 py-2 font-mono text-base" href="/" aria-label="Go to home">blisk</a>
       </div>
       <div class="flex flex-col gap-[5px] md:flex-col-reverse">
         <div class="hidden h-full pr-2 md:flex md:pr-0">
@@ -100,6 +101,7 @@
               </ul>
             </div>
           </details>
+          <NavUsermenu {user} leftSided summaryIcon />
           <NavToggleScheme />
         </div>
       </div>

@@ -17,7 +17,8 @@
 
 <span
   class={clsx(
-    "flex w-full cursor-pointer flex-row justify-between rounded-md transition-colors-opacity duration-100 hover:bg-neutral-250 dark:hover:bg-neutral-800"
+    "flex w-full cursor-pointer flex-row justify-between rounded-md transition-colors-opacity duration-100 select-none",
+    isActive ? "bg-neutral-250 dark:bg-neutral-800" : "hover:bg-neutral-250 dark:hover:bg-neutral-800"
   )}
 >
   <a
@@ -27,6 +28,7 @@
       textCenter && "text-center",
       wideText ? "shrink-0 text-base uppercase tracking-widest" : "text-base md:text-sm"
     )}
+    aria-current={isActive ? "page" : undefined}
     {...props}
   >
     {#if children}

@@ -58,6 +58,10 @@
   #nav-mobile-menu[open] > summary {
     @apply [&>:nth-child(1)]:translate-y-[0.7rem] [&>:nth-child(1)]:rotate-45 [&>:nth-child(2)]:opacity-0 [&>:nth-child(3)]:-translate-y-[0.7rem] [&>:nth-child(3)]:-rotate-45;
   }
+
+  #nav-usermenu[open] > summary {
+    @apply bg-neutral-250 dark:bg-neutral-800;
+  }
 }
 
 @layer utilities {
@@ -98,6 +102,9 @@
   }
   .nav-button {
     @apply flex cursor-pointer items-center justify-center rounded-full bg-transparent p-3 duration-100 hover:bg-neutral-250 dark:hover:bg-neutral-800;
+  }
+  .nav-button.active {
+    @apply bg-neutral-250 dark:bg-neutral-800;
   }
   .button {
     @apply min-w-max rounded-md px-5 py-2.5 text-center text-sm font-medium transition-colors duration-100 focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-gray-800;

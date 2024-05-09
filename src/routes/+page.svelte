@@ -3,7 +3,9 @@
   import ChevronRight from "$components/icons/ChevronRight.svelte";
   import { clsx } from "$lib/clsx";
   import type { EmblaCarouselType } from "embla-carousel";
+  import emblaAutoplay from "embla-carousel-autoplay";
   import emblaCarouselSvelte from "embla-carousel-svelte";
+  import CategorySlider from "./CategorySlider.svelte";
 
   let emblaApi = $state<EmblaCarouselType | null>(null);
 
@@ -26,7 +28,7 @@
 </script>
 
 <!-- svelte-ignore deprecated_event_handler -->
-<div class="flex w-full justify-center self-stretch px-6">
+<div class="flex w-full flex-col justify-center gap-10 self-stretch px-4">
   <div class="h-full w-full">
     <div class="relative w-full py-4">
       <button
@@ -51,29 +53,30 @@
       </button>
       <div
         class="flex h-full w-full overflow-hidden rounded-[20px] border border-neutral-300 bg-white dark:border-neutral-800 dark:bg-neutral-950"
-        use:emblaCarouselSvelte={{ options: { dragFree: true, containScroll: false }, plugins: [] }}
+        use:emblaCarouselSvelte={{ options: { containScroll: false, dragFree: true, loop: true }, plugins: [emblaAutoplay()] }}
         on:emblaInit={onEmbiaInit}
       >
         <div class="flex w-full">
           {#each Array.from({ length: 3 }) as _}
-            <div class="flex w-full min-w-0 flex-[0_0_100%] select-none flex-col gap-4 p-4">
-              <div class="p-2">
+            <a href="/" class="flex w-full min-w-0 flex-[0_0_100%] select-none flex-col gap-4 p-4">
+              <span class="p-2">
                 <h2 class="text-comment text-2xl">book of the day</h2>
-                <h3 class="line-clamp-1 text-4xl">
-                  asoooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooasoooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooasoooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooasoooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooasoooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooasoooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooasoooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooasoooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooasooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
-                </h3>
-              </div>
+                <h3 class="line-clamp-1 text-4xl">Lorem ipsum</h3>
+              </span>
               <img
                 width={900}
                 height={400}
-                class="h-96 md:h-[600px] w-full rounded-md object-cover opacity-75"
+                class="h-96 w-full rounded-md object-cover opacity-75 md:h-[600px]"
                 src="https://images.ctfassets.net/kftzwdyauwt9/44csSCT2TZUSqqI2UCLDF9/153e0192aeb75b2322007085c1009bc0/AGI2.png?w=3840&q=90&fm=webp"
                 alt=""
               />
-            </div>
+            </a>
           {/each}
         </div>
       </div>
     </div>
   </div>
+  {#each Array.from({ length: 3 }) as _}
+    <CategorySlider />
+  {/each}
 </div>
