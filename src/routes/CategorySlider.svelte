@@ -27,7 +27,7 @@
 </script>
 
 <div class="h-full w-full">
-  <h2 class="text-4xl mb-2"><span class="sr-only">Category: </span>mystery thrillers</h2>
+  <h2 class="mb-2 text-4xl"><span class="sr-only">Category: </span>mystery thrillers</h2>
   <div class="relative w-full py-4">
     <button
       class={clsx(
@@ -59,13 +59,13 @@
           <a
             href="/"
             class={clsx(
-              "mr-4 flex w-full min-w-0 flex-[0_0_45%] md:flex-[0_0_20%] select-none flex-col gap-4 rounded-[20px] border p-4",
+              "mr-4 flex w-full min-w-0 flex-[0_0_45%] select-none flex-col gap-4 rounded-[20px] border p-4 md:flex-[0_0_20%]",
               "border-neutral-300 bg-white dark:border-neutral-800 dark:bg-neutral-950"
             )}
           >
             <span class="p-2">
-              <h3 class="text-comment line-clamp-1 text-xl">recommendation</h3>
-              <h4 class="line-clamp-1 text-3xl">Lorem ipsum</h4>
+              <h3 class="text-comment line-clamp-1 text-xl font-semibold">recommendation</h3>
+              <h4 class="line-clamp-1 text-3xl font-semibold">Lorem ipsum</h4>
             </span>
             <img
               width={900}

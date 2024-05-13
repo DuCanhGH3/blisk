@@ -1,0 +1,13 @@
+[package]
+name = "backend"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+axum = "0.7.5"
+config = { version = "0.14.0", features = ["yaml"] }
+dotenv = "0.15.0"
+serde = "1.0.201"
+tokio = { version = "1.37.0", features = ["macros", "rt-multi-thread"] }

@@ -60,8 +60,8 @@
           {#each Array.from({ length: 3 }) as _}
             <a href="/" class="flex w-full min-w-0 flex-[0_0_100%] select-none flex-col gap-4 p-4">
               <span class="p-2">
-                <h2 class="text-comment text-2xl">book of the day</h2>
-                <h3 class="line-clamp-1 text-4xl">Lorem ipsum</h3>
+                <h2 class="text-comment text-2xl font-semibold">book of the day</h2>
+                <h3 class="line-clamp-1 text-4xl font-semibold">Lorem ipsum</h3>
               </span>
               <img
                 width={900}
