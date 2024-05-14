@@ -1,35 +1,3 @@
-use sqlx::postgres::{PgConnectOptions, PgSslMode};
-
-#[derive(serde::Deserialize, Clone)]
-pub struct DatabaseSettings {
-    pub username: String,
-    pub password: String,
-    pub port: u16,
-    pub host: String,
-    pub database_name: String,
-    pub require_ssl: bool,
-}
-
-impl DatabaseSettings {
-    pub fn to_pg_connect_options(&self) -> PgConnectOptions {
-        let ssl_mode = if self.require_ssl {
-            PgSslMode::Require
-        } else {
-            PgSslMode::Prefer
-        };
-
-        let options = PgConnectOptions::new()
-            .username(&self.username)
-            .password(&self.password)
-            .port(self.port)
-            .host(&self.host)
-            .database(&self.database_name)
-            .ssl_mode(ssl_mode);
-
-        options
-    }
-}
-
 #[derive(serde::Deserialize, Clone)]
 pub struct ApplicationSettings {
     pub port: u16,
@@ -41,7 +9,6 @@ pub struct ApplicationSettings {
 #[derive(serde::Deserialize, Clone)]
 pub struct Settings {
     pub application: ApplicationSettings,
-    pub database: DatabaseSettings,
     pub debug: bool,
 }
 
@@ -66,13 +33,13 @@ impl TryFrom<String> for Environment {
         match value.as_str() {
             "development" => Ok(Environment::Development),
             "production" => Ok(Environment::Production),
-            other => Err(format!("{} is not a supported environment.", other)),
+            other => Err(format!("{} is not a supported environment", other)),
         }
     }
 }
 
 pub fn get_settings() -> Result<Settings, config::ConfigError> {
-    let cwd = std::env::current_dir().expect("Failed to determine cwd.");
+    let cwd = std::env::current_dir().expect("Failed to determine cwd");
     let settings_dir = cwd.join("settings");
     let environment: Environment = std::env::var("APP_ENVIRONMENT")
         .unwrap_or_else(|_| "development".to_owned())
@@ -84,11 +51,7 @@ pub fn get_settings() -> Result<Settings, config::ConfigError> {
     let settings = config::Config::builder()
         .add_source(config::File::from(settings_dir.join("base.yaml")))
         .add_source(config::File::from(settings_dir.join(environment_file)))
-        .add_source(
-            config::Environment::with_prefix("APP")
-                .prefix_separator("_")
-                .separator("_"),
-        )
+        .add_source(config::Environment::with_prefix("APP"))
         .build()?;
 
     settings.try_deserialize::<Settings>()

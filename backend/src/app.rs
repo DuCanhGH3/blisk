@@ -1,10 +1,12 @@
+use std::str::FromStr;
+
 use crate::{routes, settings::Settings};
 use axum::{
     routing::{get, post},
     serve::Serve,
     Router,
 };
-use sqlx::{postgres::PgPoolOptions, Pool, Postgres};
+use sqlx::{postgres::{PgConnectOptions, PgPoolOptions}, Pool, Postgres};
 
 #[derive(Clone)]
 pub struct ApplicationState {
@@ -23,14 +25,18 @@ impl Application {
             settings.application.host, settings.application.port
         );
 
+        let db_uri = std::env::var("DATABASE_URL").expect("Failed to read database URI");
+
+        let pool_options = PgConnectOptions::from_str(&db_uri).expect("Failed to parse database URI");
+
         let pool = PgPoolOptions::new()
             .acquire_timeout(std::time::Duration::from_secs(2))
-            .connect_lazy_with(settings.database.to_pg_connect_options());
+            .connect_lazy_with(pool_options);
 
         sqlx::migrate!()
             .run(&pool)
             .await
-            .expect("Failed to migrate database.");
+            .expect("Failed to migrate database");
 
         let app_state = ApplicationState { pool };
         let listener = tokio::net::TcpListener::bind(&address).await?;
