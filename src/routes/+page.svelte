@@ -52,7 +52,7 @@
         <ChevronRight width={24} height={24} class="transition-all duration-100" />
       </button>
       <div
-        class="flex h-full w-full overflow-hidden rounded-[20px] border border-neutral-300 bg-white dark:border-neutral-800 dark:bg-neutral-950"
+        class="flex h-full w-full overflow-hidden rounded-[21px] border border-neutral-300 bg-white dark:border-neutral-800 dark:bg-neutral-950"
         use:emblaCarouselSvelte={{ options: { containScroll: false, dragFree: true, loop: true }, plugins: [emblaAutoplay()] }}
         on:emblaInit={onEmbiaInit}
       >

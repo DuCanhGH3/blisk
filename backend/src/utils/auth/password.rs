@@ -5,13 +5,11 @@ use argon2::{
 
 pub fn hash(password: String) -> Result<String, Error> {
     let salt = SaltString::generate(&mut OsRng);
-    match Argon2::default().hash_password(password.as_bytes(), &salt) {
-        Ok(password_hash) => Ok( password_hash.to_string()),
-        Err(err) => Err(err)
-    }
+    let hashed = Argon2::default().hash_password(password.as_bytes(), &salt)?;
+    Ok(hashed.to_string())
 }
 
-pub fn verify(hash: String, password: String) -> Result<(), argon2::password_hash::Error> {
+pub fn verify(hash: String, password: String) -> Result<(), Error> {
     let password_hash = PasswordHash::new(&hash)?;
     Argon2::default().verify_password(password.as_bytes(), &password_hash)
 }

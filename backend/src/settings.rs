@@ -7,9 +7,16 @@ pub struct ApplicationSettings {
 }
 
 #[derive(serde::Deserialize, Clone)]
+pub struct SecretSettings {
+    pub secret_key: String,
+    pub token_expiration: i64,
+}
+
+#[derive(serde::Deserialize, Clone)]
 pub struct Settings {
     pub application: ApplicationSettings,
     pub debug: bool,
+    pub secret: SecretSettings,
 }
 
 pub enum Environment {
