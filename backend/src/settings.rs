@@ -1,21 +1,78 @@
-#[derive(serde::Deserialize, Clone)]
-pub struct ApplicationSettings {
-    pub port: u16,
-    pub host: String,
-    pub base_url: String,
-    pub protocol: String,
-}
+use std::sync::LazyLock;
 
 #[derive(serde::Deserialize, Clone)]
+pub struct ApplicationSettings {
+    /**
+     * Whether the application should run in debug mode.
+     */
+    pub debug: bool,
+    /**
+     * The port the application should listen on.
+     */
+    pub port: u16,
+    /**
+     * The hostname the application should listen on.
+     */
+    pub host: String,
+    /**
+     * The public address that should point to the backend.
+     */
+    pub base: String,
+    /**
+     * The protocol the application should use.
+     */
+    pub protocol: String,
+}
+#[derive(serde::Deserialize, Clone)]
+pub struct EmailHostSettings {
+    pub name: String,
+    pub password: String,
+}
+#[derive(serde::Deserialize, Clone)]
+pub struct EmailSettings {
+    pub host: EmailHostSettings,
+}
+#[derive(serde::Deserialize, Clone)]
+pub struct FrontendSettings {
+    /**
+     * The URL to the frontend.
+     */
+    pub url: String,
+}
+#[derive(serde::Deserialize, Clone)]
+pub struct RedisSettings {
+    pub uri: String,
+}
+#[derive(serde::Deserialize, Clone)]
 pub struct SecretSettings {
-    pub secret_key: String,
-    pub token_expiration: i64,
+    /**
+     * The HMAC secret used for issuing tokens.
+     */
+    pub sec: String,
+    /**
+     * A token's expiration time in seconds.
+     */
+    pub exp: i64,
 }
 
 #[derive(serde::Deserialize, Clone)]
 pub struct Settings {
+    /**
+     * Application-related settings.
+     */
     pub application: ApplicationSettings,
-    pub debug: bool,
+    /**
+     * Email-related settings.
+     */
+    pub email: EmailSettings,
+    /**
+     * Frontend-related settings.
+     */
+    pub frontend: FrontendSettings,
+    pub redis: RedisSettings,
+    /**
+     * Secret-related settings.
+     */
     pub secret: SecretSettings,
 }
 
@@ -45,7 +102,7 @@ impl TryFrom<String> for Environment {
     }
 }
 
-pub fn get_settings() -> Result<Settings, config::ConfigError> {
+pub static SETTINGS: LazyLock<Settings> = LazyLock::new(|| {
     let cwd = std::env::current_dir().expect("Failed to determine cwd");
     let settings_dir = cwd.join("settings");
     let environment: Environment = std::env::var("APP_ENVIRONMENT")
@@ -55,11 +112,14 @@ pub fn get_settings() -> Result<Settings, config::ConfigError> {
 
     let environment_file = format!("{}.yaml", environment.as_str());
 
-    let settings = config::Config::builder()
+    let config = config::Config::builder()
         .add_source(config::File::from(settings_dir.join("base.yaml")))
         .add_source(config::File::from(settings_dir.join(environment_file)))
-        .add_source(config::Environment::with_prefix("APP"))
-        .build()?;
+        .add_source(config::Environment::with_prefix("APP").separator("_"))
+        .build()
+        .expect("Failed to build configuration");
 
-    settings.try_deserialize::<Settings>()
-}
+    config
+        .try_deserialize::<Settings>()
+        .expect("Failed to parse settings")
+});

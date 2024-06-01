@@ -1,6 +1,7 @@
 application:
+  debug: true
   protocol: http
   host: 127.0.0.1
-  base_url: "http://127.0.0.1"
-
-debug: true
+  base: "http://127.0.0.1"
+frontend:
+  url: "http://localhost:5173"

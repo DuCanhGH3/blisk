@@ -1,16 +1,20 @@
 use std::str::FromStr;
 
-use crate::{routes, settings::Settings};
+use crate::{routes, settings::SETTINGS};
 use axum::{
     routing::{get, post},
     serve::Serve,
     Router,
 };
-use sqlx::{postgres::{PgConnectOptions, PgPoolOptions}, Pool, Postgres};
+use sqlx::{
+    postgres::{PgConnectOptions, PgPoolOptions},
+    Pool, Postgres,
+};
 
 #[derive(Clone)]
 pub struct ApplicationState {
     pub pool: Pool<Postgres>,
+    pub redis_client: redis::Client,
 }
 
 pub struct Application {
@@ -19,15 +23,16 @@ pub struct Application {
 }
 
 impl Application {
-    pub async fn build(settings: Settings) -> Result<Self, std::io::Error> {
+    pub async fn build() -> Result<Self, std::io::Error> {
         let address = format!(
             "{}:{}",
-            settings.application.host, settings.application.port
+            SETTINGS.application.host, SETTINGS.application.port
         );
 
         let db_uri = std::env::var("DATABASE_URL").expect("Failed to read database URI");
 
-        let pool_options = PgConnectOptions::from_str(&db_uri).expect("Failed to parse database URI");
+        let pool_options =
+            PgConnectOptions::from_str(&db_uri).expect("Failed to parse database URI");
 
         let pool = PgPoolOptions::new()
             .acquire_timeout(std::time::Duration::from_secs(2))
@@ -38,7 +43,10 @@ impl Application {
             .await
             .expect("Failed to migrate database");
 
-        let app_state = ApplicationState { pool };
+        let redis_client =
+            redis::Client::open(SETTINGS.redis.uri.as_str()).expect("Failed to create a Redis client");
+
+        let app_state = ApplicationState { pool, redis_client };
         let listener = tokio::net::TcpListener::bind(&address).await?;
         let port = listener.local_addr().unwrap().port();
         let app = Router::new()
