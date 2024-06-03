@@ -1,9 +1,17 @@
 use crate::{
     app::ApplicationState,
-    utils::{auth, emails::send_confirmation_email},
+    utils::{
+        auth,
+        errors::ApplicationError,
+        response::{response, ErrorResponse, SuccessResponse},
+    },
 };
-use axum::{extract::State, http::StatusCode, response::IntoResponse, Json};
-use serde_json::json;
+use axum::{
+    extract::State,
+    http::StatusCode,
+    response::{IntoResponse, Response},
+    Json,
+};
 use sqlx::Row;
 use tracing::{event, instrument, Level};
 
@@ -24,7 +32,7 @@ pub async fn register(
         password,
         name,
     }): Json<UserRegisterPayload>,
-) -> impl IntoResponse {
+) -> Response {
     let mut transaction = match pool.begin().await {
         Ok(transaction) => transaction,
         Err(err) => {
@@ -33,11 +41,12 @@ pub async fn register(
                 "(sqlx) failed to begin a new transaction: {}",
                 err
             );
-            return (
+            return response(
                 StatusCode::INTERNAL_SERVER_ERROR,
-                Json(json!({
-                    "error": "Internal Server Error"
-                })),
+                None,
+                Json(ErrorResponse {
+                    error: "Internal Server Error".to_owned(),
+                }),
             );
         }
     };
@@ -45,11 +54,12 @@ pub async fn register(
         Ok(password) => password,
         Err(err) => {
             event!(Level::ERROR, "(argon2) failed to hash password: {}", err);
-            return (
+            return response(
                 StatusCode::INTERNAL_SERVER_ERROR,
-                Json(json!({
-                    "error": "Internal Server Error"
-                })),
+                None,
+                Json(ErrorResponse {
+                    error: "Internal Server Error".to_owned(),
+                }),
             );
         }
     };
@@ -65,22 +75,18 @@ pub async fn register(
     {
         Ok(uid) => uid,
         Err(err) => {
-            event!(Level::ERROR, "(sqlx) failed to create a new user: {}", err);
-            let error_message = if let Some(db_err) = err.as_database_error() {
+            if let Some(db_err) = err.as_database_error() {
                 if db_err.is_unique_violation() {
-                    "User already exists!"
-                } else {
-                    "Internal Server Error"
+                    return response(
+                        StatusCode::BAD_REQUEST,
+                        None,
+                        Json(ErrorResponse {
+                            error: "User already exists!".to_owned(),
+                        }),
+                    );
                 }
-            } else {
-                "Internal Server Error"
-            };
-            return (
-                StatusCode::INTERNAL_SERVER_ERROR,
-                Json(json!({
-                    "error": error_message
-                })),
-            );
+            }
+            return ApplicationError::SqlxError(err).into_response();
         }
     };
     let mut redis_con = match redis_client.get_connection() {
@@ -91,15 +97,16 @@ pub async fn register(
                 "(redis) failed to retrieve Redis connection: {}",
                 err
             );
-            return (
+            return response(
                 StatusCode::INTERNAL_SERVER_ERROR,
-                Json(json!({
-                    "error": "Internal Server Error"
-                })),
+                None,
+                Json(ErrorResponse {
+                    error: "Internal Server Error".to_owned(),
+                }),
             );
         }
     };
-    if let Err(err) = send_confirmation_email(
+    if let Err(err) = auth::emails::send_confirmation_email(
         &mut redis_con,
         "blisk - Confirmation email".to_owned(),
         uid,
@@ -109,27 +116,23 @@ pub async fn register(
     )
     .await
     {
-        event!(Level::ERROR, "failed to send confirmation email: {}", err);
-        return (
-            StatusCode::INTERNAL_SERVER_ERROR,
-            Json(json!({
-                "error": "Internal Server Error"
-            })),
-        );
+        return err.into_response();
     }
     if let Err(err) = transaction.commit().await {
         event!(Level::ERROR, "(sqlx) failed to commit transaction: {}", err);
-        return (
+        return response(
             StatusCode::INTERNAL_SERVER_ERROR,
-            Json(json!({
-                "error": "Internal Server Error"
-            })),
+            None,
+            Json(ErrorResponse {
+                error: "Internal Server Error".to_owned(),
+            }),
         );
     }
-    (
+    response(
         StatusCode::CREATED,
-        Json(json!({
-            "message": "Account created successfully."
-        })),
+        None,
+        Json(SuccessResponse {
+            message: "Account created successfully.".to_owned(),
+        }),
     )
 }

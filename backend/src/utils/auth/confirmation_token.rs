@@ -1,20 +1,20 @@
-use crate::settings::SETTINGS;
+use crate::{settings::SETTINGS, utils::errors::ApplicationError};
 use jsonwebtoken::{decode, encode, DecodingKey, EncodingKey, Header, Validation};
 use rand::{distributions::Alphanumeric, Rng};
 use redis::Commands;
-use tracing::{event, instrument, Level};
+use tracing::instrument;
 
 const CONFIRMATION_TOKEN_PREFIX: &str = "confirmation_token_sid";
 
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
 pub struct TokenClaims {
-    exp: i64,
-    uid: String,
-    sid: String,
+    pub exp: i64,
+    pub uid: String,
+    pub sid: String,
 }
 
 pub struct ConfirmationToken {
-    uid: String,
+    pub uid: String,
 }
 
 #[instrument(name = "Issuing confirmation token", skip(redis_con))]
@@ -22,7 +22,7 @@ pub async fn issue_confirmation_token(
     redis_con: &mut redis::Connection,
     uid: String,
     is_password_change: bool,
-) -> Result<String, String> {
+) -> Result<String, ApplicationError> {
     let now = chrono::Local::now();
     let ttl = {
         if is_password_change {
@@ -47,8 +47,7 @@ pub async fn issue_confirmation_token(
     let _: () = match redis_con.set(redis_key, String::new()) {
         Ok(result) => result,
         Err(err) => {
-            event!(Level::ERROR, "(Redis) error while setting token: {}", err);
-            return Err(format!("{}", err));
+            return Err(ApplicationError::RedisError(err));
         }
     };
     let claims = TokenClaims { exp, uid, sid };
@@ -59,8 +58,7 @@ pub async fn issue_confirmation_token(
     ) {
         Ok(token) => Ok(token),
         Err(err) => {
-            event!(Level::ERROR, "(JWT) error while encoding: {}", err);
-            return Err(format!("{}", err));
+            return Err(ApplicationError::JwtError(err));
         }
     }
 }
@@ -70,7 +68,7 @@ pub async fn verify_confirmation_token(
     redis_con: &mut redis::Connection,
     token: String,
     is_password_change: bool,
-) -> Result<ConfirmationToken, String> {
+) -> Result<ConfirmationToken, ApplicationError> {
     let claims = match decode::<TokenClaims>(
         &token,
         &DecodingKey::from_secret(SETTINGS.secret.sec.as_bytes()),
@@ -78,8 +76,7 @@ pub async fn verify_confirmation_token(
     ) {
         Ok(token) => token.claims,
         Err(err) => {
-            event!(Level::ERROR, "(JWT) error while decoding: {}", err);
-            return Err(format!("{}", err));
+            return Err(ApplicationError::JwtError(err));
         }
     };
 
@@ -97,20 +94,18 @@ pub async fn verify_confirmation_token(
     let redis_entry: Option<String> = match redis_con.get(redis_key.clone()) {
         Ok(entry) => entry,
         Err(err) => {
-            event!(Level::ERROR, "(Redis) error while getting token: {}", err);
-            return Err(format!("{}", err));
+            return Err(ApplicationError::RedisError(err));
         }
     };
 
     if redis_entry.is_none() {
-        return Err("Token has either expired or been used.".to_owned());
+        return Err(ApplicationError::TokenUsed);
     }
 
     let _: () = match redis_con.del(redis_key.clone()) {
         Ok(result) => result,
         Err(err) => {
-            event!(Level::ERROR, "(Redis) error while deleting token: {}", err);
-            return Err(format!("{}", err));
+            return Err(ApplicationError::RedisError(err));
         }
     };
 

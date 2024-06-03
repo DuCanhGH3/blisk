@@ -52,6 +52,7 @@ impl Application {
         let app = Router::new()
             .route("/health", get(routes::health::health_check))
             .route("/users/register", post(routes::users::register))
+            .route("/users/confirm", post(routes::users::confirm))
             .with_state(app_state);
         let server = axum::serve(listener, app);
 

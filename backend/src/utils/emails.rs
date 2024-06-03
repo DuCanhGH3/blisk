@@ -1,7 +1,5 @@
-use crate::{
-    settings::SETTINGS,
-    utils::{auth::confirmation_token::issue_confirmation_token, templating::TEMPLATES},
-};
+use crate::settings::SETTINGS;
+use crate::utils::errors::ApplicationError;
 use lettre::{
     message::{header::ContentType, MultiPart, SinglePart},
     transport::smtp::authentication::Credentials,
@@ -30,7 +28,7 @@ pub async fn send_email(
     subject: impl Into<String>,
     html_content: impl Into<String>,
     text_content: impl Into<String>,
-) -> Result<(), String> {
+) -> Result<(), ApplicationError> {
     let email = match Message::builder()
         .from(
             format!(
@@ -64,12 +62,7 @@ pub async fn send_email(
         ) {
         Ok(message) => message,
         Err(err) => {
-            event!(
-                Level::ERROR,
-                "(Lettre) failed to construct message: {}",
-                err
-            );
-            return Err(format!("{}", err));
+            return Err(ApplicationError::LettreError(err));
         }
     };
 
@@ -88,109 +81,6 @@ pub async fn send_email(
             event!(Level::INFO, "email sent!");
             Ok(())
         }
-        Err(e) => {
-            event!(Level::ERROR, "(Lettre) failed to send email: {:#?}", e);
-            Err(format!("Failed to send email: {:#?}", e))
-        }
+        Err(err) => Err(ApplicationError::LettreSmtpError(err)),
     }
-}
-
-#[instrument(
-    name = "Sending a confirmation email",
-    skip(redis_con),
-    fields(
-        recipient_user_id = %uid,
-        recipient_name = %recipient_name,
-        recipient_email = %recipient_email,
-    )
-)]
-pub async fn send_confirmation_email(
-    redis_con: &mut redis::Connection,
-    subject: String,
-    uid: String,
-    recipient_name: String,
-    recipient_email: String,
-    is_password_change: bool,
-) -> Result<(), String> {
-    let title = subject.clone();
-
-    let issued_token = match issue_confirmation_token(redis_con, uid, is_password_change).await {
-        Ok(t) => t,
-        Err(e) => {
-            event!(Level::ERROR, e);
-            return Err(e);
-        }
-    };
-
-    let web_address = {
-        if SETTINGS.application.debug {
-            format!(
-                "{}:{}",
-                SETTINGS.application.base, SETTINGS.application.port,
-            )
-        } else {
-            SETTINGS.application.base.clone()
-        }
-    };
-
-    let confirmation_link = {
-        if is_password_change {
-            format!(
-                "{}/users/change-password?token={}",
-                web_address, issued_token,
-            )
-        } else {
-            format!("{}/users/confirm/?token={}", web_address, issued_token,)
-        }
-    };
-
-    let now = chrono::Local::now();
-    let ttl = {
-        if is_password_change {
-            chrono::Duration::hours(1)
-        } else {
-            chrono::Duration::seconds(SETTINGS.secret.exp)
-        }
-    };
-    let exp = now + ttl;
-
-    let template = match TEMPLATES.get_template("confirmation_email.html") {
-        Ok(template) => template,
-        Err(err) => {
-            event!(
-                Level::ERROR,
-                "(MiniJinja) failed to retrieve template: {}",
-                err
-            );
-            return Err(format!("{}", err));
-        }
-    };
-
-    let ctx = minijinja::context! {
-        title => &title,
-        confirmation_link => &confirmation_link,
-        domain => &SETTINGS.frontend.url,
-        ttl_minutes => ttl.num_minutes(),
-        // Sat, 01 Jun 2024 14:17:00 UTC+7
-        expiration_time => &exp.format("%a, %b %d %Y %X UTC%z").to_string()
-    };
-    let html_text = template.render(ctx).unwrap();
-
-    let text = format!(
-        r#"
-        Tap the link below to confirm your email address.
-        {}
-        "#,
-        confirmation_link
-    );
-
-    send_email(
-        None,
-        recipient_name,
-        recipient_email,
-        subject,
-        html_text,
-        text,
-    )
-    .await
 }
