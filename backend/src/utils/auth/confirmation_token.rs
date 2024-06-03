@@ -44,23 +44,13 @@ pub async fn issue_confirmation_token(
             format!("{}_{}", CONFIRMATION_TOKEN_PREFIX, sid)
         }
     };
-    let _: () = match redis_con.set(redis_key, String::new()) {
-        Ok(result) => result,
-        Err(err) => {
-            return Err(ApplicationError::RedisError(err));
-        }
-    };
+    redis_con.set(redis_key, String::new())?;
     let claims = TokenClaims { exp, uid, sid };
-    match encode(
+    Ok(encode(
         &Header::default(),
         &claims,
         &EncodingKey::from_secret(SETTINGS.secret.sec.as_bytes()),
-    ) {
-        Ok(token) => Ok(token),
-        Err(err) => {
-            return Err(ApplicationError::JwtError(err));
-        }
-    }
+    )?)
 }
 
 #[instrument(name = "Verifying confirmation token", skip(redis_con))]
@@ -69,45 +59,32 @@ pub async fn verify_confirmation_token(
     token: String,
     is_password_change: bool,
 ) -> Result<ConfirmationToken, ApplicationError> {
-    let claims = match decode::<TokenClaims>(
+    let token = decode::<TokenClaims>(
         &token,
         &DecodingKey::from_secret(SETTINGS.secret.sec.as_bytes()),
         &Validation::default(),
-    ) {
-        Ok(token) => token.claims,
-        Err(err) => {
-            return Err(ApplicationError::JwtError(err));
-        }
-    };
+    )?;
 
     let redis_key = {
         if is_password_change {
             format!(
                 "{}_password_change_{}",
-                CONFIRMATION_TOKEN_PREFIX, claims.sid
+                CONFIRMATION_TOKEN_PREFIX, token.claims.sid
             )
         } else {
-            format!("{}_{}", CONFIRMATION_TOKEN_PREFIX, claims.sid)
+            format!("{}_{}", CONFIRMATION_TOKEN_PREFIX, token.claims.sid)
         }
     };
 
-    let redis_entry: Option<String> = match redis_con.get(redis_key.clone()) {
-        Ok(entry) => entry,
-        Err(err) => {
-            return Err(ApplicationError::RedisError(err));
-        }
-    };
+    let redis_entry: Option<String> = redis_con.get(redis_key.clone())?;
 
     if redis_entry.is_none() {
         return Err(ApplicationError::TokenUsed);
     }
 
-    let _: () = match redis_con.del(redis_key.clone()) {
-        Ok(result) => result,
-        Err(err) => {
-            return Err(ApplicationError::RedisError(err));
-        }
-    };
+    redis_con.del(redis_key.clone())?;
 
-    Ok(ConfirmationToken { uid: claims.uid })
+    Ok(ConfirmationToken {
+        uid: token.claims.uid,
+    })
 }

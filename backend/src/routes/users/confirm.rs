@@ -11,7 +11,7 @@ use crate::{
     utils::{
         auth::confirmation_token::verify_confirmation_token,
         errors::ApplicationError,
-        response::{response, SuccessResponse},
+        response::{response, ErrorResponse, SuccessResponse},
     },
 };
 
@@ -30,13 +30,13 @@ pub async fn confirm(
     let mut transaction = match pool.begin().await {
         Ok(transaction) => transaction,
         Err(err) => {
-            return ApplicationError::SqlxError(err).into_response();
+            return ApplicationError::from(err).into_response();
         }
     };
     let mut redis_con = match redis_client.get_connection() {
         Ok(con) => con,
         Err(err) => {
-            return ApplicationError::RedisError(err).into_response();
+            return ApplicationError::from(err).into_response();
         }
     };
     let token = match verify_confirmation_token(&mut redis_con, token, false).await {
@@ -45,21 +45,33 @@ pub async fn confirm(
             return err.into_response();
         }
     };
-    if let Err(err) = sqlx::query("UPDATE users SET is_verified = TRUE WHERE id = $1")
-        .bind(&token.uid)
-        .execute(&mut *transaction)
-        .await
+    if let Err(err) =
+        sqlx::query("UPDATE users SET is_verified = TRUE WHERE id = $1 AND is_verified = FALSE")
+            .bind(&token.uid)
+            .execute(&mut *transaction)
+            .await
     {
-        return ApplicationError::SqlxError(err).into_response();
+        match err {
+            sqlx::Error::RowNotFound => {
+                return response(
+                    StatusCode::BAD_REQUEST,
+                    None,
+                    Json(ErrorResponse {
+                        error: "User not found or already verified.".to_owned(),
+                    }),
+                )
+            }
+            _ => return ApplicationError::from(err).into_response(),
+        }
     };
     if let Err(err) = transaction.commit().await {
-        return ApplicationError::SqlxError(err).into_response();
+        return ApplicationError::from(err).into_response();
     }
     response(
         StatusCode::OK,
         None,
         Json(SuccessResponse {
-            message: "Verified successfully".to_owned(),
+            message: "Verified successfully!".to_owned(),
         }),
     )
 }

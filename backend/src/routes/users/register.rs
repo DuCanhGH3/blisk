@@ -13,10 +13,10 @@ use axum::{
     Json,
 };
 use sqlx::Row;
-use tracing::{event, instrument, Level};
+use tracing::instrument;
 
 #[derive(serde::Deserialize)]
-pub struct UserRegisterPayload {
+pub struct RegisterPayload {
     email: String,
     password: String,
     name: String,
@@ -27,40 +27,22 @@ pub async fn register(
     State(ApplicationState {
         pool, redis_client, ..
     }): State<ApplicationState>,
-    Json(UserRegisterPayload {
+    Json(RegisterPayload {
         email,
         password,
         name,
-    }): Json<UserRegisterPayload>,
+    }): Json<RegisterPayload>,
 ) -> Response {
     let mut transaction = match pool.begin().await {
         Ok(transaction) => transaction,
         Err(err) => {
-            event!(
-                Level::ERROR,
-                "(sqlx) failed to begin a new transaction: {}",
-                err
-            );
-            return response(
-                StatusCode::INTERNAL_SERVER_ERROR,
-                None,
-                Json(ErrorResponse {
-                    error: "Internal Server Error".to_owned(),
-                }),
-            );
+            return ApplicationError::from(err).into_response();
         }
     };
     let password = match auth::password::hash(password) {
         Ok(password) => password,
         Err(err) => {
-            event!(Level::ERROR, "(argon2) failed to hash password: {}", err);
-            return response(
-                StatusCode::INTERNAL_SERVER_ERROR,
-                None,
-                Json(ErrorResponse {
-                    error: "Internal Server Error".to_owned(),
-                }),
-            );
+            return ApplicationError::from(err).into_response();
         }
     };
     let uid = match sqlx::query(
@@ -86,24 +68,13 @@ pub async fn register(
                     );
                 }
             }
-            return ApplicationError::SqlxError(err).into_response();
+            return ApplicationError::from(err).into_response();
         }
     };
     let mut redis_con = match redis_client.get_connection() {
         Ok(connection) => connection,
         Err(err) => {
-            event!(
-                Level::ERROR,
-                "(redis) failed to retrieve Redis connection: {}",
-                err
-            );
-            return response(
-                StatusCode::INTERNAL_SERVER_ERROR,
-                None,
-                Json(ErrorResponse {
-                    error: "Internal Server Error".to_owned(),
-                }),
-            );
+            return ApplicationError::from(err).into_response();
         }
     };
     if let Err(err) = auth::emails::send_confirmation_email(
@@ -119,14 +90,7 @@ pub async fn register(
         return err.into_response();
     }
     if let Err(err) = transaction.commit().await {
-        event!(Level::ERROR, "(sqlx) failed to commit transaction: {}", err);
-        return response(
-            StatusCode::INTERNAL_SERVER_ERROR,
-            None,
-            Json(ErrorResponse {
-                error: "Internal Server Error".to_owned(),
-            }),
-        );
+        return ApplicationError::from(err).into_response();
     }
     response(
         StatusCode::CREATED,

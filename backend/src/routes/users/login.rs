@@ -9,8 +9,8 @@ struct LoginResponse {
     refresh_token: String,
 }
 
-#[instrument(name = "Logging user in", skip(pool))]
-pub fn login(State(ApplicationState { pool, .. }): State<ApplicationState>) -> Response {
+#[instrument(name = "Logging user in")]
+pub async fn login(State(ApplicationState { .. }): State<ApplicationState>) -> Response {
     response(
         StatusCode::OK,
         None,

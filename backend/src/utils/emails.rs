@@ -29,7 +29,7 @@ pub async fn send_email(
     html_content: impl Into<String>,
     text_content: impl Into<String>,
 ) -> Result<(), ApplicationError> {
-    let email = match Message::builder()
+    let email = Message::builder()
         .from(
             format!(
                 "{} <{}>",
@@ -59,12 +59,7 @@ pub async fn send_email(
                         .header(ContentType::TEXT_HTML)
                         .body(html_content.into()),
                 ),
-        ) {
-        Ok(message) => message,
-        Err(err) => {
-            return Err(ApplicationError::LettreError(err));
-        }
-    };
+        )?;
 
     let creds = Credentials::new(
         SETTINGS.email.host.name.clone(),
@@ -76,11 +71,7 @@ pub async fn send_email(
         .credentials(creds)
         .build();
 
-    match mailer.send(email).await {
-        Ok(_) => {
-            event!(Level::INFO, "email sent!");
-            Ok(())
-        }
-        Err(err) => Err(ApplicationError::LettreSmtpError(err)),
-    }
+    mailer.send(email).await?;
+    event!(Level::INFO, "email sent!");
+    Ok(())
 }

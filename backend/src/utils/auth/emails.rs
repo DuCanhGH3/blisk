@@ -57,12 +57,7 @@ pub async fn send_confirmation_email(
     };
     let exp = now + ttl;
 
-    let template = match TEMPLATES.get_template("confirmation_email.html") {
-        Ok(template) => template,
-        Err(err) => {
-            return Err(ApplicationError::MiniJinjaError(err));
-        }
-    };
+    let template = TEMPLATES.get_template("confirmation_email.html")?;
 
     let ctx = minijinja::context! {
         title => &title,
