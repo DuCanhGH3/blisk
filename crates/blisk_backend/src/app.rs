@@ -51,6 +51,8 @@ impl Application {
         let port = listener.local_addr().unwrap().port();
         let app = Router::new()
             .route("/health", get(routes::health::health_check))
+            .route("/posts/create", post(routes::posts::create))
+            .route("/posts/read", get(routes::posts::read))
             .route("/users/confirm", post(routes::users::confirm))
             .route("/users/login", post(routes::users::login))
             .route("/users/register", post(routes::users::register))

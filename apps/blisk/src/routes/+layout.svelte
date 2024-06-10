@@ -65,7 +65,7 @@
 </svelte:head>
 
 <a class="absolute -top-full z-[100] text-black underline focus:top-0 dark:text-white" href="#main-content">Skip to main content</a>
-<div class="flex h-full w-full flex-col md:flex-row">
+<div class="flex flex-1 flex-col md:flex-row">
   <!-- <Navbar user={data.user} /> -->
   <VerticalNavbar user={data.user} />
   <main id="main-content">

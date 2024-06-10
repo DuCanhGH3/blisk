@@ -28,51 +28,49 @@
 </script>
 
 <!-- svelte-ignore deprecated_event_handler -->
-<div class="flex w-full flex-col justify-center gap-10 self-stretch px-4">
-  <div class="h-full w-full">
-    <div class="relative w-full py-4">
-      <button
-        class={clsx(
-          "absolute left-4 top-1/2 z-10 flex -translate-y-1/2 active:!bg-neutral-400 dark:active:!bg-neutral-700",
-          "flex cursor-pointer items-center justify-center rounded-full bg-transparent [&>svg]:invisible [&>svg]:hover:visible",
-          "p-3 transition-colors duration-100 hover:bg-neutral-250 dark:hover:bg-neutral-800"
-        )}
-        onclick={emblaPrev}
-      >
-        <ChevronLeft width={24} height={24} class="transition-all duration-100" />
-      </button>
-      <button
-        class={clsx(
-          "absolute right-4 top-1/2 z-10 flex -translate-y-1/2 active:!bg-neutral-400 dark:active:!bg-neutral-700",
-          "flex cursor-pointer items-center justify-center rounded-full bg-transparent [&>svg]:invisible [&>svg]:hover:visible",
-          "p-3 transition-colors duration-100 hover:bg-neutral-250 dark:hover:bg-neutral-800"
-        )}
-        onclick={emblaNext}
-      >
-        <ChevronRight width={24} height={24} class="transition-all duration-100" />
-      </button>
-      <div
-        class="flex h-full w-full overflow-hidden rounded-[21px] border border-neutral-300 bg-white dark:border-neutral-800 dark:bg-neutral-950"
-        use:emblaCarouselSvelte={{ options: { containScroll: false, dragFree: true, loop: true }, plugins: [emblaAutoplay()] }}
-        on:emblaInit={onEmbiaInit}
-      >
-        <div class="flex w-full">
-          {#each Array.from({ length: 3 }) as _}
-            <a href="/" class="flex w-full min-w-0 flex-[0_0_100%] select-none flex-col gap-4 p-4">
-              <span class="p-2">
-                <h2 class="text-comment text-2xl font-semibold">book of the day</h2>
-                <h3 class="line-clamp-1 text-4xl font-semibold">Lorem ipsum</h3>
-              </span>
-              <img
-                width={900}
-                height={400}
-                class="h-96 w-full rounded-md object-cover opacity-75 md:h-[600px]"
-                src="https://images.ctfassets.net/kftzwdyauwt9/44csSCT2TZUSqqI2UCLDF9/153e0192aeb75b2322007085c1009bc0/AGI2.png?w=3840&q=90&fm=webp"
-                alt=""
-              />
-            </a>
-          {/each}
-        </div>
+<div class="flex w-full flex-col justify-center gap-10 self-stretch">
+  <div class="relative h-full w-full">
+    <button
+      class={clsx(
+        "absolute left-4 top-1/2 z-10 flex -translate-y-1/2 active:!bg-neutral-400 dark:active:!bg-neutral-700",
+        "flex cursor-pointer items-center justify-center rounded-full bg-transparent [&>svg]:invisible [&>svg]:hover:visible",
+        "hover:bg-neutral-250 p-3 transition-colors duration-100 dark:hover:bg-neutral-800"
+      )}
+      onclick={emblaPrev}
+    >
+      <ChevronLeft width={24} height={24} class="transition-all duration-100" />
+    </button>
+    <button
+      class={clsx(
+        "absolute right-4 top-1/2 z-10 flex -translate-y-1/2 active:!bg-neutral-400 dark:active:!bg-neutral-700",
+        "flex cursor-pointer items-center justify-center rounded-full bg-transparent [&>svg]:invisible [&>svg]:hover:visible",
+        "hover:bg-neutral-250 p-3 transition-colors duration-100 dark:hover:bg-neutral-800"
+      )}
+      onclick={emblaNext}
+    >
+      <ChevronRight width={24} height={24} class="transition-all duration-100" />
+    </button>
+    <div
+      class="flex h-full w-full overflow-hidden rounded-[21px] border border-neutral-300 bg-white dark:border-neutral-800 dark:bg-neutral-950"
+      use:emblaCarouselSvelte={{ options: { containScroll: false, dragFree: true, loop: true }, plugins: [emblaAutoplay()] }}
+      on:emblaInit={onEmbiaInit}
+    >
+      <div class="flex w-full">
+        {#each Array.from({ length: 3 }) as _}
+          <a href="/" class="flex w-full min-w-0 flex-[0_0_100%] select-none flex-col gap-4 p-4">
+            <span class="p-2">
+              <h2 class="text-comment text-2xl font-semibold">book of the day</h2>
+              <h3 class="line-clamp-1 text-4xl font-semibold">Lorem ipsum</h3>
+            </span>
+            <img
+              width={900}
+              height={400}
+              class="h-96 w-full rounded-md object-cover opacity-75 md:h-[600px]"
+              src="https://images.ctfassets.net/kftzwdyauwt9/44csSCT2TZUSqqI2UCLDF9/153e0192aeb75b2322007085c1009bc0/AGI2.png?w=3840&q=90&fm=webp"
+              alt=""
+            />
+          </a>
+        {/each}
       </div>
     </div>
   </div>
