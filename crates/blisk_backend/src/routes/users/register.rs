@@ -1,12 +1,10 @@
 use crate::{
-    app::ApplicationState,
+    app::AppState,
     utils::{
-        auth::{self, errors::AuthError},
-        errors::ApplicationError,
-        response::{response, SuccessResponse},
+        auth::{self, errors::AuthError}, errors::AppError, json::AppJson, response::{response, SuccessResponse}
     },
 };
-use axum::{extract::State, http::StatusCode, response::Response, Json};
+use axum::{extract::State, http::StatusCode, response::Response};
 use tracing::instrument;
 
 #[derive(serde::Deserialize)]
@@ -21,15 +19,15 @@ pub struct RegisterPayload {
     skip(pool, redis_client, email, password, username)
 )]
 pub async fn register(
-    State(ApplicationState {
+    State(AppState {
         pool, redis_client, ..
-    }): State<ApplicationState>,
-    Json(RegisterPayload {
+    }): State<AppState>,
+    AppJson(RegisterPayload {
         email,
         password,
         username,
-    }): Json<RegisterPayload>,
-) -> Result<Response, ApplicationError> {
+    }): AppJson<RegisterPayload>,
+) -> Result<Response, AppError> {
     let mut transaction = pool.begin().await?;
     let password = auth::password::hash(&password)?;
     let uid: i64 = match sqlx::query_scalar(
@@ -46,10 +44,10 @@ pub async fn register(
             println!("{}", err);
             if let Some(db_err) = err.as_database_error() {
                 if db_err.is_unique_violation() {
-                    return Err(ApplicationError::from(AuthError::Invalid));
+                    return Err(AppError::from(AuthError::Invalid));
                 }
             }
-            return Err(ApplicationError::from(err));
+            return Err(AppError::from(err));
         }
     };
     transaction.commit().await?;
@@ -66,7 +64,7 @@ pub async fn register(
     Ok(response(
         StatusCode::CREATED,
         None,
-        Json(SuccessResponse {
+        AppJson(SuccessResponse {
             message: "Account created successfully.".to_owned(),
         }),
     ))

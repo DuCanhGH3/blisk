@@ -2,12 +2,11 @@ use axum::{
     extract::rejection::JsonRejection,
     http::StatusCode,
     response::{IntoResponse, Response},
-    Json,
 };
 
-use super::{auth::errors::AuthError, response::ErrorResponse};
+use super::{auth::errors::AuthError, json::AppJson, response::ErrorResponse};
 
-pub enum ApplicationError {
+pub enum AppError {
     TokenUsed,
     AuthError(AuthError),
     Unexpected(&'static str),
@@ -21,112 +20,116 @@ pub enum ApplicationError {
     Argon2HashError(argon2::password_hash::Error),
 }
 
-impl From<AuthError> for ApplicationError {
+impl From<AuthError> for AppError {
     fn from(value: AuthError) -> Self {
-        ApplicationError::AuthError(value)
+        AppError::AuthError(value)
     }
 }
-impl From<redis::RedisError> for ApplicationError {
+impl From<JsonRejection> for AppError {
+    fn from(value: JsonRejection) -> Self {
+        AppError::JsonRejection(value)
+    }
+}
+impl From<redis::RedisError> for AppError {
     fn from(value: redis::RedisError) -> Self {
-        ApplicationError::RedisError(value)
+        AppError::RedisError(value)
     }
 }
-impl From<jsonwebtoken::errors::Error> for ApplicationError {
+impl From<jsonwebtoken::errors::Error> for AppError {
     fn from(value: jsonwebtoken::errors::Error) -> Self {
-        ApplicationError::JwtError(value)
+        AppError::JwtError(value)
     }
 }
-impl From<sqlx::Error> for ApplicationError {
+impl From<sqlx::Error> for AppError {
     fn from(value: sqlx::Error) -> Self {
-        ApplicationError::SqlxError(value)
+        AppError::SqlxError(value)
     }
 }
-impl From<minijinja::Error> for ApplicationError {
+impl From<minijinja::Error> for AppError {
     fn from(value: minijinja::Error) -> Self {
-        ApplicationError::MiniJinjaError(value)
+        AppError::MiniJinjaError(value)
     }
 }
-impl From<lettre::error::Error> for ApplicationError {
+impl From<lettre::error::Error> for AppError {
     fn from(value: lettre::error::Error) -> Self {
-        ApplicationError::LettreError(value)
+        AppError::LettreError(value)
     }
 }
-impl From<lettre::transport::smtp::Error> for ApplicationError {
+impl From<lettre::transport::smtp::Error> for AppError {
     fn from(value: lettre::transport::smtp::Error) -> Self {
-        ApplicationError::LettreSmtpError(value)
+        AppError::LettreSmtpError(value)
     }
 }
-impl From<argon2::password_hash::Error> for ApplicationError {
+impl From<argon2::password_hash::Error> for AppError {
     fn from(value: argon2::password_hash::Error) -> Self {
-        ApplicationError::Argon2HashError(value)
+        AppError::Argon2HashError(value)
     }
 }
 
-/// TODO: more user-friendly error messages
-impl IntoResponse for ApplicationError {
+impl IntoResponse for AppError {
     fn into_response(self) -> Response {
         let (status, error) = match self {
-            ApplicationError::TokenUsed => (
+            AppError::TokenUsed => (
                 StatusCode::UNPROCESSABLE_ENTITY,
                 "Token has either expired or been used.".to_owned(),
             ),
-            ApplicationError::AuthError(error) => {
-                tracing::error!("encountered an AuthN error");
+            AppError::AuthError(error) => {
+                tracing::error!(%error, "encountered an AuthN error");
                 return error.into_response();
             },
-            ApplicationError::Unexpected(error) => {
+            AppError::Unexpected(error) => {
                 tracing::error!(%error, "encountered an unexpected error");
                 (
                     StatusCode::INTERNAL_SERVER_ERROR,
                     "Internal Server Error".to_owned(),
                 )
             }
-            ApplicationError::JsonRejection(rejection) => {
+            AppError::JsonRejection(rejection) => {
                 (rejection.status(), rejection.body_text())
             }
-            ApplicationError::RedisError(error) => {
+            AppError::RedisError(error) => {
                 tracing::error!(%error, "encountered an error from Redis");
                 (
                     StatusCode::INTERNAL_SERVER_ERROR,
                     "Internal Server Error".to_owned(),
                 )
             }
-            ApplicationError::JwtError(error) => {
+            AppError::JwtError(error) => {
                 tracing::error!(%error, "encountered an error from jsonwebtoken");
                 (
                     StatusCode::INTERNAL_SERVER_ERROR,
                     "Internal Server Error".to_owned(),
                 )
             }
-            ApplicationError::SqlxError(error) => {
+            AppError::SqlxError(error) => {
                 tracing::error!(%error, "encountered an error from SQLx");
                 (
                     StatusCode::INTERNAL_SERVER_ERROR,
                     "Internal Server Error".to_owned(),
                 )
             }
-            ApplicationError::MiniJinjaError(error) => {
+            AppError::MiniJinjaError(error) => {
                 tracing::error!(%error, "encountered an error from MiniJinja");
                 (
                     StatusCode::INTERNAL_SERVER_ERROR,
                     "Internal Server Error".to_owned(),
                 )
             }
-            ApplicationError::LettreError(error) => {
+            AppError::LettreError(error) => {
                 tracing::error!(%error, "encountered an error from Lettre");
                 (
                     StatusCode::INTERNAL_SERVER_ERROR,
                     "Internal Server Error".to_owned(),
                 )
             }
-            ApplicationError::LettreSmtpError(error) => {
+            AppError::LettreSmtpError(error) => {
                 tracing::error!(%error, "encountered an error from Lettre");
                 (
                     StatusCode::INTERNAL_SERVER_ERROR,
                     "Internal Server Error".to_owned(),
                 )
             }
-            ApplicationError::Argon2HashError(error) => {
+            AppError::Argon2HashError(error) => {
                 tracing::error!(%error, "encountered an error from Argon2");
                 (
                     StatusCode::INTERNAL_SERVER_ERROR,
@@ -134,6 +137,6 @@ impl IntoResponse for ApplicationError {
                 )
             }
         };
-        (status, Json(ErrorResponse { error })).into_response()
+        (status, AppJson(ErrorResponse { error })).into_response()
     }
 }

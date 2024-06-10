@@ -1,5 +1,5 @@
 use crate::settings::SETTINGS;
-use crate::utils::errors::ApplicationError;
+use crate::utils::errors::AppError;
 use lettre::{
     message::{header::ContentType, MultiPart, SinglePart},
     transport::smtp::authentication::Credentials,
@@ -28,7 +28,7 @@ pub async fn send_email(
     subject: impl Into<String>,
     html_content: impl Into<String>,
     text_content: impl Into<String>,
-) -> Result<(), ApplicationError> {
+) -> Result<(), AppError> {
     let email = Message::builder()
         .from(
             format!(

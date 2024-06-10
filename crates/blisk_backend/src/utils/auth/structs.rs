@@ -5,7 +5,7 @@ use axum_extra::{
 };
 use jsonwebtoken::{decode, encode, DecodingKey, EncodingKey, Header, Validation};
 
-use crate::{settings::SETTINGS, utils::errors::ApplicationError};
+use crate::{settings::SETTINGS, utils::errors::AppError};
 
 use super::errors::AuthError;
 
@@ -37,14 +37,14 @@ pub struct UserClaims {
 }
 
 impl UserClaims {
-    pub fn encode(&self) -> Result<String, ApplicationError> {
+    pub fn encode(&self) -> Result<String, AppError> {
         Ok(encode(
             &Header::default(),
             &self,
             &EncodingKey::from_secret(SETTINGS.auth.access.sec.as_bytes()),
         )?)
     }
-    pub fn decode(token: &str) -> Result<UserClaims, ApplicationError> {
+    pub fn decode(token: &str) -> Result<UserClaims, AppError> {
         let mut validation = Validation::new(jsonwebtoken::Algorithm::HS256);
         validation.set_audience(&["abc"]);
         let token_data = decode::<UserClaims>(
@@ -61,7 +61,7 @@ impl<S> FromRequestParts<S> for UserClaims
 where
     S: Send + Sync,
 {
-    type Rejection = ApplicationError;
+    type Rejection = AppError;
 
     async fn from_request_parts(parts: &mut Parts, _state: &S) -> Result<Self, Self::Rejection> {
         // Extract the token from the authorization header

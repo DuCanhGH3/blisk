@@ -12,7 +12,7 @@ use sqlx::{
 };
 
 #[derive(Clone)]
-pub struct ApplicationState {
+pub struct AppState {
     pub pool: Pool<Postgres>,
     pub redis_client: redis::Client,
 }
@@ -26,7 +26,7 @@ impl Application {
     pub async fn build() -> Result<Self, std::io::Error> {
         let address = format!(
             "{}:{}",
-            SETTINGS.application.host, SETTINGS.application.port
+            SETTINGS.app.host, SETTINGS.app.port
         );
 
         let db_uri = std::env::var("DATABASE_URL").expect("Failed to read database URI");
@@ -46,7 +46,7 @@ impl Application {
         let redis_client =
             redis::Client::open(SETTINGS.redis.uri.as_str()).expect("Failed to create a Redis client");
 
-        let app_state = ApplicationState { pool, redis_client };
+        let app_state = AppState { pool, redis_client };
         let listener = tokio::net::TcpListener::bind(&address).await?;
         let port = listener.local_addr().unwrap().port();
         let app = Router::new()

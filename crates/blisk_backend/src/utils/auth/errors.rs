@@ -1,10 +1,14 @@
-use axum::{http::StatusCode, response::IntoResponse, Json};
+use axum::{http::StatusCode, response::IntoResponse};
 
-use crate::utils::response::ErrorResponse;
+use crate::utils::{json::AppJson, response::ErrorResponse};
 
+#[derive(Debug, thiserror::Error)]
 pub enum AuthError {
+    #[error("this user either doesn't exist or has already been verified")]
     AlreadyVerified,
+    #[error("this user is not valid")]
     Invalid,
+    #[error("this error is not expected")]
     Unexpected,
 }
 
@@ -24,6 +28,6 @@ impl IntoResponse for AuthError {
                 "Internal Server Error",
             ),
         };
-        (status, Json(ErrorResponse { error: error.to_owned() })).into_response()
+        (status, AppJson(ErrorResponse { error: error.to_owned() })).into_response()
     }
 }

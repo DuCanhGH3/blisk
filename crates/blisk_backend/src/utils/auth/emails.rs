@@ -2,7 +2,7 @@ use crate::{
     settings::SETTINGS,
     utils::{
         auth::confirmation_token::issue_confirmation_token, emails::send_email,
-        errors::ApplicationError, templating::TEMPLATES,
+        errors::AppError, templating::TEMPLATES,
     },
 };
 use tracing::instrument;
@@ -23,7 +23,7 @@ pub async fn send_confirmation_email(
     recipient_name: String,
     recipient_email: String,
     is_password_change: bool,
-) -> Result<(), ApplicationError> {
+) -> Result<(), AppError> {
     let title = subject.clone();
 
     let issued_token = match issue_confirmation_token(redis_con, uid, is_password_change).await {

@@ -1,8 +1,9 @@
 use axum::{
     http::{HeaderMap, HeaderName, HeaderValue, StatusCode},
     response::{IntoResponse, Response},
-    Json,
 };
+
+use super::json::AppJson;
 
 #[derive(serde::Serialize)]
 pub struct SuccessResponse {
@@ -16,7 +17,7 @@ pub struct ErrorResponse {
 pub fn response<T>(
     status: StatusCode,
     headers: Option<Vec<(HeaderName, HeaderValue)>>,
-    json: Json<T>,
+    json: AppJson<T>,
 ) -> Response
 where
     T: serde::Serialize,

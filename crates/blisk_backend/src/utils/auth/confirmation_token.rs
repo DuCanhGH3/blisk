@@ -1,4 +1,4 @@
-use crate::{settings::SETTINGS, utils::errors::ApplicationError};
+use crate::{settings::SETTINGS, utils::errors::AppError};
 use jsonwebtoken::{decode, encode, DecodingKey, EncodingKey, Header, Validation};
 use rand::{distributions::Alphanumeric, Rng};
 use redis::Commands;
@@ -22,7 +22,7 @@ pub async fn issue_confirmation_token(
     redis_con: &mut redis::Connection,
     uid: String,
     is_password_change: bool,
-) -> Result<String, ApplicationError> {
+) -> Result<String, AppError> {
     let sid: String = rand::thread_rng()
         .sample_iter(&Alphanumeric)
         .take(10)
@@ -59,7 +59,7 @@ pub async fn verify_confirmation_token(
     redis_con: &mut redis::Connection,
     token: String,
     is_password_change: bool,
-) -> Result<ConfirmationToken, ApplicationError> {
+) -> Result<ConfirmationToken, AppError> {
     let token = decode::<TokenClaims>(
         &token,
         &DecodingKey::from_secret(SETTINGS.secret.sec.as_bytes()),
@@ -80,7 +80,7 @@ pub async fn verify_confirmation_token(
     let redis_entry: Option<String> = redis_con.get(redis_key.clone())?;
 
     if redis_entry.is_none() {
-        return Err(ApplicationError::TokenUsed);
+        return Err(AppError::TokenUsed);
     }
 
     redis_con.del(redis_key.clone())?;

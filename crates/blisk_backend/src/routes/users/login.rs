@@ -2,21 +2,18 @@ use axum::{
     extract::{Query, State},
     http::{header, HeaderValue, StatusCode},
     response::Response,
-    Json,
 };
 use tracing::instrument;
 
 use crate::{
-    app::ApplicationState,
+    app::AppState,
     settings::SETTINGS,
     utils::{
         auth::{
             errors::AuthError,
             password::verify,
             structs::{User, UserClaims},
-        },
-        errors::ApplicationError,
-        response::response,
+        }, errors::AppError, json::AppJson, response::response
     },
 };
 
@@ -38,10 +35,10 @@ pub struct LoginResponse {
 
 #[instrument(name = "Logging user in", skip(pool, client_id, password))]
 pub async fn login(
-    State(ApplicationState { pool, .. }): State<ApplicationState>,
+    State(AppState { pool, .. }): State<AppState>,
     Query(LoginQuery { client_id }): Query<LoginQuery>,
-    Json(LoginPayload { username, password }): Json<LoginPayload>,
-) -> Result<Response, ApplicationError> {
+    AppJson(LoginPayload { username, password }): AppJson<LoginPayload>,
+) -> Result<Response, AppError> {
     let mut transaction = pool.begin().await?;
     let user: User = sqlx::query_as("SELECT id, password FROM users WHERE name = $1")
         .bind(&username)
@@ -54,17 +51,17 @@ pub async fn login(
     transaction.commit().await?;
     let user_id = user
         .id
-        .ok_or(ApplicationError::Unexpected("user.id is unexpectedly None"))?;
-    let password_hash = user.password.ok_or(ApplicationError::Unexpected(
+        .ok_or(AppError::Unexpected("user.id is unexpectedly None"))?;
+    let password_hash = user.password.ok_or(AppError::Unexpected(
         "user.password is unexpectedly None",
     ))?;
     if !verify(password_hash, password)? {
-        return Err(ApplicationError::from(AuthError::Invalid));
+        return Err(AppError::from(AuthError::Invalid));
     }
     let now = chrono::Local::now();
     let id_ttl = chrono::Duration::seconds(SETTINGS.auth.access.exp);
     let id_claims = UserClaims {
-        iss: SETTINGS.application.base.clone(),
+        iss: SETTINGS.app.base.clone(),
         sub: user_id,
         aud: client_id,
         exp: (now + id_ttl).timestamp(),
@@ -77,7 +74,7 @@ pub async fn login(
             header::CACHE_CONTROL,
             HeaderValue::from_static("no-store"),
         )]),
-        Json(LoginResponse {
+        AppJson(LoginResponse {
             token_type: "Bearer".to_owned(),
             expires_in: id_ttl.num_seconds(),
             id_token,

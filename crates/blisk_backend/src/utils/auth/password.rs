@@ -3,7 +3,7 @@ use argon2::{
     Argon2, PasswordHash, PasswordHasher, PasswordVerifier,
 };
 
-use crate::utils::errors::ApplicationError;
+use crate::utils::errors::AppError;
 
 pub fn hash(password: &String) -> Result<String, Error> {
     let salt = SaltString::generate(&mut OsRng);
@@ -11,11 +11,11 @@ pub fn hash(password: &String) -> Result<String, Error> {
     Ok(hashed.to_string())
 }
 
-pub fn verify(hash: String, password: String) -> Result<bool, ApplicationError> {
+pub fn verify(hash: String, password: String) -> Result<bool, AppError> {
     let password_hash = PasswordHash::new(&hash)?;
     match Argon2::default().verify_password(password.as_bytes(), &password_hash) {
         Ok(()) => Ok(true),
         Err(Error::Password) => Ok(false),
-        Err(err) => Err(ApplicationError::from(err)),
+        Err(err) => Err(AppError::from(err)),
     }
 }

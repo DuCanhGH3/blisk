@@ -1,7 +1,7 @@
 use std::sync::LazyLock;
 
 #[derive(serde::Deserialize, Clone)]
-pub struct ApplicationSettings {
+pub struct AppSettings {
     /// Whether the application should run in debug mode.
     pub debug: bool,
     /// The port the application should listen on.
@@ -49,7 +49,7 @@ pub struct AuthSettings {
 #[derive(serde::Deserialize, Clone)]
 pub struct Settings {
     /// Application-related settings.
-    pub application: ApplicationSettings,
+    pub app: AppSettings,
     /// Email-related settings.
     pub email: EmailSettings,
     /// Frontend-related settings.
@@ -101,7 +101,7 @@ pub static SETTINGS: LazyLock<Settings> = LazyLock::new(|| {
     let config = config::Config::builder()
         .add_source(config::File::from(settings_dir.join("base.yaml")))
         .add_source(config::File::from(settings_dir.join(environment_file)))
-        .add_source(config::Environment::with_prefix("APP").separator("_"))
+        .add_source(config::Environment::with_prefix("BLISK").separator("_"))
         .build()
         .expect("Failed to build configuration");
 

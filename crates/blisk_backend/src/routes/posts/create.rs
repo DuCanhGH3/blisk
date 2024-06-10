@@ -1,9 +1,9 @@
-use axum::{extract::State, http::StatusCode, response::Response, Json};
+use axum::{extract::State, http::StatusCode, response::Response};
 use tracing::instrument;
 
 use crate::{
-    app::ApplicationState,
-    utils::{auth::structs::UserClaims, errors::ApplicationError, response::response},
+    app::AppState,
+    utils::{auth::structs::UserClaims, errors::AppError, json::AppJson, response::response},
 };
 
 #[derive(serde::Deserialize)]
@@ -18,10 +18,10 @@ pub struct CreateResponse {
 
 #[instrument(name = "Creating a new post", skip(pool, claims, title, content))]
 pub async fn create(
-    State(ApplicationState { pool, .. }): State<ApplicationState>,
+    State(AppState { pool, .. }): State<AppState>,
     claims: UserClaims,
-    Json(CreatePayload { title, content }): Json<CreatePayload>,
-) -> Result<Response, ApplicationError> {
+    AppJson(CreatePayload { title, content }): AppJson<CreatePayload>,
+) -> Result<Response, AppError> {
     let mut transaction = pool.begin().await?;
     let pid: i64 = sqlx::query_scalar(
         "INSERT INTO posts (user_id, title, content) VALUES ($1, $2, $3) RETURNING id",
@@ -35,6 +35,6 @@ pub async fn create(
     Ok(response(
         StatusCode::CREATED,
         None,
-        Json(CreateResponse { id: pid }),
+        AppJson(CreateResponse { id: pid }),
     ))
 }

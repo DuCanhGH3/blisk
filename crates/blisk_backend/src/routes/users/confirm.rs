@@ -2,15 +2,15 @@ use axum::{
     extract::{Query, State},
     http::StatusCode,
     response::Response,
-    Json,
 };
 use tracing::instrument;
 
 use crate::{
-    app::ApplicationState,
+    app::AppState,
     utils::{
         auth::{confirmation_token::verify_confirmation_token, errors::AuthError},
-        errors::ApplicationError,
+        errors::AppError,
+        json::AppJson,
         response::{response, SuccessResponse},
     },
 };
@@ -22,11 +22,11 @@ pub struct ConfirmQuery {
 
 #[instrument(name = "Confirming user", skip(pool, redis_client))]
 pub async fn confirm(
-    State(ApplicationState {
+    State(AppState {
         pool, redis_client, ..
-    }): State<ApplicationState>,
+    }): State<AppState>,
     Query(ConfirmQuery { token }): Query<ConfirmQuery>,
-) -> Result<Response, ApplicationError> {
+) -> Result<Response, AppError> {
     let mut transaction = pool.begin().await?;
     let mut redis_con = redis_client.get_connection()?;
     let token = verify_confirmation_token(&mut redis_con, token, false).await?;
@@ -35,14 +35,14 @@ pub async fn confirm(
         .execute(&mut *transaction)
         .await
         .map_err(|err| match err {
-            sqlx::Error::RowNotFound => ApplicationError::from(AuthError::AlreadyVerified),
-            _ => ApplicationError::from(err),
+            sqlx::Error::RowNotFound => AppError::from(AuthError::AlreadyVerified),
+            _ => AppError::from(err),
         })?;
     transaction.commit().await?;
     Ok(response(
         StatusCode::OK,
         None,
-        Json(SuccessResponse {
+        AppJson(SuccessResponse {
             message: "Verified successfully!".to_owned(),
         }),
     ))

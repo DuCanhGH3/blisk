@@ -2,13 +2,12 @@ use axum::{
     extract::{Query, State},
     http::StatusCode,
     response::Response,
-    Json,
 };
 use tracing::instrument;
 
 use crate::{
-    app::ApplicationState,
-    utils::{errors::ApplicationError, response::response},
+    app::AppState,
+    utils::{errors::AppError, json::AppJson, response::response},
 };
 
 #[derive(serde::Deserialize)]
@@ -25,14 +24,14 @@ struct ReadResponse {
 
 #[instrument(name = "Reading a post", skip(pool))]
 pub async fn read(
-    State(ApplicationState { pool, .. }): State<ApplicationState>,
+    State(AppState { pool, .. }): State<AppState>,
     Query(ReadQuery { post_id }): Query<ReadQuery>,
-) -> Result<Response, ApplicationError> {
+) -> Result<Response, AppError> {
     let mut transaction = pool.begin().await?;
     let post: ReadResponse = sqlx::query_as("SELECT p.title, p.content, u.name as author_name FROM posts p JOIN users u ON p.user_id = u.id WHERE p.id = $1")
         .bind(&post_id)
         .fetch_one(&mut *transaction)
         .await?;
     transaction.commit().await?;
-    Ok(response(StatusCode::OK, None, Json(post)))
+    Ok(response(StatusCode::OK, None, AppJson(post)))
 }
