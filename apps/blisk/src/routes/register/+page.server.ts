@@ -1,9 +1,17 @@
-import { fail, redirect } from "@sveltejs/kit";
+import { fail, isRedirect, redirect } from "@sveltejs/kit";
+import { z } from "zod";
 
 import { base } from "$app/paths";
 
 import type { Actions, PageServerLoad } from "./$types";
-import { hashPassword, saveUser } from "$lib/users";
+import { BACKEND_URL } from "$env/static/private";
+import { handleBackendError } from "$lib/backendResponse";
+
+const registerSchema = z.object({
+  username: z.string().min(1, "Please enter a valid username!"),
+  email: z.string().email("Please enter a valid email!"),
+  password: z.string().min(6, "Please enter a valid password of at least 6 characters!"),
+});
 
 export const load: PageServerLoad = ({ locals }) => {
   if (locals.user) {
@@ -15,45 +23,34 @@ export const load: PageServerLoad = ({ locals }) => {
 };
 
 export const actions: Actions = {
-  async register({ cookies, locals, request }) {
+  async register({ cookies, fetch, locals, request }) {
     try {
       const formData = await request.formData();
-      const username = formData.get("username");
-      const email = formData.get("email");
-      const password = formData.get("password");
-      if (typeof username !== "string") {
-        return fail(400, { usernameError: "Username is not valid!" });
-      }
-      if (typeof email !== "string") {
-        return fail(400, { emailError: "Email is not valid!" });
-      }
-      if (typeof password !== "string") {
-        return fail(400, { passwordError: "Password is not valid!" });
-      }
-      const existingUser = await locals.prisma.user.findFirst({
-        where: {
-          OR: [{ email: email }, { name: username }],
-        },
-        select: {
-          email: true,
-          password: true,
-        },
+      const data = await registerSchema.spa({
+        username: formData.get("username"),
+        email: formData.get("email"),
+        password: formData.get("password"),
       });
-      if (existingUser !== null) {
-        return fail(401, { error: "This account already exists." });
+      if (!data.success) {
+        return fail(400, { validationError: data.error.flatten().fieldErrors });
       }
-      const user = await locals.prisma.user.create({
-        data: {
-          name: username,
-          email: email,
-          password: await hashPassword(password),
+      const res = await fetch(`${BACKEND_URL}/users/register`, {
+        method: "POST",
+        body: JSON.stringify(data.data),
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
         },
-        select: {
-          id: true,
-        },
+        signal: AbortSignal.timeout(10000),
       });
-      saveUser({ id: user.id, cookies });
+      if (!res.ok) {
+        return await handleBackendError(res);
+      }
+      redirect(307, `${base}/login`);
     } catch (err) {
+      if (isRedirect(err)) {
+        throw err;
+      }
       console.log(err);
       if (err instanceof Error && err.name === "TimeoutError") {
         return fail(500, { error: "Server is currently under heavy load." });

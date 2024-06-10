@@ -1,0 +1,26 @@
+use axum::{extract::State, http::StatusCode, response::Response, Json};
+use tracing::instrument;
+
+use crate::{
+    app::ApplicationState,
+    utils::{
+        auth::structs::{User, UserClaims},
+        errors::ApplicationError,
+        response::response,
+    },
+};
+
+#[instrument(name = "Fetching user info...", skip(pool, claims), fields(
+    uid = &claims.sub
+))]
+pub async fn authenticate(
+    State(ApplicationState { pool, .. }): State<ApplicationState>,
+    claims: UserClaims,
+) -> Result<Response, ApplicationError> {
+    let mut transaction = pool.begin().await?;
+    let user: User = sqlx::query_as("SELECT email, name, role FROM users WHERE id = $1")
+        .bind(&claims.sub)
+        .fetch_one(&mut *transaction)
+        .await?;
+    Ok(response(StatusCode::OK, None, Json(user)))
+}

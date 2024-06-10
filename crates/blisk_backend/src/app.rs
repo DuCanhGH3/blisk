@@ -53,6 +53,7 @@ impl Application {
             .route("/health", get(routes::health::health_check))
             .route("/posts/create", post(routes::posts::create))
             .route("/posts/read", get(routes::posts::read))
+            .route("/users/authenticate", post(routes::users::authenticate))
             .route("/users/confirm", post(routes::users::confirm))
             .route("/users/login", post(routes::users::login))
             .route("/users/register", post(routes::users::register))

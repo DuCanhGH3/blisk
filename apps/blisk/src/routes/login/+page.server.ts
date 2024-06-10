@@ -3,7 +3,14 @@ import { fail, redirect } from "@sveltejs/kit";
 import { base } from "$app/paths";
 
 import type { Actions, PageServerLoad } from "./$types";
-import { clearUser, saveUser, verifyPassword } from "$lib/users";
+import { z } from "zod";
+import { BACKEND_URL } from "$env/static/private";
+import { handleBackendError } from "$lib/backendResponse";
+
+const loginSchema = z.object({
+  username: z.string().min(1, "Please enter a valid username!"),
+  password: z.string().min(1, "Please enter a valid password!"),
+});
 
 export const load: PageServerLoad = ({ locals }) => {
   if (locals.user) {
@@ -15,35 +22,38 @@ export const load: PageServerLoad = ({ locals }) => {
 };
 
 export const actions: Actions = {
-  async login({ cookies, locals, request }) {
+  async login({ cookies, fetch, request }) {
     try {
       const formData = await request.formData();
-      const username = formData.get("username");
-      const password = formData.get("password");
-      if (typeof username !== "string") {
-        return fail(400, { usernameError: "Username is not valid!" });
-      }
-      if (typeof password !== "string") {
-        return fail(400, { passwordError: "Password is not valid!" });
-      }
-      const user = await locals.prisma.user.findFirst({
-        where: {
-          OR: [{ email: username }, { name: username }],
-        },
-        select: {
-          id: true,
-          name: true,
-          email: true,
-          password: true,
-        },
+      const data = await loginSchema.spa({
+        username: formData.get("username"),
+        password: formData.get("password"),
       });
-      if (user === null) {
-        return fail(401, { error: "This account does not exist." });
+      if (!data.success) {
+        return fail(400, { validationError: data.error.flatten().fieldErrors });
       }
-      if (!(await verifyPassword(user.password, password))) {
-        return fail(401, { error: "Password is incorrect!" });
+      const res = await fetch(`${BACKEND_URL}/users/login?client_id=abc`, {
+        method: "POST",
+        body: JSON.stringify(data.data),
+        headers: {
+          Accept: "application/json",
+          "Content-Type": "application/json",
+        },
+        signal: AbortSignal.timeout(10000),
+      });
+      if (!res.ok) {
+        return await handleBackendError(res);
       }
-      saveUser({ id: user.id, cookies });
+      const loginInfo = await res.json();
+      const cookiesOptions = {
+        httpOnly: true,
+        secure: true,
+        sameSite: "strict",
+        path: "/",
+        maxAge: loginInfo.expires_in,
+      } as const;
+      cookies.set("token_type", loginInfo.token_type, cookiesOptions);
+      cookies.set("token", loginInfo.id_token, cookiesOptions);
     } catch (err) {
       console.log(err);
       if (err instanceof Error && err.name === "TimeoutError") {
@@ -52,9 +62,8 @@ export const actions: Actions = {
       return fail(500, { error: "Internal Server Error" });
     }
   },
-  async logout({ cookies, locals }) {
+  async logout({ locals }) {
     try {
-      clearUser({ cookies });
       locals.user = null;
     } catch (err) {
       if (err instanceof Error && err.name === "TimeoutError") {

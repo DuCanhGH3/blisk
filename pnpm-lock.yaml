@@ -41,15 +41,6 @@ importers:
 
   apps/blisk:
     devDependencies:
-      '@cloudflare/workers-types':
-        specifier: 4.20240502.0
-        version: 4.20240502.0
-      '@prisma/adapter-d1':
-        specifier: 5.13.0
-        version: 5.13.0
-      '@prisma/client':
-        specifier: 5.13.0
-        version: 5.13.0(prisma@5.13.0)
       '@serwist/vite':
         specifier: 9.0.2
         version: 9.0.2(typescript@5.4.5)(vite@5.2.11(@types/node@20.12.11))
@@ -59,9 +50,6 @@ importers:
       '@sveltejs/adapter-auto':
         specifier: 3.2.0
         version: 3.2.0(@sveltejs/kit@2.5.7(@sveltejs/vite-plugin-svelte@3.1.0(svelte@5.0.0-next.115)(vite@5.2.11(@types/node@20.12.11)))(svelte@5.0.0-next.115)(vite@5.2.11(@types/node@20.12.11)))
-      '@sveltejs/adapter-cloudflare':
-        specifier: 4.4.0
-        version: 4.4.0(@sveltejs/kit@2.5.7(@sveltejs/vite-plugin-svelte@3.1.0(svelte@5.0.0-next.115)(vite@5.2.11(@types/node@20.12.11)))(svelte@5.0.0-next.115)(vite@5.2.11(@types/node@20.12.11)))(wrangler@3.55.0(@cloudflare/workers-types@4.20240502.0))
       '@sveltejs/enhanced-img':
         specifier: 0.2.0
         version: 0.2.0(rollup@4.17.2)(svelte@5.0.0-next.115)
@@ -4298,14 +4286,6 @@ snapshots:
       esbuild: 0.20.2
       worktop: 0.8.0-next.18
       wrangler: 3.52.0(@cloudflare/workers-types@4.20240423.0)
-
-  '@sveltejs/adapter-cloudflare@4.4.0(@sveltejs/kit@2.5.7(@sveltejs/vite-plugin-svelte@3.1.0(svelte@5.0.0-next.115)(vite@5.2.11(@types/node@20.12.11)))(svelte@5.0.0-next.115)(vite@5.2.11(@types/node@20.12.11)))(wrangler@3.55.0(@cloudflare/workers-types@4.20240502.0))':
-    dependencies:
-      '@cloudflare/workers-types': 4.20240502.0
-      '@sveltejs/kit': 2.5.7(@sveltejs/vite-plugin-svelte@3.1.0(svelte@5.0.0-next.115)(vite@5.2.11(@types/node@20.12.11)))(svelte@5.0.0-next.115)(vite@5.2.11(@types/node@20.12.11))
-      esbuild: 0.20.2
-      worktop: 0.8.0-next.18
-      wrangler: 3.55.0(@cloudflare/workers-types@4.20240502.0)
 
   '@sveltejs/enhanced-img@0.2.0(rollup@4.17.2)(svelte@5.0.0-next.115)':
     dependencies:

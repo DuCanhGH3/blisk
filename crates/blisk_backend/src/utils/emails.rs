@@ -32,8 +32,7 @@ pub async fn send_email(
     let email = Message::builder()
         .from(
             format!(
-                "{} <{}>",
-                "blisk",
+                "blisk <{}>",
                 if sender_email.is_some() {
                     sender_email.unwrap()
                 } else {

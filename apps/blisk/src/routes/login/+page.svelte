@@ -26,7 +26,7 @@
         label="Username"
         name="username"
         type="text"
-        errorText={form?.usernameError}
+        errorText={form?.validationError?.username}
         errorTextId="login-username-error-text"
       />
       <Input
@@ -34,7 +34,7 @@
         label="Password"
         name="password"
         type="password"
-        errorText={form?.passwordError}
+        errorText={form?.validationError?.password}
         errorTextId="login-password-error-text"
       />
       <button class="button filled" disabled={isLoading} type="submit">Login</button>

@@ -1,4 +1,4 @@
-import { fail } from "@sveltejs/kit";
+import { fail, redirect } from "@sveltejs/kit";
 import { z } from "zod";
 
 export const errorSchema = z.object({
@@ -9,10 +9,13 @@ export const successSchema = z.object({
 });
 
 export const handleBackendError = async (response: Response) => {
+  if (response.status >= 300 && response.status <= 308 && response.headers.has("Location")) {
+    redirect(response.status, new URL(response.headers.get("Location")!));
+  }
   let json: unknown;
   try {
     json = await response.json();
-  } catch {
+  } catch (err) {
     json = { error: "An unexpected error occurred." };
   }
   const validatedJson = await errorSchema.spa(json);

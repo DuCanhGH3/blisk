@@ -26,16 +26,23 @@
         label="Username"
         name="username"
         type="text"
-        errorText={form?.usernameError}
+        errorText={form?.validationError?.username}
         errorTextId="register-username-error-text"
       />
-      <Input id="register-email-input" label="Email" name="email" type="text" errorText={form?.emailError} errorTextId="register-email-error-text" />
+      <Input
+        id="register-email-input"
+        label="Email"
+        name="email"
+        type="text"
+        errorText={form?.validationError?.email}
+        errorTextId="register-email-error-text"
+      />
       <Input
         id="register-password-input"
         label="Password"
         name="password"
         type="password"
-        errorText={form?.passwordError}
+        errorText={form?.validationError?.password}
         errorTextId="register-password-error-text"
       />
       <button class="button filled" disabled={isLoading} type="submit">Register</button>

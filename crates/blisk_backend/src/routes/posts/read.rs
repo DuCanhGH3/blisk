@@ -4,7 +4,6 @@ use axum::{
     response::Response,
     Json,
 };
-use sqlx::{postgres::PgRow, Row};
 use tracing::instrument;
 
 use crate::{
@@ -14,29 +13,26 @@ use crate::{
 
 #[derive(serde::Deserialize)]
 pub struct ReadQuery {
-    post_id: String,
+    post_id: i64,
 }
 
-#[derive(serde::Serialize)]
-struct Post {
+#[derive(serde::Serialize, sqlx::FromRow)]
+struct ReadResponse {
     title: String,
     content: String,
+    author_name: String,
 }
 
-#[instrument(name = "read", skip(pool))]
+#[instrument(name = "Reading a post", skip(pool))]
 pub async fn read(
     State(ApplicationState { pool, .. }): State<ApplicationState>,
     Query(ReadQuery { post_id }): Query<ReadQuery>,
 ) -> Result<Response, ApplicationError> {
     let mut transaction = pool.begin().await?;
-    let rows = sqlx::query("SELECT title, content FROM posts WHERE user_id = $1")
+    let post: ReadResponse = sqlx::query_as("SELECT p.title, p.content, u.name as author_name FROM posts p JOIN users u ON p.user_id = u.id WHERE p.id = $1")
         .bind(&post_id)
-        .map(|e: PgRow| Post {
-            title: e.get("title"),
-            content: e.get("content"),
-        })
-        .fetch_all(&mut *transaction)
+        .fetch_one(&mut *transaction)
         .await?;
     transaction.commit().await?;
-    Ok(response(StatusCode::OK, None, Json(rows)))
+    Ok(response(StatusCode::OK, None, Json(post)))
 }
