@@ -1,5 +1,4 @@
 {
-  "typescript.preferences.autoImportFileExcludePatterns": ["./packages/sw/src/index.ts", "./packages/sw/src/index.*.ts"],
   "[typescriptreact]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode"
   },
