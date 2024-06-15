@@ -6,22 +6,23 @@
   import Input from "$components/Input.svelte";
 
   interface CommentFormProps {
-    disabled?: boolean;
     parentId: number | null;
     updateComments(newComment: Comment): void;
   }
 
-  const { disabled = false, updateComments, parentId }: CommentFormProps = $props();
+  const { parentId, updateComments }: CommentFormProps = $props();
+  const isParentComment = $derived(parentId === null);
+  const isParentOptimistic = $derived(parentId === OPTIMISTIC_ID);
   const idPrefix = $derived(parentId !== null ? `reply-${parentId}` : "comment");
-  let isCommenting = $state(false);
+  let isProcessing = $state(false);
 </script>
 
 <form
   method="POST"
-  action={`?/comment${parentId !== null ? `&parentId=${parentId}` : ""}`}
+  action={`?/comment${!isParentComment ? `&parentId=${parentId}` : ""}`}
   class="flex flex-col gap-2"
   use:enhance={({ formData }) => {
-    isCommenting = true;
+    isProcessing = true;
     const content = formData.get("content");
     const author_name = $page.data.user?.name;
     const post_id = Number.parseInt($page.params.id);
@@ -44,13 +45,13 @@
       } else {
         await update();
       }
-      isCommenting = false;
+      isProcessing = false;
     };
   }}
 >
   <Input
     id={`${idPrefix}-content-input`}
-    {disabled}
+    disabled={isParentOptimistic}
     label="Content"
     name="content"
     type="text"
@@ -58,6 +59,6 @@
     errorTextId={`${idPrefix}-content-error-text`}
   />
   <div>
-    <button class="button" disabled={disabled || isCommenting}>{parentId !== null ? "Reply" : "Comment"}</button>
+    <button class="button" disabled={isParentOptimistic || isProcessing}>{isParentComment ? "Comment" : "Reply"}</button>
   </div>
 </form>

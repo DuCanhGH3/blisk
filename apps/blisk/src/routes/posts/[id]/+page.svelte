@@ -13,12 +13,7 @@
       {data.post.content}
     </div>
   </article>
-  <CommentForm
-    parentId={null}
-    updateComments={(newComment) => {
-      data.comments.unshift(newComment);
-    }}
-  />
+  <CommentForm parentId={null} updateComments={(newComment) => data.comments.unshift(newComment)} />
   {#each data.comments as comment}
     <CommentRenderer {comment} username={data.user?.name} />
   {/each}
