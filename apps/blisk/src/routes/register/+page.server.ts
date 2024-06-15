@@ -1,11 +1,10 @@
-import { fail, isRedirect, redirect } from "@sveltejs/kit";
+import { fail, redirect } from "@sveltejs/kit";
 import { z } from "zod";
 
 import { base } from "$app/paths";
 
 import type { Actions, PageServerLoad } from "./$types";
-import { BACKEND_URL } from "$env/static/private";
-import { handleBackendError } from "$lib/backendResponse";
+import { fetchBackend } from "$lib/backend";
 
 const registerSchema = z.object({
   username: z.string().min(1, "Please enter a valid username!"),
@@ -23,39 +22,28 @@ export const load: PageServerLoad = ({ locals }) => {
 };
 
 export const actions: Actions = {
-  async register({ cookies, fetch, locals, request }) {
-    try {
-      const formData = await request.formData();
-      const data = await registerSchema.spa({
-        username: formData.get("username"),
-        email: formData.get("email"),
-        password: formData.get("password"),
-      });
-      if (!data.success) {
-        return fail(400, { validationError: data.error.flatten().fieldErrors });
-      }
-      const res = await fetch(`${BACKEND_URL}/users/register`, {
-        method: "POST",
-        body: JSON.stringify(data.data),
-        headers: {
-          "Content-Type": "application/json",
-          Accept: "application/json",
-        },
-        signal: AbortSignal.timeout(10000),
-      });
-      if (!res.ok) {
-        return await handleBackendError(res);
-      }
-      redirect(307, `${base}/login`);
-    } catch (err) {
-      if (isRedirect(err)) {
-        throw err;
-      }
-      console.log(err);
-      if (err instanceof Error && err.name === "TimeoutError") {
-        return fail(500, { error: "Server is currently under heavy load." });
-      }
-      return fail(500, { error: "Internal Server Error" });
+  async register({ cookies, fetch, request, setHeaders }) {
+    const formData = await request.formData();
+    const data = await registerSchema.spa({
+      username: formData.get("username"),
+      email: formData.get("email"),
+      password: formData.get("password"),
+    });
+    if (!data.success) {
+      return fail(400, { validationError: data.error.flatten().fieldErrors });
     }
+    const res = await fetchBackend("/users/register", {
+      authz: false,
+      cookies,
+      fetch,
+      setHeaders,
+      method: "POST",
+      body: JSON.stringify(data.data),
+      signal: AbortSignal.timeout(10000),
+    });
+    if (!res.ok) {
+      return fail(res.status, { error: res.error });
+    }
+    redirect(307, `${base}/login`);
   },
 };

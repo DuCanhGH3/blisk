@@ -5,7 +5,9 @@ import type { Handle } from "@sveltejs/kit";
 export const handle: Handle = async ({ event, resolve }) => {
   const tokenType = event.cookies.get("token_type");
   const token = event.cookies.get("token");
-  if (tokenType && token) {
+  // Since we only use `event.locals.user` on the client (we authenticate the end-user to the server
+  // via the JWT token in other cases), we limit this loading to GET requests only.
+  if (event.request.method === "GET" && tokenType && token) {
     const res = await fetchBackend<User>("/users/authenticate", {
       authz: true,
       cookies: event.cookies,

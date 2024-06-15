@@ -1,4 +1,7 @@
-use axum::{extract::FromRequest, response::{IntoResponse, Response}};
+use axum::{
+    extract::FromRequest,
+    response::{IntoResponse, Response},
+};
 
 use super::errors::AppError;
 

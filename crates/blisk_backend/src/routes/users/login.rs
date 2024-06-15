@@ -13,7 +13,10 @@ use crate::{
             errors::AuthError,
             password::verify,
             structs::{User, UserClaims},
-        }, errors::AppError, json::AppJson, response::response
+        },
+        errors::AppError,
+        json::AppJson,
+        response::response,
     },
 };
 
@@ -52,9 +55,9 @@ pub async fn login(
     let user_id = user
         .id
         .ok_or(AppError::Unexpected("user.id is unexpectedly None"))?;
-    let password_hash = user.password.ok_or(AppError::Unexpected(
-        "user.password is unexpectedly None",
-    ))?;
+    let password_hash = user
+        .password
+        .ok_or(AppError::Unexpected("user.password is unexpectedly None"))?;
     if !verify(password_hash, password)? {
         return Err(AppError::from(AuthError::Invalid));
     }

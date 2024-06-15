@@ -6,3 +6,5 @@ export const BREAKPOINTS = {
   md: 768,
   lg: 1280,
 };
+
+export const OPTIMISTIC_ID = -9999;

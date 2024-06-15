@@ -24,10 +24,7 @@ pub struct Application {
 
 impl Application {
     pub async fn build() -> Result<Self, std::io::Error> {
-        let address = format!(
-            "{}:{}",
-            SETTINGS.app.host, SETTINGS.app.port
-        );
+        let address = format!("{}:{}", SETTINGS.app.host, SETTINGS.app.port);
 
         let db_uri = std::env::var("DATABASE_URL").expect("Failed to read database URI");
 
@@ -43,8 +40,8 @@ impl Application {
             .await
             .expect("Failed to migrate database");
 
-        let redis_client =
-            redis::Client::open(SETTINGS.redis.uri.as_str()).expect("Failed to create a Redis client");
+        let redis_client = redis::Client::open(SETTINGS.redis.uri.as_str())
+            .expect("Failed to create a Redis client");
 
         let app_state = AppState { pool, redis_client };
         let listener = tokio::net::TcpListener::bind(&address).await?;
@@ -53,6 +50,8 @@ impl Application {
             .route("/health", get(routes::health::health_check))
             .route("/posts/create", post(routes::posts::create))
             .route("/posts/read", get(routes::posts::read))
+            .route("/comments/create", post(routes::comments::create))
+            .route("/comments/read", get(routes::comments::read))
             .route("/users/authenticate", post(routes::users::authenticate))
             .route("/users/confirm", post(routes::users::confirm))
             .route("/users/login", post(routes::users::login))

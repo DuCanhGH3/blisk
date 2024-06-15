@@ -9,5 +9,3 @@ CREATE TABLE IF NOT EXISTS users (
     "role" ROLE NOT NULL DEFAULT 'user',
     "password" TEXT NOT NULL
 );
-
-CREATE INDEX IF NOT EXISTS users_id_email_is_verified_idx ON users (id, email, is_verified);

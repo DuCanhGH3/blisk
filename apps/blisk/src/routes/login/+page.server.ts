@@ -4,8 +4,7 @@ import { base } from "$app/paths";
 
 import type { Actions, PageServerLoad } from "./$types";
 import { z } from "zod";
-import { BACKEND_URL } from "$env/static/private";
-import { handleBackendError } from "$lib/backendResponse";
+import { fetchBackend } from "$lib/backend";
 
 const loginSchema = z.object({
   username: z.string().min(1, "Please enter a valid username!"),
@@ -22,7 +21,7 @@ export const load: PageServerLoad = ({ locals }) => {
 };
 
 export const actions: Actions = {
-  async login({ cookies, fetch, request }) {
+  async login({ cookies, fetch, request, setHeaders }) {
     try {
       const formData = await request.formData();
       const data = await loginSchema.spa({
@@ -32,28 +31,27 @@ export const actions: Actions = {
       if (!data.success) {
         return fail(400, { validationError: data.error.flatten().fieldErrors });
       }
-      const res = await fetch(`${BACKEND_URL}/users/login?client_id=abc`, {
+      const res = await fetchBackend<{ token_type: string; expires_in: number; id_token: string }>("/users/login?client_id=abc", {
+        authz: false,
+        cookies,
+        fetch,
+        setHeaders,
         method: "POST",
         body: JSON.stringify(data.data),
-        headers: {
-          Accept: "application/json",
-          "Content-Type": "application/json",
-        },
         signal: AbortSignal.timeout(10000),
       });
       if (!res.ok) {
-        return await handleBackendError(res);
+        return fail(res.status, { error: res.error });
       }
-      const loginInfo = await res.json();
       const cookiesOptions = {
         httpOnly: true,
         secure: true,
         sameSite: "strict",
         path: "/",
-        maxAge: loginInfo.expires_in,
+        maxAge: res.data.expires_in,
       } as const;
-      cookies.set("token_type", loginInfo.token_type, cookiesOptions);
-      cookies.set("token", loginInfo.id_token, cookiesOptions);
+      cookies.set("token_type", res.data.token_type, cookiesOptions);
+      cookies.set("token", res.data.id_token, cookiesOptions);
     } catch (err) {
       console.log(err);
       if (err instanceof Error && err.name === "TimeoutError") {

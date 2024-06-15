@@ -24,7 +24,7 @@ pub async fn create(
 ) -> Result<Response, AppError> {
     let mut transaction = pool.begin().await?;
     let pid: i64 = sqlx::query_scalar(
-        "INSERT INTO posts (user_id, title, content) VALUES ($1, $2, $3) RETURNING id",
+        "INSERT INTO posts (author_id, title, content) VALUES ($1, $2, $3) RETURNING id",
     )
     .bind(&claims.sub)
     .bind(&title)

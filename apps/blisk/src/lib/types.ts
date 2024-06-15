@@ -13,3 +13,13 @@ export interface Post {
   content: string;
   author_name: string;
 }
+
+export interface Comment {
+  id: number;
+  path: string;
+  content: string;
+  author_name: string;
+  level: number;
+  post_id: number;
+  replies: Comment[];
+}
