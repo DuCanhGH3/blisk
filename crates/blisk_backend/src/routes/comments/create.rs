@@ -3,7 +3,7 @@ use tracing::instrument;
 
 use crate::{
     app::AppState,
-    utils::{auth::structs::UserClaims, errors::AppError, json::AppJson, response::response},
+    utils::{errors::AppError, json::AppJson, response::response, users::structs::UserClaims},
 };
 
 #[derive(serde::Deserialize)]
@@ -21,18 +21,14 @@ pub struct CreateResponse {
 pub async fn create(
     State(AppState { pool, .. }): State<AppState>,
     claims: UserClaims,
-    AppJson(CreatePayload {
-        post_id,
-        parent_id,
-        content,
-    }): AppJson<CreatePayload>,
+    AppJson(CreatePayload { post_id, parent_id, content }): AppJson<CreatePayload>,
 ) -> Result<Response, AppError> {
     let mut transaction = pool.begin().await?;
     let query = {
         if let Some(parent) = parent_id {
             sqlx::query_scalar!(
                 "INSERT INTO comments (post_id, author_id, content, path)
-                VALUES ($1, $2, $3, (SELECT path || text2ltree(id::VARCHAR(255)) FROM comments WHERE id = $4))
+                VALUES ($1, $2, $3, (SELECT path || TEXT2LTREE(id::VARCHAR(255)) FROM comments WHERE id = $4))
                 RETURNING id",
                 &post_id,
                 &claims.sub,

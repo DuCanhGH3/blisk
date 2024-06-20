@@ -4,7 +4,7 @@ use tracing::instrument;
 use crate::{
     app::AppState,
     utils::{
-        auth::structs::{User, UserClaims},
+        users::structs::{User, UserClaims},
         errors::AppError,
         json::AppJson,
         response::response,

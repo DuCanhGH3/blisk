@@ -1,5 +1,5 @@
 <script lang="ts">
-  import CommentRenderer from "./Comment.svelte";
+  import CommentRenderer from "./CommentRenderer.svelte";
   import CommentForm from "./CommentForm.svelte";
 
   const { data } = $props();
@@ -14,7 +14,9 @@
     </div>
   </article>
   <CommentForm parentId={null} updateComments={(newComment) => data.comments.unshift(newComment)} />
-  {#each data.comments as comment}
-    <CommentRenderer {comment} username={data.user?.name} />
-  {/each}
+  <ul>
+    {#each data.comments as comment}
+      <CommentRenderer {comment} username={data.user?.name} />
+    {/each}
+  </ul>
 </div>

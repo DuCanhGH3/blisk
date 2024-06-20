@@ -1,7 +1,7 @@
 use crate::{
     app::AppState,
     utils::{
-        auth::{self, errors::AuthError},
+        users::{self, errors::AuthError},
         errors::AppError,
         json::AppJson,
         response::{response, SuccessResponse},
@@ -32,7 +32,7 @@ pub async fn register(
     }): AppJson<RegisterPayload>,
 ) -> Result<Response, AppError> {
     let mut transaction = pool.begin().await?;
-    let password = auth::password::hash(&password)?;
+    let password = users::password::hash(&password)?;
     let uid: i64 = match sqlx::query_scalar(
         "INSERT INTO users (email, name, password) VALUES ($1, $2, $3) RETURNING id",
     )
@@ -55,7 +55,7 @@ pub async fn register(
     };
     transaction.commit().await?;
     let mut redis_con = redis_client.get_connection()?;
-    auth::emails::send_confirmation_email(
+    users::emails::send_confirmation_email(
         &mut redis_con,
         "blisk - Confirmation email".to_owned(),
         uid.to_string(),

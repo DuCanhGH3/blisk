@@ -1,5 +1,5 @@
 import { BACKEND_URL } from "$env/static/private";
-import { fail, redirect, type Cookies } from "@sveltejs/kit";
+import { redirect, type Cookies } from "@sveltejs/kit";
 import { z } from "zod";
 
 export const errorSchema = z.object({

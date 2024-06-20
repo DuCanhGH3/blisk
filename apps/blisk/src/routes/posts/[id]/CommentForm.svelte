@@ -20,7 +20,7 @@
 <form
   method="POST"
   action={`?/comment${!isParentComment ? `&parentId=${parentId}` : ""}`}
-  class="flex flex-col gap-2"
+  class="flex flex-row gap-2"
   use:enhance={({ formData }) => {
     isProcessing = true;
     const content = formData.get("content");
@@ -49,16 +49,16 @@
     };
   }}
 >
-  <Input
-    id={`${idPrefix}-content-input`}
-    disabled={isParentOptimistic}
-    label="Content"
-    name="content"
-    type="text"
-    errorText={$page.form?.validationError?.content}
-    errorTextId={`${idPrefix}-content-error-text`}
-  />
-  <div>
-    <button class="button" disabled={isParentOptimistic || isProcessing}>{isParentComment ? "Comment" : "Reply"}</button>
+  <div class="flex-1">
+    <Input
+      id={`${idPrefix}-content-input`}
+      disabled={isParentOptimistic}
+      label="Content"
+      name="content"
+      type="text"
+      errorText={$page.form?.validationError?.content}
+      errorTextId={`${idPrefix}-content-error-text`}
+    />
   </div>
+  <button class="button" disabled={isParentOptimistic || isProcessing}>{isParentComment ? "Comment" : "Reply"}</button>
 </form>

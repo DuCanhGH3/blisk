@@ -8,10 +8,22 @@ export interface User {
   role: string;
 }
 
+export type PostReaction =
+  | "overwhelmingly_positive"
+  | "very_positive"
+  | "positive"
+  | "mostly_positive"
+  | "mixed"
+  | "mostly_negative"
+  | "negative"
+  | "very_negative"
+  | "overwhelmingly_negative";
+
 export interface Post {
   title: string;
   content: string;
   author_name: string;
+  reaction: PostReaction;
 }
 
 export interface Comment {

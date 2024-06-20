@@ -48,13 +48,17 @@ impl Application {
         let port = listener.local_addr().unwrap().port();
         let app = Router::new()
             .route("/health", get(routes::health::health_check))
+            .route("/books/create", post(routes::books::create))
+            .route("/books/read", get(routes::books::read))
             .route("/posts/create", post(routes::posts::create))
             .route("/posts/read", get(routes::posts::read))
             .route("/comments/create", post(routes::comments::create))
             .route("/comments/read", get(routes::comments::read))
+            .route("/reactions/create", post(routes::reactions::create))
             .route("/users/authenticate", post(routes::users::authenticate))
             .route("/users/confirm", post(routes::users::confirm))
             .route("/users/login", post(routes::users::login))
+            .route("/users/read", get(routes::users::read))
             .route("/users/register", post(routes::users::register))
             .with_state(app_state);
         let server = axum::serve(listener, app);

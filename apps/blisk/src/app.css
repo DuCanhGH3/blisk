@@ -119,6 +119,15 @@
   .input:not(:placeholder-shown) + .label {
     @apply top-0.5 text-xs text-neutral-700 dark:text-gray-300;
   }
+  .textarea:placeholder-shown:focus + .label {
+    @apply top-0.5 translate-x-0 translate-y-0 text-xs text-neutral-700 dark:text-gray-300;
+  }
+  .textarea:placeholder-shown:not(:focus) + .label {
+    @apply top-[12px] translate-x-0 text-sm text-black dark:text-white;
+  }
+  .textarea:not(:placeholder-shown) + .label {
+    @apply top-0.5 text-xs text-neutral-700 dark:text-gray-300;
+  }
   .text-error {
     @apply text-[#a51a12] dark:text-red-400;
   }

@@ -4,10 +4,25 @@ import type { Actions, PageServerLoad } from "./$types";
 import type { Comment, Post } from "$lib/types";
 import { z } from "zod";
 
+const postIdSchema = z
+  .number({ coerce: true, message: "Post ID is not a number!" })
+  .int("Post ID must be an integer!")
+  .safe("Post ID must be within safe range!");
+
 const commentSchema = z.object({
-  post_id: z.number().int().safe(),
-  parent_id: z.coerce.number().int().nullable(),
+  post_id: postIdSchema,
+  parent_id: z
+    .number({ coerce: true, message: "Parent ID is not a number!" })
+    .int("Parent ID must be an integer!")
+    .safe("Parent ID must be within safe range!")
+    .nullable(),
   content: z.string().min(1, "Your comment must not be empty!"),
+});
+
+const reactionSchema = z.object({
+  for_type: z.union([z.literal("post"), z.literal("comment")], { message: "Reaction must be for a post or a comment!" }),
+  post_id: postIdSchema,
+  reaction_type: z.union([z.literal("like"), z.literal("angry")], { message: "Reaction is not valid!" }),
 });
 
 export const actions: Actions = {
@@ -15,7 +30,7 @@ export const actions: Actions = {
     const formData = await request.formData();
 
     const data = await commentSchema.spa({
-      post_id: Number.parseInt(params.id),
+      post_id: params.id,
       parent_id: url.searchParams.get("parentId"),
       content: formData.get("content"),
     });
@@ -40,6 +55,33 @@ export const actions: Actions = {
 
     return { id: res.data.id };
   },
+  async react({ cookies, fetch, params, request, setHeaders }) {
+    const formData = await request.formData();
+
+    const data = await reactionSchema.spa({
+      for_type: formData.get("forType"),
+      post_id: params.id,
+      reaction_type: formData.get("reactionType"),
+    });
+
+    if (!data.success) {
+      return fail(400, { validationError: data.error.flatten().fieldErrors });
+    }
+
+    const res = await fetchBackend("/reactions/create", {
+      authz: true,
+      cookies,
+      fetch,
+      setHeaders,
+      method: "POST",
+      body: JSON.stringify(data.data),
+      signal: AbortSignal.timeout(10000),
+    });
+
+    if (!res.ok) {
+      return fail(res.status, { error: res.error });
+    }
+  },
 };
 
 export const load: PageServerLoad = async ({ cookies, fetch, params, setHeaders }) => {
@@ -53,7 +95,6 @@ export const load: PageServerLoad = async ({ cookies, fetch, params, setHeaders 
   if (!res.ok) {
     error(res.status, { message: res.error });
   }
-  console.log(res.data.comments);
   return {
     post: res.data.post,
     comments: res.data.comments,

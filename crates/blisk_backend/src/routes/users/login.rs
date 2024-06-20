@@ -9,7 +9,7 @@ use crate::{
     app::AppState,
     settings::SETTINGS,
     utils::{
-        auth::{
+        users::{
             errors::AuthError,
             password::verify,
             structs::{User, UserClaims},

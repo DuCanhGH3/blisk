@@ -1,8 +1,10 @@
 mod authenticate;
 mod confirm;
 mod login;
+mod read;
 mod register;
 pub use authenticate::authenticate;
 pub use confirm::confirm;
 pub use login::login;
+pub use read::read;
 pub use register::register;

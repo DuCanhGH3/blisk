@@ -1,0 +1,44 @@
+<script lang="ts">
+  import type { HTMLTextareaAttributes } from "svelte/elements";
+
+  import { clsx } from "$lib/clsx";
+
+  interface TextareaProps extends Omit<HTMLTextareaAttributes, "placeholder"> {
+    label: string;
+    id: string;
+    errorTextId?: string;
+    errorText?: string | string[];
+  }
+
+  const { label, id, errorTextId, errorText, oninput, ...rest }: TextareaProps = $props();
+</script>
+
+<div class="relative">
+  <textarea
+    {id}
+    class={clsx(
+      "textarea block min-h-[44px] w-full overflow-hidden rounded-lg px-2.5 pb-2.5 pt-4 text-sm shadow-md transition-opacity disabled:opacity-50",
+      "focus:border-accent-light dark:focus:border-accent-dark border border-neutral-400 focus:outline-none dark:border-neutral-700",
+      "dark:bg-neutral-1000 bg-white text-black opacity-80 dark:text-white"
+    )}
+    aria-invalid={!!errorText}
+    aria-describedby={errorTextId}
+    placeholder=" "
+    oninput={(ev) => (ev.currentTarget.style.height = `${Math.max(44, ev.currentTarget.offsetHeight, ev.currentTarget.scrollHeight)}px`)}
+    {...rest}
+  ></textarea>
+  <label class="label absolute left-2.5 block select-none font-medium transition-all duration-100 ease-in" for={id}>
+    {label}
+  </label>
+</div>
+{#if !!errorText && errorTextId}
+  {#if typeof errorText === "string"}
+    <p class="text-error" id={errorTextId}>{errorText}</p>
+  {:else}
+    <div id={errorTextId} class="flex flex-col gap-2">
+      {#each errorText as error}
+        <p class="text-error">{error}</p>
+      {/each}
+    </div>
+  {/if}
+{/if}

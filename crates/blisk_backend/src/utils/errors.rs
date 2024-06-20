@@ -5,8 +5,11 @@ use axum::{
 };
 
 use super::{
-    auth::errors::AuthError, comments::errors::CommentsError, json::AppJson,
-    posts::errors::PostsError, response::ErrorResponse,
+    comments::errors::CommentsError,
+    json::AppJson,
+    posts::errors::PostsError,
+    response::ErrorResponse,
+    users::errors::{AuthError, UserError},
 };
 
 #[derive(Debug, thiserror::Error)]
@@ -15,6 +18,8 @@ pub enum AppError {
     TokenUsed,
     #[error("error while authenticating an user: {0}")]
     AuthError(#[from] AuthError),
+    #[error("error while processing an user: {0}")]
+    UserError(#[from] UserError),
     #[error("error while processing a comment: {0}")]
     CommentsError(#[from] CommentsError),
     #[error("error while processing a post: {0}")]
@@ -69,6 +74,18 @@ impl IntoResponse for AppError {
                         StatusCode::INTERNAL_SERVER_ERROR,
                         "Internal Server Error".to_owned(),
                     ),
+                }
+            }
+            AppError::UserError(error) => {
+                match error {
+                    UserError::UserNotFound(username) => (
+                        StatusCode::NOT_FOUND,
+                        format!("User {} may have been banned, or the username is incorrect.", username)
+                    ),
+                    UserError::Unexpected => (
+                        StatusCode::INTERNAL_SERVER_ERROR,
+                        "Internal Server Error".to_owned()
+                    )
                 }
             }
             AppError::CommentsError(error) => {

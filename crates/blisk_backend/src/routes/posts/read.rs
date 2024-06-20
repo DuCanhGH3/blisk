@@ -11,7 +11,10 @@ use crate::{
         comments::{self, structs::Comment},
         errors::AppError,
         json::AppJson,
-        posts::errors::PostsError,
+        posts::{
+            errors::PostsError,
+            structs::{Post, Reaction},
+        },
         response::response,
     },
 };
@@ -23,13 +26,7 @@ pub struct ReadQuery {
 #[derive(serde::Serialize)]
 pub struct ReadResponse {
     post: Post,
-    comments: Vec<sqlx::types::Json<Comment>>,
-}
-#[derive(serde::Serialize)]
-struct Post {
-    title: String,
-    content: String,
-    author_name: String,
+    comments: Vec<Comment>,
 }
 
 #[instrument(name = "Reading a post", skip(pool))]
@@ -40,10 +37,14 @@ pub async fn read(
     let mut transaction = pool.begin().await?;
     let post = sqlx::query_as!(
         Post,
-        "SELECT p.title, p.content, u.name as author_name
+        r#"SELECT
+            p.title,
+            p.content,
+            u.name as author_name,
+            p.reaction AS "reaction!: Reaction"
         FROM posts p
         JOIN users u ON p.author_id = u.id
-        WHERE p.id = $1",
+        WHERE p.id = $1"#,
         &post_id,
     )
     .fetch_one(&mut *transaction)

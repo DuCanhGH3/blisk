@@ -8,7 +8,7 @@ use tracing::instrument;
 use crate::{
     app::AppState,
     utils::{
-        auth::{confirmation_token::verify_confirmation_token, errors::AuthError},
+        users::{confirmation_token::verify_confirmation_token, errors::AuthError},
         errors::AppError,
         json::AppJson,
         response::{response, SuccessResponse},

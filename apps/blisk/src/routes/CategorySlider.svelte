@@ -59,8 +59,8 @@
           <a
             href="/"
             class={clsx(
-              "mr-4 flex w-full min-w-0 flex-[0_0_45%] select-none flex-col gap-4 rounded-[20px] border p-4 md:flex-[0_0_20%]",
-              "border-neutral-300 bg-white dark:border-neutral-800 dark:bg-neutral-950"
+              "mr-4 flex w-full min-w-0 flex-[0_0_45%] select-none flex-col gap-4 rounded-[21px] border p-4 lg:flex-[0_0_20%]",
+              "border-neutral-300 bg-white dark:border-neutral-800 dark:bg-neutral-950 shadow-[2px_0_6px_-1px_rgb(0_0_0_/_0.1)]"
             )}
           >
             <span class="p-2">

@@ -10,7 +10,7 @@ use crate::{settings::SETTINGS, utils::errors::AppError};
 use super::errors::AuthError;
 
 #[derive(Clone, Debug, PartialEq, PartialOrd, sqlx::Type, serde::Deserialize, serde::Serialize)]
-#[sqlx(type_name = "role", rename_all = "lowercase")]
+#[sqlx(type_name = "urole", rename_all = "lowercase")]
 pub enum UserRole {
     Admin,
     User,
