@@ -30,7 +30,7 @@
     <div
       class={clsx(
         "absolute right-0 mt-2 w-52 origin-top-right rounded-[10px] shadow-lg transition ease-in-out [&>*]:p-1",
-        "border-[0.25px] border-neutral-300 bg-white dark:border-gray-700 dark:bg-black",
+        "border-[0.25px] border-border-light bg-white dark:border-gray-700 dark:bg-black",
         "divide-y divide-neutral-300 ring-1 ring-black/5 focus:outline-none dark:divide-gray-700"
       )}
       aria-labelledby="navbar-usermenu-button"

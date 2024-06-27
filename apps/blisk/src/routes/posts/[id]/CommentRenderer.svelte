@@ -1,7 +1,8 @@
 <script lang="ts">
-  import { enhance } from "$app/forms";
+  import ThumbUp from "$components/icons/ThumbUp.svelte";
   import type { Comment } from "$lib/types";
   import CommentForm from "./CommentForm.svelte";
+  import ReactionBar from "./ReactionBar.svelte";
 
   interface CommentProps {
     comment: Comment;
@@ -12,22 +13,15 @@
 </script>
 
 <li>
-  <div class="mb-3 rounded-lg border border-neutral-400 bg-white px-2.5 py-2.5 shadow-md dark:border-neutral-700">
-    <div class="text-comment text-sm">{comment.author_name} - {comment.id}</div>
-    <div>{comment.content}</div>
+  <div class="box sm">
+    <a href={`/users/${comment.author_name}`} class="link text-sm">{comment.author_name}</a>
+    <div>{comment.id} - {comment.content}</div>
     <div class="flex flex-row gap-2">
-      <form method="POST" action="?/react" use:enhance>
-        <input name="forType" value="comment" hidden />
-        <input name="commentId" value={"" + comment.id} hidden />
-        <input name="reactionType" value="like" hidden />
-        <button type="submit">Like</button>
-      </form>
-      <form method="POST" action="?/react" use:enhance>
-        <input name="forType" value="comment" hidden />
-        <input name="commentId" value={"" + comment.id} hidden />
-        <input name="reactionType" value="angry" hidden />
-        <button type="submit">Dislike</button>
-      </form>
+      <span class="flex flex-row gap-1">
+        <ThumbUp width={24} height={24} />
+        Like
+      </span>
+      <ReactionBar />
     </div>
   </div>
   <div class="flex flex-col gap-3 pl-3">

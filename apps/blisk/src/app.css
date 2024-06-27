@@ -62,6 +62,202 @@
   #nav-usermenu[open] > summary {
     @apply bg-neutral-250 dark:bg-neutral-800;
   }
+
+  @keyframes like {
+    0% {
+      @apply translate-x-0 translate-y-0 rotate-0 scale-100;
+    }
+    60% {
+      @apply -translate-x-1 -translate-y-1 -rotate-45 scale-125;
+    }
+    80% {
+      @apply translate-x-[1px] translate-y-[1px] rotate-[15deg] scale-90;
+    }
+  }
+
+  @keyframes heart {
+    0%,
+    80% {
+      @apply translate-x-0 translate-y-0 rotate-0 scale-100;
+    }
+    15% {
+      @apply translate-x-0 translate-y-1 rotate-[5deg] scale-75;
+    }
+    25% {
+      @apply -translate-x-[1px] translate-y-[1px] rotate-[-20deg] scale-100;
+    }
+    50% {
+      @apply -translate-y-[1px] translate-x-[1px] rotate-[10deg] scale-125;
+    }
+    65% {
+      @apply translate-x-0 translate-y-0 rotate-0 scale-90;
+    }
+  }
+
+  .book {
+    @apply relative h-72 w-12 select-none shadow-md transition-transform duration-500;
+    transform-style: preserve-3d;
+  }
+
+  .book:hover {
+    transform: rotateX(-15deg) rotateY(-45deg) rotateZ(-15deg) translateY(50px);
+  }
+
+  .book-side {
+    @apply absolute select-none rounded-sm border-2 border-black;
+    transform-origin: left center;
+  }
+
+  .book-side.spine {
+    @apply relative h-72 w-12;
+  }
+
+  .book-side.top {
+    @apply top-0 h-[186px] w-12 bg-[#eee7d7];
+    transform: rotateX(90deg) translateZ(90px) translateY(-96px);
+  }
+
+  .book-side.back-cover {
+    @apply left-0 top-0 h-72 w-48 bg-[#eee7d7];
+    transform: rotateY(90deg);
+  }
+
+  .book-side.cover {
+    @apply left-12 top-0 h-72 w-48;
+    transform: rotateY(90deg);
+  }
+
+  .react-button {
+    @apply rounded-full bg-gradient-to-tl p-1 duration-100;
+    & > svg {
+      @apply h-auto w-5;
+    }
+  }
+
+  .react-button.like {
+    @apply from-blue-800 to-sky-300;
+    & > svg {
+      @apply animate-[like_1.5s_ease-out_0.5s_infinite];
+    }
+  }
+
+  .react-button.heart {
+    @apply from-red-700 to-red-400;
+    & > svg {
+      @apply animate-[heart_1.5s_ease-out_0.5s_infinite];
+    }
+  }
+
+  @keyframes laugh-eyes {
+    0% {
+      @apply translate-x-[-3.5px] translate-y-[-2px] rotate-[-15deg] scale-[1.1];
+    }
+    5% {
+      @apply translate-x-[-2.8px] translate-y-0 rotate-[-12deg] scale-[1.09];
+    }
+    10% {
+      @apply translate-x-[-2.1px] translate-y-[-2px] rotate-[-9deg] scale-[1.08];
+    }
+    15% {
+      @apply translate-x-[-1.4px] translate-y-0 rotate-[-6deg] scale-[1.07];
+    }
+    20% {
+      @apply translate-x-[-0.7px] translate-y-[-2px] rotate-[-3deg] scale-[1.06];
+    }
+    25% {
+      @apply translate-x-0 translate-y-0 rotate-0 scale-[1.05];
+    }
+    30% {
+      @apply translate-x-[0.7px] translate-y-[-2px] rotate-[3deg] scale-[1.06];
+    }
+    35% {
+      @apply translate-x-[1.4px] translate-y-0 rotate-[6deg] scale-[1.07];
+    }
+    40% {
+      @apply translate-x-[2.1px] translate-y-[-2px] rotate-[9deg] scale-[1.08];
+    }
+    45% {
+      @apply translate-x-[2.8px] translate-y-0 rotate-[12deg] scale-[1.09];
+    }
+    50% {
+      @apply translate-x-[3.5px] translate-y-[-2px] rotate-[15deg] scale-[1.1];
+    }
+  }
+
+  @keyframes laugh-mouth {
+    0% {
+      @apply origin-top translate-x-[-1px] translate-y-0 rotate-[-15deg] scale-[1.1];
+    }
+    5% {
+      @apply origin-top translate-x-[-1px] translate-y-0 rotate-[-12deg] scale-100;
+    }
+    10% {
+      @apply origin-top translate-x-[-1px] translate-y-0 rotate-[-9deg] scale-[1.1];
+    }
+    15% {
+      @apply origin-top translate-x-[-1px] translate-y-0 rotate-[-6deg] scale-100;
+    }
+    20% {
+      @apply origin-top translate-x-[-1px] translate-y-0 rotate-[-3deg] scale-[1.1];
+    }
+    25% {
+      @apply origin-top translate-x-0 translate-y-0 rotate-0 scale-100;
+    }
+    30% {
+      @apply origin-top translate-x-[1px] translate-y-[0.7px] rotate-[3deg] scale-[1.1];
+    }
+    35% {
+      @apply origin-top translate-x-[1px] translate-y-[0.7px] rotate-[6deg] scale-100;
+    }
+    40% {
+      @apply origin-top translate-x-[1px] translate-y-[0.7px] rotate-[9deg] scale-[1.1];
+    }
+    45% {
+      @apply origin-top translate-x-[1px] translate-y-[0.7px] rotate-[12deg] scale-100;
+    }
+    50% {
+      @apply origin-top translate-x-[1px] translate-y-[0.7px] rotate-[15deg] scale-[1.1];
+    }
+  }
+
+  .react-button.laugh {
+    @apply from-yellow-600 to-yellow-100;
+    & > .laugh-emoji {
+      @apply flex size-5 flex-col items-center justify-between;
+      & > .eyes-cont {
+        @apply flex h-2 w-full animate-[laugh-eyes_3s_ease-out_0.5s_infinite] flex-row justify-between px-[2px] py-[4px];
+        & > .eyes {
+          @apply relative block h-[5px] w-[6px];
+          &::before,
+          &::after {
+            @apply absolute left-1/2 h-[2px] w-[6px] origin-center -translate-x-1/2 rounded-md bg-black content-[''];
+          }
+          &.left {
+            &::before {
+              @apply top-0 rotate-[30deg];
+            }
+            &::after {
+              @apply bottom-0 rotate-[-30deg];
+            }
+          }
+          &.right {
+            &::before {
+              @apply top-0 rotate-[150deg];
+            }
+            &::after {
+              @apply bottom-0 rotate-[210deg];
+            }
+          }
+        }
+      }
+      & > .mouth {
+        @apply relative block h-2 w-4 animate-[laugh-mouth_3s_ease-out_0.5s_infinite] overflow-hidden rounded-b-[40px] bg-gradient-to-b from-black to-red-700;
+        &::after {
+          @apply absolute bottom-[-1px] left-1/2 block h-1 w-3 -translate-x-1/2 rounded-t-[30px] bg-gradient-to-b from-red-400 to-red-500 content-[''];
+        }
+      }
+    }
+  }
 }
 
 @layer utilities {
@@ -77,15 +273,33 @@
   details[open] > summary > .details-chevron {
     @apply rotate-90;
   }
+  .box {
+    @apply dark:bg-neutral-1000 border-border-light dark:border-border-dark w-full border bg-white;
+  }
+  .box.hover {
+    @apply hover:bg-neutral-100 dark:hover:bg-neutral-800;
+  }
+  .box.lg {
+    @apply rounded-3xl p-8 shadow-lg;
+  }
+  .box.md {
+    @apply rounded-xl p-4 shadow-md;
+  }
+  .box.sm {
+    @apply rounded-xl p-2.5 shadow-md;
+  }
+  .box.xs {
+    @apply rounded-lg p-2 shadow-md;
+  }
   .container {
-    @apply border border-neutral-300 bg-white dark:border-neutral-800 dark:bg-neutral-950;
+    @apply border-border-light dark:border-border-dark border bg-white dark:bg-neutral-950;
   }
   .text-comment {
     @apply text-neutral-600 dark:text-neutral-400;
   }
   .link,
   .link > * {
-    @apply !text-accent-light underline underline-offset-[5px] dark:!text-accent-dark;
+    @apply !text-accent-light dark:!text-accent-dark underline underline-offset-[5px];
   }
   .link.sm,
   .link.sm > * {
@@ -101,14 +315,14 @@
     @apply mt-2;
   }
   .nav-button {
-    @apply flex cursor-pointer items-center justify-center rounded-full bg-transparent p-3 duration-100 hover:bg-neutral-250 dark:hover:bg-neutral-800;
+    @apply hover:bg-neutral-250 flex cursor-pointer items-center justify-center rounded-full bg-transparent p-3 duration-100 dark:hover:bg-neutral-800;
   }
   .nav-button.active {
     @apply bg-neutral-250 dark:bg-neutral-800;
   }
   .button {
     @apply transition-colors-opacity min-w-max rounded-md px-5 py-2.5 text-center text-sm font-medium duration-100 focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-gray-800;
-    @apply bg-accent-light text-white disabled:bg-gray-100 disabled:text-neutral-700 dark:bg-accent-dark dark:text-black dark:disabled:bg-neutral-900 dark:disabled:text-neutral-400 [&:not(:disabled)]:hover:bg-accent-light/80 dark:[&:not(:disabled)]:hover:bg-accent-dark/80;
+    @apply bg-accent-light dark:bg-accent-dark [&:not(:disabled)]:hover:bg-accent-light/80 dark:[&:not(:disabled)]:hover:bg-accent-dark/80 text-white disabled:bg-gray-100 disabled:text-neutral-700 dark:text-black dark:disabled:bg-neutral-900 dark:disabled:text-neutral-400;
   }
   .input:placeholder-shown:focus + .label {
     @apply top-0.5 translate-x-0 translate-y-0 text-xs text-neutral-700 dark:text-gray-300;
@@ -159,7 +373,7 @@ li[aria-current="page"] {
 
 li[aria-current="page"]::before {
   view-transition-name: active-page;
-  @apply absolute bottom-0.5 left-1/2 z-10 h-0 w-[75%] -translate-x-1/2 rounded-md border-2 border-accent-light content-[''] dark:border-accent-dark;
+  @apply border-accent-light dark:border-accent-dark absolute bottom-0.5 left-1/2 z-10 h-0 w-[75%] -translate-x-1/2 rounded-md border-2 content-[''];
 }
 
 ::view-transition-old(root),

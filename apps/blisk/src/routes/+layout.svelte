@@ -10,7 +10,6 @@
   import { isColorScheme } from "$lib/isColorScheme";
   import { colorScheme } from "$lib/stores/colorScheme";
   import { PUBLIC_CANONICAL_URL } from "$env/static/public";
-  import Navbar from "$components/layouts/Navbar.svelte";
   import VerticalNavbar from "$components/layouts/VerticalNavbar.svelte";
 
   const { data, children } = $props();
@@ -66,7 +65,6 @@
 
 <a class="absolute -top-full z-[100] text-black underline focus:top-0 dark:text-white" href="#main-content">Skip to main content</a>
 <div class="flex flex-1 flex-col md:flex-row">
-  <!-- <Navbar user={data.user} /> -->
   <VerticalNavbar user={data.user} />
   <main id="main-content">
     {@render children()}

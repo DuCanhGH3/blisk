@@ -33,7 +33,7 @@
       class={clsx(
         "absolute left-4 top-1/2 z-10 flex -translate-y-1/2 active:!bg-neutral-400 dark:active:!bg-neutral-700",
         "flex cursor-pointer items-center justify-center rounded-full bg-transparent [&>svg]:invisible [&>svg]:hover:visible",
-        "p-3 transition-colors duration-100 hover:bg-neutral-250 dark:hover:bg-neutral-800"
+        "hover:bg-neutral-250 p-3 transition-colors duration-100 dark:hover:bg-neutral-800"
       )}
       onclick={emblaPrev}
     >
@@ -43,40 +43,34 @@
       class={clsx(
         "absolute right-4 top-1/2 z-10 flex -translate-y-1/2 active:!bg-neutral-400 dark:active:!bg-neutral-700",
         "flex cursor-pointer items-center justify-center rounded-full bg-transparent [&>svg]:invisible [&>svg]:hover:visible",
-        "p-3 transition-colors duration-100 hover:bg-neutral-250 dark:hover:bg-neutral-800"
+        "hover:bg-neutral-250 p-3 transition-colors duration-100 dark:hover:bg-neutral-800"
       )}
       onclick={emblaNext}
     >
       <ChevronRight width={24} height={24} class="transition-all duration-100" />
     </button>
     <div
-      class="flex h-full w-full overflow-hidden"
+      class="flex h-full w-full z-[2] overflow-x-hidden pb-[50px] mb-[-50px]"
       use:emblaCarousel={{ options: { align: "start", containScroll: false, dragFree: true, loop: true }, plugins: [] }}
       on:emblaInit={onEmbiaInit}
     >
-      <div class="flex w-full">
-        {#each Array.from({ length: 10 }) as _}
-          <a
-            href="/"
-            class={clsx(
-              "mr-4 flex w-full min-w-0 flex-[0_0_45%] select-none flex-col gap-4 rounded-[21px] border p-4 lg:flex-[0_0_20%]",
-              "border-neutral-300 bg-white dark:border-neutral-800 dark:bg-neutral-950 shadow-[2px_0_6px_-1px_rgb(0_0_0_/_0.1)]"
-            )}
-          >
-            <span class="p-2">
-              <h3 class="text-comment line-clamp-1 text-xl font-semibold">recommendation</h3>
-              <h4 class="line-clamp-1 text-3xl font-semibold">Lorem ipsum</h4>
-            </span>
-            <img
-              width={900}
-              height={400}
-              class="h-64 w-full rounded-md object-cover opacity-75 md:h-[300px]"
-              src="https://images.ctfassets.net/kftzwdyauwt9/44csSCT2TZUSqqI2UCLDF9/153e0192aeb75b2322007085c1009bc0/AGI2.png?w=3840&q=90&fm=webp"
-              alt=""
-            />
-          </a>
+      <div class="flex w-full flex-row">
+        {#each Array.from({ length: 50 }) as _}
+          <div class="shrink-0 z-[3] hover:z-[4] mr-1">
+            <div class="book">
+              <div class="book-side spine">
+                <img src="/test-spine.jpg" width="48" height="288" alt="" class="h-full w-full" />
+              </div>
+              <div class="book-side top"></div>
+              <div class="book-side back-cover"></div>
+              <div class="book-side cover">
+                <img src="/test-cover.jpg" width="192" height="288" alt="" class="h-full w-full" />
+              </div>
+            </div>
+          </div>
         {/each}
       </div>
     </div>
+    <div class="z-[1] h-7 w-full bg-white shadow-[0_0_10px_2px_rgb(0,_0,_0,_0.5)]"></div>
   </div>
 </div>

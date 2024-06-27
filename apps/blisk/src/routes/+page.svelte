@@ -51,7 +51,10 @@
       <ChevronRight width={24} height={24} class="transition-all duration-100" />
     </button>
     <div
-      class="flex h-full w-full overflow-hidden rounded-[21px] border border-neutral-300 shadow-md bg-white dark:border-neutral-800 dark:bg-neutral-950"
+      class={clsx(
+        "flex h-full w-full overflow-hidden rounded-[21px] border shadow-md transition-colors duration-100",
+        "border-border-light bg-white dark:border-border-dark dark:bg-neutral-1000 hover:bg-neutral-100 dark:hover:bg-neutral-800"
+      )}
       use:emblaCarouselSvelte={{ options: { containScroll: false, dragFree: true, loop: true }, plugins: [emblaAutoplay()] }}
       on:emblaInit={onEmbiaInit}
     >
@@ -66,7 +69,7 @@
               width={900}
               height={400}
               class="h-96 w-full rounded-md object-cover opacity-75 md:h-[600px]"
-              src="https://images.ctfassets.net/kftzwdyauwt9/44csSCT2TZUSqqI2UCLDF9/153e0192aeb75b2322007085c1009bc0/AGI2.png?w=3840&q=90&fm=webp"
+              src="/AGI2.webp"
               alt=""
             />
           </a>

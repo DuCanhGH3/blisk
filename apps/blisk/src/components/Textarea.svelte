@@ -18,7 +18,7 @@
     {id}
     class={clsx(
       "textarea block min-h-[44px] w-full overflow-hidden rounded-lg px-2.5 pb-2.5 pt-4 text-sm shadow-md transition-opacity disabled:opacity-50",
-      "focus:border-accent-light dark:focus:border-accent-dark border border-neutral-400 focus:outline-none dark:border-neutral-700",
+      "focus:border-accent-light dark:focus:border-accent-dark border border-border-light focus:outline-none dark:border-border-dark",
       "dark:bg-neutral-1000 bg-white text-black opacity-80 dark:text-white"
     )}
     aria-invalid={!!errorText}

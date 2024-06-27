@@ -1,16 +1,22 @@
 import { fetchBackend } from "$lib/backend";
 import { error } from "@sveltejs/kit";
 import type { PageServerLoad } from "./$types";
+import type { Post } from "$lib/types";
 
-export const load: PageServerLoad = async ({ cookies, fetch, params, setHeaders }) => {
-  const res = await fetchBackend(`/users/read?username=${params.name}`, {
+interface LoadData {
+  name: string;
+  posts: Post[];
+}
+
+export const load: PageServerLoad = async ({ cookies, fetch, params, setHeaders, url }) => {
+  const user = await fetchBackend<LoadData>(`/users/read?username=${params.name}`, {
     authz: false,
     cookies,
     fetch,
     setHeaders,
   });
-  if (!res.ok) {
-    error(res.status, res.error);
+  if (!user.ok) {
+    error(user.status, user.error);
   }
-  return { data: res.data };
+  return { title: `User ${user.data.name}`, data: user.data };
 };

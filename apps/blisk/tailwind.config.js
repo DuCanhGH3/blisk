@@ -17,6 +17,10 @@ export default {
           light: "#1e40af",
           dark: "#7dd3fc",
         },
+        border: {
+          light: "#d4d4d4",
+          dark: "#262626",
+        },
         neutral: {
           250: "#dddddd",
           1000: "#111111",

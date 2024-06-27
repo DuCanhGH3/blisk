@@ -74,7 +74,7 @@
     @apply rotate-90;
   }
   .container {
-    @apply border border-neutral-300 bg-white dark:border-neutral-800 dark:bg-neutral-950;
+    @apply border border-border-light bg-white dark:border-border-dark dark:bg-neutral-950;
   }
   .text-comment {
     @apply text-neutral-600 dark:text-neutral-400;

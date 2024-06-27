@@ -36,7 +36,7 @@
 <nav
   class={clsx(
     "sticky top-0 z-[50] h-fit max-h-dvh border-b transition-colors-opacity duration-100",
-    "border-neutral-300 bg-white dark:border-neutral-800 dark:bg-black"
+    "border-border-light bg-white dark:border-border-dark dark:bg-black"
   )}
 >
   <div class="mx-auto max-w-7xl px-2 py-2 md:px-6 lg:px-8">
@@ -60,7 +60,7 @@
           </summary>
           <div class="absolute right-0 w-[150px] md:hidden">
             <ul
-              class="relative top-2 max-h-[60dvh] space-y-1 overflow-y-auto rounded-[14px] border border-neutral-300 bg-white p-2 dark:border-neutral-800 dark:bg-black"
+              class="relative top-2 max-h-[60dvh] space-y-1 overflow-y-auto rounded-[14px] border border-border-light bg-white p-2 dark:border-border-dark dark:bg-black"
             >
               {#each links as { label, link, isActive }}
                 <li aria-current={isActive ? "page" : undefined}>
