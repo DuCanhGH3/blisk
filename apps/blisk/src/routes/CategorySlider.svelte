@@ -21,14 +21,14 @@
     if (!emblaApi) return;
     const { index } = emblaApi?.internalEngine();
     const next = index.add(-10).get();
-    emblaApi?.scrollTo(next, false);
+    emblaApi.scrollTo(next, false);
   };
 
   const emblaNext = () => {
     if (!emblaApi) return;
     const { index } = emblaApi?.internalEngine();
     const next = index.add(10).get();
-    emblaApi?.scrollTo(next, false);
+    emblaApi.scrollTo(next, false);
   };
 </script>
 
@@ -56,7 +56,7 @@
       <ChevronRight width={24} height={24} class="transition-all duration-100" />
     </button>
     <div
-      class="z-[2] mb-[-50px] flex h-full w-full overflow-x-hidden pb-[50px]"
+      class="z-[2] mb-[-65px] flex h-full w-full overflow-x-hidden pb-[65px]"
       use:emblaCarousel={{ options: { align: "start", containScroll: false, dragFree: true, loop: true }, plugins: [] }}
       on:emblaInit={onEmbiaInit}
     >

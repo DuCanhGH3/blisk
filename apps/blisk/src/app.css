@@ -100,7 +100,7 @@
   }
 
   .book:hover {
-    transform: rotateX(-15deg) rotateY(-45deg) rotateZ(-15deg) translateY(50px);
+    transform: rotateX(-5deg) rotateY(-20deg) rotateZ(-15deg) translateX(-50px) translateY(50px);
   }
 
   .book-side {
