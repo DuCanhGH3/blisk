@@ -18,11 +18,17 @@
   };
 
   const emblaPrev = () => {
-    emblaApi?.scrollPrev();
+    if (!emblaApi) return;
+    const { index } = emblaApi?.internalEngine();
+    const next = index.add(-10).get();
+    emblaApi?.scrollTo(next, false);
   };
 
   const emblaNext = () => {
-    emblaApi?.scrollNext();
+    if (!emblaApi) return;
+    const { index } = emblaApi?.internalEngine();
+    const next = index.add(10).get();
+    emblaApi?.scrollTo(next, false);
   };
 </script>
 
@@ -50,13 +56,13 @@
       <ChevronRight width={24} height={24} class="transition-all duration-100" />
     </button>
     <div
-      class="flex h-full w-full z-[2] overflow-x-hidden pb-[50px] mb-[-50px]"
+      class="z-[2] mb-[-50px] flex h-full w-full overflow-x-hidden pb-[50px]"
       use:emblaCarousel={{ options: { align: "start", containScroll: false, dragFree: true, loop: true }, plugins: [] }}
       on:emblaInit={onEmbiaInit}
     >
       <div class="flex w-full flex-row">
         {#each Array.from({ length: 50 }) as _}
-          <div class="shrink-0 z-[3] hover:z-[4] mr-1">
+          <div class="z-[3] mr-1 shrink-0 hover:z-[4]">
             <div class="book">
               <div class="book-side spine">
                 <img src="/test-spine.jpg" width="48" height="288" alt="" class="h-full w-full" />
