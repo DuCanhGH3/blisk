@@ -1,6 +1,6 @@
 use std::str::FromStr;
 
-use crate::{routes, settings::SETTINGS};
+use crate::{routes, settings::SETTINGS, utils::constants::UPLOADS_DIRECTORY};
 use axum::{
     routing::{get, post},
     serve::Serve,
@@ -24,6 +24,10 @@ pub struct Application {
 
 impl Application {
     pub async fn build() -> Result<Self, std::io::Error> {
+        tokio::fs::create_dir_all(UPLOADS_DIRECTORY)
+            .await
+            .expect("Failed to create `uploads` directory");
+
         let address = format!("{}:{}", SETTINGS.app.host, SETTINGS.app.port);
 
         let db_uri = std::env::var("DATABASE_URL").expect("Failed to read database URI");

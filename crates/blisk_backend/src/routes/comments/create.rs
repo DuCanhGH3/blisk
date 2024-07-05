@@ -3,7 +3,7 @@ use tracing::instrument;
 
 use crate::{
     app::AppState,
-    utils::{errors::AppError, json::AppJson, response::response, users::structs::UserClaims},
+    utils::{errors::AppError, response::response, structs::AppJson, users::structs::UserClaims},
 };
 
 #[derive(serde::Deserialize)]
@@ -21,7 +21,11 @@ pub struct CreateResponse {
 pub async fn create(
     State(AppState { pool, .. }): State<AppState>,
     claims: UserClaims,
-    AppJson(CreatePayload { post_id, parent_id, content }): AppJson<CreatePayload>,
+    AppJson(CreatePayload {
+        post_id,
+        parent_id,
+        content,
+    }): AppJson<CreatePayload>,
 ) -> Result<Response, AppError> {
     let mut transaction = pool.begin().await?;
     let query = {

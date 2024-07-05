@@ -5,3 +5,5 @@ pub static TEMPLATES: LazyLock<minijinja::Environment<'static>> = LazyLock::new(
     env.set_loader(minijinja::path_loader("templates"));
     env
 });
+
+pub const UPLOADS_DIRECTORY: &str = "uploads";

@@ -3,12 +3,14 @@ use axum::{
     http::StatusCode,
     response::{IntoResponse, Response},
 };
+use axum_typed_multipart::TypedMultipartError;
 
 use super::{
     comments::errors::CommentsError,
-    json::AppJson,
     posts::errors::PostsError,
     response::ErrorResponse,
+    structs::AppJson,
+    uploads::errors::UploadsError,
     users::errors::{AuthError, UserError},
 };
 
@@ -24,10 +26,14 @@ pub enum AppError {
     CommentsError(#[from] CommentsError),
     #[error("error while processing a post: {0}")]
     PostsError(#[from] PostsError),
+    #[error("error while uploading a file: {0}")]
+    UploadsError(#[from] UploadsError),
     #[error("error was not expected {0}")]
     Unexpected(&'static str),
     #[error("error while procesing json: {0}")]
     JsonRejection(#[from] JsonRejection),
+    #[error("error while processing a multipart request: {0}")]
+    MultipartError(#[from] TypedMultipartError),
     #[error("erro while processing json: {0}")]
     SerdeError(#[from] serde_json::Error),
     #[error("error while querying redis: {0}")]
@@ -110,11 +116,24 @@ impl IntoResponse for AppError {
                     ),
                 }
             }
+            AppError::UploadsError(error) => {
+                match error {
+                    UploadsError::InvalidName(file) => (
+                        StatusCode::BAD_REQUEST,
+                        format!("{file} is not a valid filename!")
+                    ),
+                    UploadsError::IoError(_) => (
+                        StatusCode::INTERNAL_SERVER_ERROR,
+                        "Internal Server Error".to_owned()
+                    )
+                }
+            },
             AppError::Unexpected(_) => (
                 StatusCode::INTERNAL_SERVER_ERROR,
                 "Internal Server Error".to_owned(),
             ),
             AppError::JsonRejection(rejection) => (rejection.status(), rejection.body_text()),
+            AppError::MultipartError(error) => (error.get_status(), error.to_string()),
             AppError::SerdeError(_) => (
                 StatusCode::INTERNAL_SERVER_ERROR,
                 "Internal Server Error".to_owned(),

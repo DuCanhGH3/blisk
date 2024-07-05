@@ -53,7 +53,7 @@
     <div
       class={clsx(
         "flex h-full w-full overflow-hidden rounded-[21px] border shadow-md transition-colors duration-100",
-        "border-border-light bg-white dark:border-border-dark dark:bg-neutral-1000 hover:bg-neutral-100 dark:hover:bg-neutral-800"
+        "border-border-light bg-white dark:border-border-dark dark:bg-neutral-925 hover:bg-neutral-100 dark:hover:bg-neutral-800"
       )}
       use:emblaCarouselSvelte={{ options: { containScroll: false, dragFree: true, loop: true }, plugins: [emblaAutoplay()] }}
       on:emblaInit={onEmbiaInit}
@@ -77,7 +77,7 @@
       </div>
     </div>
   </div>
-  {#each Array.from({ length: 3 }) as _}
+  {#each Array.from({ length: 1 }) as _}
     <CategorySlider />
   {/each}
 </div>

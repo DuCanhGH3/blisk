@@ -4,9 +4,9 @@ use crate::{
     app::AppState,
     utils::{
         errors::AppError,
-        json::AppJson,
         reactions::structs::PostReaction,
         response::{response, SuccessResponse},
+        structs::AppJson,
         users::structs::UserClaims,
     },
 };

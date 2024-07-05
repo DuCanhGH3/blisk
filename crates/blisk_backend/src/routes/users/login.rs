@@ -9,14 +9,14 @@ use crate::{
     app::AppState,
     settings::SETTINGS,
     utils::{
+        errors::AppError,
+        response::response,
+        structs::AppJson,
         users::{
             errors::AuthError,
             password::verify,
             structs::{User, UserClaims},
         },
-        errors::AppError,
-        json::AppJson,
-        response::response,
     },
 };
 

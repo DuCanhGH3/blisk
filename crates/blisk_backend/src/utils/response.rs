@@ -3,7 +3,7 @@ use axum::{
     response::{IntoResponse, Response},
 };
 
-use super::json::AppJson;
+use super::structs::AppJson;
 
 #[derive(serde::Serialize)]
 pub struct SuccessResponse {

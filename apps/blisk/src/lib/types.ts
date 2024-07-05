@@ -35,3 +35,9 @@ export interface Comment {
   post_id: number;
   replies: Comment[];
 }
+
+export interface Book {
+  title: string;
+  summary: string;
+  reviews: Post[];
+}

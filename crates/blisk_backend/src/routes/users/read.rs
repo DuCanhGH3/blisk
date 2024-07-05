@@ -6,7 +6,7 @@ use axum::{
 
 use crate::{
     app::AppState,
-    utils::{errors::AppError, json::AppJson, response::response, users::errors::UserError},
+    utils::{errors::AppError, response::response, structs::AppJson, users::errors::UserError},
 };
 
 #[derive(serde::Deserialize)]

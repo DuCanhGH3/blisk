@@ -61,22 +61,22 @@
       on:emblaInit={onEmbiaInit}
     >
       <div class="flex w-full flex-row">
-        {#each Array.from({ length: 50 }) as _}
-          <div class="z-[3] mr-1 shrink-0 hover:z-[4]">
-            <div class="book">
-              <div class="book-side spine">
+        {#each Array.from({ length: 1 }) as _}
+          <a href="/books/1" class="book-container z-[3] mr-1 shrink-0 hover:z-[4]">
+            <span class="book">
+              <span class="book-side spine">
                 <img src="/test-spine.jpg" width="48" height="288" alt="" class="h-full w-full" />
-              </div>
-              <div class="book-side top"></div>
-              <div class="book-side back-cover"></div>
-              <div class="book-side cover">
+              </span>
+              <span class="book-side top"></span>
+              <span class="book-side back-cover"></span>
+              <span class="book-side cover">
                 <img src="/test-cover.jpg" width="192" height="288" alt="" class="h-full w-full" />
-              </div>
-            </div>
-          </div>
+              </span>
+            </span>
+          </a>
         {/each}
       </div>
     </div>
-    <div class="z-[1] h-7 w-full bg-white shadow-[0_0_10px_2px_rgb(0,_0,_0,_0.5)]"></div>
+    <div class="dark:bg-neutral-925 z-[1] h-7 w-full bg-white shadow-[0_0_10px_2px_rgb(0,_0,_0,_0.5)]"></div>
   </div>
 </div>

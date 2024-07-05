@@ -4,8 +4,8 @@ use tracing::instrument;
 use crate::{
     app::AppState,
     utils::{
-        users::structs::UserClaims, errors::AppError, json::AppJson, posts::structs::Reaction,
-        response::response,
+        errors::AppError, posts::structs::Reaction, response::response, structs::AppJson,
+        users::structs::UserClaims,
     },
 };
 

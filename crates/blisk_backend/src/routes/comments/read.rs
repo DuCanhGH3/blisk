@@ -7,7 +7,7 @@ use tracing::instrument;
 
 use crate::{
     app::AppState,
-    utils::{comments, errors::AppError, json::AppJson, response::response},
+    utils::{comments, errors::AppError, response::response, structs::AppJson},
 };
 
 #[derive(serde::Deserialize)]

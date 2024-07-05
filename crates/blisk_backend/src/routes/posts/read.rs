@@ -10,12 +10,12 @@ use crate::{
     utils::{
         comments::{self, structs::Comment},
         errors::AppError,
-        json::AppJson,
         posts::{
             errors::PostsError,
             structs::{Post, Reaction},
         },
         response::response,
+        structs::AppJson,
     },
 };
 

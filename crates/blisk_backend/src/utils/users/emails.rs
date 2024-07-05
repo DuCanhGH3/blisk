@@ -1,8 +1,8 @@
 use crate::{
     settings::SETTINGS,
     utils::{
-        users::confirmation_token::issue_confirmation_token, emails::send_email, errors::AppError,
-        templating::TEMPLATES,
+        constants::TEMPLATES, emails::send_email, errors::AppError,
+        users::confirmation_token::issue_confirmation_token,
     },
 };
 use tracing::instrument;

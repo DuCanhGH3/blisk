@@ -1,10 +1,12 @@
-pub mod users;
 pub mod books;
 pub mod comments;
+pub mod constants;
 pub mod emails;
 pub mod errors;
-pub mod json;
 pub mod posts;
 pub mod reactions;
 pub mod response;
-pub mod templating;
+pub mod structs;
+pub mod uploads;
+pub mod users;
+pub mod validators;

@@ -1,11 +1,16 @@
 use axum::{extract::State, http::StatusCode, response::Response};
+use axum_typed_multipart::TryFromMultipart;
 
 use crate::{
     app::AppState,
-    utils::{errors::AppError, json::AppJson, response::response},
+    utils::{
+        errors::AppError,
+        response::response,
+        structs::{AppJson, AppMultipart},
+    },
 };
 
-#[derive(serde::Deserialize)]
+#[derive(TryFromMultipart)]
 pub struct CreatePayload {
     title: String,
     summary: String,
@@ -17,7 +22,7 @@ pub struct CreateResponse {
 
 pub async fn create(
     State(AppState { pool, .. }): State<AppState>,
-    AppJson(CreatePayload { title, summary }): AppJson<CreatePayload>,
+    AppMultipart(CreatePayload { title, summary }): AppMultipart<CreatePayload>,
 ) -> Result<Response, AppError> {
     let mut transaction = pool.begin().await?;
     let bid: i64 = sqlx::query_scalar!(

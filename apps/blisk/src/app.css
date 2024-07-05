@@ -3,6 +3,15 @@
 @tailwind components;
 @tailwind utilities;
 
+@view-transition {
+  navigation: auto;
+}
+
+::view-transition-old(*),
+::view-transition-new(*) {
+  animation-duration: 0.1s;
+}
+
 @layer base {
   * {
     @apply relative box-border min-w-0 border-solid;
@@ -95,7 +104,7 @@
   }
 
   .book {
-    @apply relative h-72 w-12 select-none shadow-md transition-transform duration-500;
+    @apply block relative h-72 w-12 select-none shadow-md transition-transform duration-500;
     transform-style: preserve-3d;
   }
 
@@ -104,27 +113,51 @@
   }
 
   .book-side {
-    @apply absolute select-none rounded-sm border-2 border-black;
+    @apply block absolute select-none rounded-sm border-2 border-black;
     transform-origin: left center;
   }
 
   .book-side.spine {
-    @apply relative h-72 w-12;
+    @apply block relative h-72 w-12;
   }
 
   .book-side.top {
-    @apply top-0 h-[186px] w-12 bg-[#eee7d7];
-    transform: rotateX(90deg) translateZ(90px) translateY(-96px);
+    @apply block top-0 h-[184px] w-12 bg-[#eee7d7];
+    transform: rotateX(90deg) translateZ(88px) translateY(-96px);
   }
 
   .book-side.back-cover {
-    @apply left-0 top-0 h-72 w-48 bg-[#eee7d7];
+    @apply block left-0 top-0 h-72 w-48 bg-[#eee7d7];
     transform: rotateY(90deg);
   }
 
   .book-side.cover {
-    @apply left-12 top-0 h-72 w-48;
+    @apply block left-12 top-0 h-72 w-48;
     transform: rotateY(90deg);
+    view-transition-class: book-cover;
+  }
+  
+  .book.front {
+    @apply h-72 w-48;
+    transform: unset !important;
+  }
+
+  .book.front .book-side.back-cover {
+    transform: rotateY(-180deg) translateX(-192px) translateZ(48px);
+  }
+
+  .book.front .book-side.spine {
+    @apply left-0 top-0;
+    transform: rotateY(-90deg) translateX(-48px);
+  }
+
+  .book.front .book-side.top {
+    transform: rotateX(90deg) rotateZ(-90deg) translateZ(88px) translateY(96px);
+  }
+
+  .book.front .book-side.cover {
+    @apply left-0;
+    transform: rotateY(0deg);
   }
 
   .react-button {
@@ -274,7 +307,7 @@
     @apply rotate-90;
   }
   .box {
-    @apply dark:bg-neutral-1000 border-border-light dark:border-border-dark w-full border bg-white;
+    @apply dark:bg-neutral-925 border-border-light dark:border-border-dark w-full border bg-white;
   }
   .box.hover {
     @apply hover:bg-neutral-100 dark:hover:bg-neutral-800;
@@ -374,9 +407,4 @@ li[aria-current="page"] {
 li[aria-current="page"]::before {
   view-transition-name: active-page;
   @apply border-accent-light dark:border-accent-dark absolute bottom-0.5 left-1/2 z-10 h-0 w-[75%] -translate-x-1/2 rounded-md border-2 content-[''];
-}
-
-::view-transition-old(root),
-::view-transition-new(root) {
-  animation-duration: 0.1s;
 }

@@ -1,10 +1,10 @@
 use crate::{
     app::AppState,
     utils::{
-        users::{self, errors::AuthError},
         errors::AppError,
-        json::AppJson,
         response::{response, SuccessResponse},
+        structs::AppJson,
+        users::{self, errors::AuthError},
     },
 };
 use axum::{extract::State, http::StatusCode, response::Response};
