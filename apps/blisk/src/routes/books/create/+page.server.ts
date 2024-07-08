@@ -24,7 +24,7 @@ export const actions: Actions = {
       fetch,
       setHeaders,
       method: "POST",
-      body: JSON.stringify(data.data),
+      body: formData,
     });
     if (!backendResponse.ok) {
       return fail(backendResponse.status, { error: backendResponse.error });
