@@ -1,5 +1,7 @@
 import type { COLOR_SCHEMES } from "./constants";
 
+export type RequireFields<T, K extends keyof T> = Omit<T, K> & Required<Pick<T, K>>;
+
 export type ColorScheme = (typeof COLOR_SCHEMES)[number];
 
 export interface User {

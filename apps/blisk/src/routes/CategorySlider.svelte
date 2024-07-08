@@ -77,6 +77,6 @@
         {/each}
       </div>
     </div>
-    <div class="dark:bg-neutral-925 z-[1] h-7 w-full bg-white shadow-[0_0_10px_2px_rgb(0,_0,_0,_0.5)]"></div>
+    <div class="dark:bg-neutral-915 z-[1] h-7 w-full bg-white shadow-[0_0_10px_2px_rgb(0,_0,_0,_0.5)]"></div>
   </div>
 </div>

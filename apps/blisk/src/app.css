@@ -307,7 +307,7 @@
     @apply rotate-90;
   }
   .box {
-    @apply dark:bg-neutral-925 border-border-light dark:border-border-dark w-full border bg-white;
+    @apply dark:bg-neutral-915 border-border-light dark:border-border-dark w-full border bg-white;
   }
   .box.hover {
     @apply hover:bg-neutral-100 dark:hover:bg-neutral-800;
@@ -325,7 +325,7 @@
     @apply rounded-lg p-2 shadow-md;
   }
   .container {
-    @apply border-border-light dark:border-border-dark border bg-white dark:bg-neutral-950;
+    @apply border-border-light dark:border-border-dark border bg-white dark:bg-neutral-925;
   }
   .text-comment {
     @apply text-neutral-600 dark:text-neutral-400;

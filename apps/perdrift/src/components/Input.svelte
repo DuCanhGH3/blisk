@@ -19,7 +19,7 @@
     class={clsx(
       "input block h-[44px] w-full rounded-lg px-2.5 pt-2.5 text-sm shadow-md transition-opacity disabled:opacity-50",
       "border border-neutral-400 focus:border-accent-light focus:outline-none dark:border-neutral-700 dark:focus:border-accent-dark",
-      "bg-white text-black opacity-80 dark:bg-neutral-925 dark:text-white"
+      "bg-white text-black opacity-80 dark:bg-neutral-915 dark:text-white"
     )}
     aria-invalid={!!errorText}
     aria-describedby={errorTextId}
