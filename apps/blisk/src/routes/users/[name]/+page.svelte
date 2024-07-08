@@ -1,4 +1,6 @@
 <script lang="ts">
+  import PostRenderer from "$components/PostRenderer.svelte";
+
   const { data } = $props();
 
   const days = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
@@ -69,11 +71,13 @@
         </div>
       </div>
       <div class="flex flex-col items-center gap-4">
-        {#each data.data.posts as { title, content }}
-          <article class="box md">
-            <h3 class="pb-3">{title}</h3>
-            <h4 class="text-base font-normal">{content}</h4>
-          </article>
+        {#each data.data.posts as post}
+          <PostRenderer
+            post={{
+              ...post,
+              author_name: data.data.name,
+            }}
+          />
         {/each}
       </div>
     </article>

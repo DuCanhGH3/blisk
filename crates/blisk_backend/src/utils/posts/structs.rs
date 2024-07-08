@@ -8,6 +8,7 @@ pub enum Reaction {
 
 #[derive(serde::Serialize, serde::Deserialize)]
 pub struct Post {
+    pub id: i64,
     pub title: String,
     pub content: String,
     pub author_name: String,

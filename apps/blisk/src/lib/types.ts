@@ -22,6 +22,7 @@ export type PostReaction =
   | "overwhelmingly_negative";
 
 export interface Post {
+  id: number;
   title: string;
   content: string;
   author_name: string;

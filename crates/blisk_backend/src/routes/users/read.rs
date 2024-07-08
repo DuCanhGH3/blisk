@@ -19,6 +19,7 @@ struct ReadResponseComment {
 }
 #[derive(serde::Serialize, serde::Deserialize)]
 struct ReadResponsePost {
+    id: i64,
     title: String,
     content: String,
     comments: Vec<ReadResponseComment>,
@@ -42,6 +43,7 @@ pub async fn read(
         FROM users u
         LEFT JOIN LATERAL (
             SELECT
+                p.id,
                 p.title,
                 p.content,
                 COALESCE(JSON_AGG(c) FILTER (WHERE c IS NOT NULL), '[]'::JSON) as comments

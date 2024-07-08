@@ -38,6 +38,7 @@ pub async fn read(
     let post = sqlx::query_as!(
         Post,
         r#"SELECT
+            p.id,
             p.title,
             p.content,
             u.name as author_name,
