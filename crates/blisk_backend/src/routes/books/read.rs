@@ -34,7 +34,7 @@ pub async fn read(
                 COALESCE(JSON_AGG(rv) FILTER (WHERE rv IS NOT NULL), '[]'::JSON) AS "reviews!: sqlx::types::Json<Vec<Post>>" 
             FROM books b
             LEFT JOIN LATERAL (
-                SELECT rv.title, rv.content, rvu.name as author_name, rv.reaction
+                SELECT rv.id, rv.title, rv.content, rvu.name as author_name, rv.reaction
                 FROM posts rv
                 JOIN users rvu ON rv.author_id = rvu.id
                 WHERE rv.book_id = b.id
@@ -57,7 +57,7 @@ pub async fn read(
                 COALESCE(JSON_AGG(rv) FILTER (WHERE rv IS NOT NULL), '[]'::JSON) AS "reviews!: sqlx::types::Json<Vec<Post>>" 
             FROM books b
             LEFT JOIN LATERAL (
-                SELECT rv.title, rv.content, rvu.name as author_name, rv.reaction
+                SELECT rv.id, rv.title, rv.content, rvu.name as author_name, rv.reaction
                 FROM posts rv
                 JOIN users rvu ON rv.author_id = rvu.id
                 WHERE rv.book_id = b.id
