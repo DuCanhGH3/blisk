@@ -1,4 +1,5 @@
 <script>
+  import Haha from "$components/icons/Haha.svelte";
   import HeartFilled from "$components/icons/HeartFilled.svelte";
   import ThumbUpFilled from "$components/icons/ThumbUpFilled.svelte";
 </script>
@@ -10,10 +11,7 @@
   <button class="react-button heart">
     <HeartFilled width={20} height={20} fill="#ffffff" />
   </button>
-  <button class="react-button laugh">
-    <span class="laugh-emoji">
-      <span class="eyes-cont"> </span>
-      <span class="mouth"></span>
-    </span>
+  <button>
+    <Haha />
   </button>
 </div>
