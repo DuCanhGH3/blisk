@@ -7,10 +7,11 @@
 
   import { dev } from "$app/environment";
   import { page } from "$app/stores";
+  import GlobalSvgDefs from "$components/icons/index.svelte";
+  import VerticalNavbar from "$components/layouts/VerticalNavbar.svelte";
   import { isColorScheme } from "$lib/isColorScheme";
   import { colorScheme } from "$lib/stores/colorScheme";
   import { PUBLIC_CANONICAL_URL } from "$env/static/public";
-  import VerticalNavbar from "$components/layouts/VerticalNavbar.svelte";
 
   const { data, children } = $props();
   const isDark = $derived($colorScheme === "dark");
@@ -64,8 +65,9 @@
 </svelte:head>
 
 <a class="absolute -top-full z-[100] text-black underline focus:top-0 dark:text-white" href="#main-content">Skip to main content</a>
+<GlobalSvgDefs />
 <div class="flex flex-1 flex-col md:flex-row">
-  <!-- <VerticalNavbar user={data.user} /> -->
+  <VerticalNavbar user={data.user} />
   <main id="main-content">
     {@render children()}
   </main>

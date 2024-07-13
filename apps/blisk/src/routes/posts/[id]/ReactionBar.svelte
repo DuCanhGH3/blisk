@@ -1,17 +1,21 @@
 <script>
-  import Haha from "$components/icons/Haha.svelte";
-  import HeartFilled from "$components/icons/HeartFilled.svelte";
-  import ThumbUpFilled from "$components/icons/ThumbUpFilled.svelte";
+  import Svg from "$components/Svg.svelte";
 </script>
 
 <div class="dark:bg-neutral-915 border-border-light dark:border-border-dark flex flex-row gap-2 rounded-full border bg-white p-1 shadow-md">
-  <button class="react-button like">
-    <ThumbUpFilled width={20} height={20} fill="#ffffff" />
-  </button>
-  <button class="react-button heart">
-    <HeartFilled width={20} height={20} fill="#ffffff" />
+  <button>
+    <Svg width="28" height="28">
+      <use href="#like-emoji" />
+    </Svg>
   </button>
   <button>
-    <Haha />
+    <Svg width="28" height="28">
+      <use href="#heart-emoji" />
+    </Svg>
+  </button>
+  <button>
+    <Svg width="28" height="28">
+      <use href="#haha-emoji" />
+    </Svg>
   </button>
 </div>
