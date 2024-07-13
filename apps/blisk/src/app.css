@@ -72,39 +72,8 @@
     @apply bg-neutral-250 dark:bg-neutral-800;
   }
 
-  @keyframes like {
-    0% {
-      @apply translate-x-0 translate-y-0 rotate-0 scale-100;
-    }
-    60% {
-      @apply -translate-x-1 -translate-y-1 -rotate-45 scale-125;
-    }
-    80% {
-      @apply translate-x-[1px] translate-y-[1px] rotate-[15deg] scale-90;
-    }
-  }
-
-  @keyframes heart {
-    0%,
-    80% {
-      @apply translate-x-0 translate-y-0 rotate-0 scale-100;
-    }
-    15% {
-      @apply translate-x-0 translate-y-1 rotate-[5deg] scale-75;
-    }
-    25% {
-      @apply -translate-x-[1px] translate-y-[1px] rotate-[-20deg] scale-100;
-    }
-    50% {
-      @apply -translate-y-[1px] translate-x-[1px] rotate-[10deg] scale-125;
-    }
-    65% {
-      @apply translate-x-0 translate-y-0 rotate-0 scale-90;
-    }
-  }
-
   .book {
-    @apply block relative h-72 w-12 select-none shadow-md transition-transform duration-500;
+    @apply relative block h-72 w-12 select-none shadow-md transition-transform duration-500;
     transform-style: preserve-3d;
   }
 
@@ -113,30 +82,30 @@
   }
 
   .book-side {
-    @apply block absolute select-none rounded-sm border-2 border-black;
+    @apply absolute block select-none rounded-sm border-2 border-black;
     transform-origin: left center;
   }
 
   .book-side.spine {
-    @apply block relative h-72 w-12;
+    @apply relative block h-72 w-12;
   }
 
   .book-side.top {
-    @apply block top-0 h-[184px] w-12 bg-[#eee7d7];
+    @apply top-0 block h-[184px] w-12 bg-[#eee7d7];
     transform: rotateX(90deg) translateZ(88px) translateY(-96px);
   }
 
   .book-side.back-cover {
-    @apply block left-0 top-0 h-72 w-48 bg-[#eee7d7];
+    @apply left-0 top-0 block h-72 w-48 bg-[#eee7d7];
     transform: rotateY(90deg);
   }
 
   .book-side.cover {
-    @apply block left-12 top-0 h-72 w-48;
+    @apply left-12 top-0 block h-72 w-48;
     transform: rotateY(90deg);
     view-transition-class: book-cover;
   }
-  
+
   .book.front {
     @apply h-72 w-48;
     transform: unset !important;
@@ -193,7 +162,7 @@
     @apply rounded-lg p-2 shadow-md;
   }
   .container {
-    @apply border-border-light dark:border-border-dark border bg-white dark:bg-neutral-925;
+    @apply border-border-light dark:border-border-dark dark:bg-neutral-925 border bg-white;
   }
   .text-comment {
     @apply text-neutral-600 dark:text-neutral-400;

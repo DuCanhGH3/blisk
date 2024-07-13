@@ -13,6 +13,37 @@ export default {
         sans: "'Geist', Arial, sans-serif",
       },
       keyframes: {
+        "thumbs-up": {
+          "0%": {
+            transform: "translateX(0px) translateY(0px) rotate(0deg) scale(1)",
+          },
+          "25%": {
+            transform: "translateX(3px) translateY(0.5px) rotate(15deg) scale(0.9)",
+          },
+          "60%": {
+            transform: "translateX(-4px) translateY(-1px) rotate(-15deg) scale(1.2)",
+          },
+          "75%": {
+            transform: "translateX(3px) translateY(0.5px) rotate(15deg) scale(0.9)",
+          },
+        },
+        heart: {
+          "0%, 80%": {
+            transform: "translateX(0px) translateY(0px) rotate(0deg) scale(1)",
+          },
+          "15%": {
+            transform: "translateX(4px) translateY(4px) rotate(20deg) scale(.65)",
+          },
+          "35%": {
+            transform: "translateX(-6px) translateY(1px) rotate(-20deg) scale(1.3)",
+          },
+          "50%": {
+            transform: "translateX(0.5px) translateY(-4px) rotate(10deg) scale(1.25)",
+          },
+          "70%": {
+            transform: "translateX(0.5px) translateY(1.5px) rotate(0deg) scale(.9)",
+          },
+        },
         "laughing-eyes": {
           "0%": {
             transform: "translateX(-2.25px) translateY(1px) rotate(-10deg) scale(1.07)",
@@ -97,8 +128,10 @@ export default {
         },
       },
       animation: {
-        "haha-eyes": "laughing-eyes 3s ease-out 0s infinite",
-        "haha-mouth": "laughing-mouth 3s ease-out 0s infinite",
+        like: "thumbs-up 1.5s ease-out 0.5s infinite",
+        love: "heart 1.5s ease-out 0.5s infinite",
+        "haha-eyes": "laughing-eyes 2.25s ease-out 0s infinite",
+        "haha-mouth": "laughing-mouth 2.25s ease-out 0s infinite",
       },
       colors: {
         accent: {
