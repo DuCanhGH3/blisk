@@ -12,7 +12,7 @@
   const { post }: PostRendererProps = $props();
 </script>
 
-<article class="box md flex flex-col gap-3 !rounded-[35px]">
+<article class="box flex flex-col gap-3 rounded-[31px] p-4 shadow-md">
   <h3 class="order-2">{post.title}</h3>
   <h4 class="order-1 flex flex-row gap-2">
     <img src="/no-avatar.webp" class="border-border-light dark:border-border-dark size-10 select-none rounded-full border shadow-lg" alt="" />
@@ -22,18 +22,18 @@
     </span>
   </h4>
   <div class="order-3 text-base font-normal">{post.content}</div>
-  <div class="order-4 flex flex-row gap-3">
+  <div class="-m-1 order-4 flex flex-row gap-3">
     <PostRendererButton as="div">
       <ThumbUp width={24} height={24} class="h-6 w-auto" />
-      Like
+      <span class="mb-[-1px]">Like</span>
     </PostRendererButton>
-    <PostRendererButton as="a" href={`/posts/${post.id}#comments`}>
+    <PostRendererButton as="a" href="/posts/{post.id}#comments">
       <Comment width={24} height={24} class="h-6 w-auto" />
-      Comment
+      <span class="mb-[-1px]">Comment</span>
     </PostRendererButton>
     <PostRendererButton as="div">
       <Share width={24} height={24} class="h-6 w-auto" />
-      Share
+      <span class="mb-[-1px]">Share</span>
     </PostRendererButton>
   </div>
 </article>

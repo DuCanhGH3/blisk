@@ -1,4 +1,6 @@
 <script lang="ts">
+  import PostRenderer from "$components/PostRenderer.svelte";
+
   const { data } = $props();
 </script>
 
@@ -70,10 +72,7 @@
   </div>
   <!-- <h2>Buy this book</h2> -->
   <h2>Reviews</h2>
-  {#each data.book.reviews as { title, content }}
-    <article class="box md">
-      <h3 class="pb-3">{title}</h3>
-      <h4 class="text-base font-normal">{content}</h4>
-    </article>
+  {#each data.book.reviews as post}
+    <PostRenderer {post} />
   {/each}
 </div>

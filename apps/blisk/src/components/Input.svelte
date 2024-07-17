@@ -22,7 +22,7 @@
       "dark:bg-neutral-915 bg-white text-black opacity-80 dark:text-white"
     )}
     aria-invalid={!!errorText}
-    aria-describedby={errorTextId}
+    aria-describedby={!!errorText ? errorTextId : undefined}
     placeholder=" "
     {...rest}
   />

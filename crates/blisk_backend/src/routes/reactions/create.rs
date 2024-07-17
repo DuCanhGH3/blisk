@@ -1,4 +1,5 @@
 use axum::{extract::State, http::StatusCode, response::Response};
+use tracing::instrument;
 
 use crate::{
     app::AppState,
@@ -11,7 +12,7 @@ use crate::{
     },
 };
 
-#[derive(serde::Deserialize)]
+#[derive(Debug, serde::Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum CreateForType {
     Post,
@@ -25,6 +26,9 @@ pub struct CreatePayload {
     reaction_type: PostReaction,
 }
 
+#[instrument(name = "Creating a reaction...", skip(pool, claims), fields(
+    uid = &claims.sub
+))]
 pub async fn create(
     State(AppState { pool, .. }): State<AppState>,
     claims: UserClaims,

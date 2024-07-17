@@ -1,6 +1,6 @@
 <script lang="ts">
-  import CommentRenderer from "./CommentRenderer.svelte";
-  import CommentForm from "./CommentForm.svelte";
+  import CommentRenderer from "$components/CommentRenderer.svelte";
+  import CommentForm from "$components/CommentForm.svelte";
 
   const { data } = $props();
 </script>
@@ -14,9 +14,11 @@
     </div>
   </article>
   <CommentForm parentId={null} updateComments={(newComment) => data.comments.unshift(newComment)} />
-  <ul id="comments">
+  <ul class="flex flex-col gap-3" id="comments">
     {#each data.comments as comment}
-      <CommentRenderer {comment} username={data.user?.name} />
+      <li>
+        <CommentRenderer {comment} username={data.user?.name} />
+      </li>
     {/each}
   </ul>
 </div>

@@ -3,6 +3,7 @@ import { error, fail } from "@sveltejs/kit";
 import type { Actions, PageServerLoad } from "./$types";
 import type { Comment, Post } from "$lib/types";
 import { z } from "zod";
+import { reactionTypeSchema } from "$lib/schemas";
 
 const postIdSchema = z
   .number({ coerce: true, message: "Post ID is not a number!" })
@@ -22,7 +23,7 @@ const commentSchema = z.object({
 const reactionSchema = z.object({
   for_type: z.union([z.literal("post"), z.literal("comment")], { message: "Reaction must be for a post or a comment!" }),
   post_id: postIdSchema,
-  reaction_type: z.union([z.literal("like"), z.literal("angry")], { message: "Reaction is not valid!" }),
+  reaction_type: reactionTypeSchema,
 });
 
 export const actions: Actions = {
@@ -55,12 +56,12 @@ export const actions: Actions = {
 
     return { id: res.data.id };
   },
-  async react({ cookies, fetch, params, request, setHeaders }) {
+  async react({ cookies, fetch, request, setHeaders }) {
     const formData = await request.formData();
 
     const data = await reactionSchema.spa({
+      post_id: formData.get("forId"),
       for_type: formData.get("forType"),
-      post_id: params.id,
       reaction_type: formData.get("reactionType"),
     });
 

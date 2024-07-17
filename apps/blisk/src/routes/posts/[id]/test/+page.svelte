@@ -1,7 +1,7 @@
 <script>
-  import ReactionBar from "../ReactionBar.svelte";
+  import ReactionBar from "$components/ReactionBar.svelte";
 </script>
 
 <div>
-  <ReactionBar />
+  <ReactionBar id={1} for="post" />
 </div>

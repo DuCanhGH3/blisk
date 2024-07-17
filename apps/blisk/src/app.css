@@ -128,17 +128,86 @@
     @apply left-0;
     transform: rotateY(0deg);
   }
+
+  #wow-emoji * {
+    transform-box: fill-box;
+    transform-origin: center;
+  }
+
+  @keyframes eyes {
+    /* 17% and 8% */
+    13% {
+      @apply scale-y-[.01];
+    }
+    0%, 11%, 15% {
+      @apply scale-y-[1];
+    }
+    25%, 33%, 37% {
+      @apply translate-y-[-1.75px];
+    }
+    35% {
+      @apply translate-y-[-1.75px] scale-y-[.01];
+    }
+    50%, 53%, 57% {
+      @apply translate-x-[2px] translate-y-[-1px] rotate-[-7deg] scale-x-[.95] scale-y-[1.02];
+    }
+    55% {
+      @apply translate-x-[2px] translate-y-[-1px] rotate-[-7deg] scale-x-[.95] scale-y-[.01];
+    }
+    75%, 80% {
+      @apply translate-x-[-3.75px] translate-y-[1px] rotate-[17deg] scale-x-[.95] scale-y-[1.02];
+    }
+  }
+
+  @keyframes mouth {
+    0%, 11%, 13%, 15% {
+      @apply scale-y-[1];
+    }
+    25% {
+      @apply translate-y-[-4px] scale-x-[.5] scale-y-[.5];
+    }
+    33%, 37% {
+      @apply translate-y-[-3px] scale-x-[.9] scale-y-[.9];
+    }
+    50%, 53%, 55%, 57% {
+      @apply translate-x-[2px] translate-y-[-1.5px] rotate-[5deg] scale-x-[.9] scale-y-[1.1];
+    }
+    80% {
+      @apply translate-x-[-5.25px] translate-y-[-1.5px] rotate-[17deg] scale-x-[.45] scale-y-[.4];
+    }
+  }
+
+  @keyframes eyesbrow {
+    0%, 11%, 13%, 15% {
+      @apply scale-y-[1.1];
+    }
+    25%, 33%, 37% {
+      @apply translate-y-[-1.5px] scale-y-[1.1];
+    }
+    50%, 53%, 55%, 57% {
+      @apply translate-x-[1.75px] translate-y-[-0.5px] rotate-[-7deg] scale-x-[.95] scale-y-[1.02];
+    }
+    75%, 80% {
+      @apply translate-x-[-3px] translate-y-[1.5px] rotate-[17deg] scale-x-[.9] scale-y-[1.02];
+    }
+  }
+
+  .eyes-t {
+    @apply animate-[eyes_5s_cubic-bezier(0,1.03,1,1.03)_0.5s_infinite];
+  }
+
+  .mouth-t {
+    @apply animate-[mouth_5s_cubic-bezier(0,1.05,1,1.05)_0.5s_infinite];
+  }
+
+  .eyebrow-t {
+    @apply animate-[eyesbrow_5s_cubic-bezier(0,1,1,1)_0.5s_infinite];
+  }
 }
 
 @layer utilities {
-  @keyframes details-show {
-    from {
-      opacity: 0;
-      transform: var(--details-translate, translateY(-1rem));
-    }
-  }
   details.details-anim[open] > *:not(summary) {
-    animation: details-show 100ms ease-out;
+    @apply animate-fly-down;
   }
   details[open] > summary > .details-chevron {
     @apply rotate-90;

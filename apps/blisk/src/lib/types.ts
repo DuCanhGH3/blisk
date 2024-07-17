@@ -1,4 +1,6 @@
+import type { z } from "zod";
 import type { COLOR_SCHEMES } from "./constants";
+import type { reactionTypeSchema } from "./schemas";
 
 export type RequireFields<T, K extends keyof T> = Omit<T, K> & Required<Pick<T, K>>;
 
@@ -10,7 +12,7 @@ export interface User {
   role: string;
 }
 
-export type PostReaction =
+export type BookReaction =
   | "overwhelmingly_positive"
   | "very_positive"
   | "positive"
@@ -26,7 +28,7 @@ export interface Post {
   title: string;
   content: string;
   author_name: string;
-  reaction: PostReaction;
+  reaction: BookReaction;
 }
 
 export interface Comment {
@@ -44,3 +46,7 @@ export interface Book {
   summary: string;
   reviews: Post[];
 }
+
+export type ReactionFor = "post" | "comment";
+
+export type ReactionType = z.infer<typeof reactionTypeSchema>;

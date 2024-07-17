@@ -57,7 +57,7 @@
         </div>
       </div>
       <div>
-        <a href={`/users/${user.name}`} class={NAV_USERMENU_CLASS}>
+        <a href="/users/{user.name}" class={NAV_USERMENU_CLASS}>
           <UserCircle width={24} height={24} class="mr-2 h-5 w-5" />
           Your profile
         </a>
