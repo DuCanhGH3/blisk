@@ -13,7 +13,7 @@ export default {
         sans: "'Geist', Arial, sans-serif",
       },
       keyframes: {
-        "fly-down": {
+        "fly": {
           from: {
             opacity: "0",
             transform: "var(--fly-translate-y, translateY(-1rem))",
@@ -134,7 +134,7 @@ export default {
         },
       },
       animation: {
-        "fly-down": "fly-down 100ms ease-out",
+        "fly": "fly 100ms ease-out",
         like: "thumbs-up 1.5s ease-out 0.5s infinite",
         love: "heart 1.5s ease-out 0.5s infinite",
         "haha-eyes": "laughing-eyes 2.5s ease-out 0s infinite",
@@ -150,6 +150,7 @@ export default {
           dark: "#262626",
         },
         neutral: {
+          150: "#eeeeee",
           250: "#dddddd",
           915: "#111111",
           925: "#0d0d0d",

@@ -1,6 +1,5 @@
 <script lang="ts">
   import { enhance } from "$app/forms";
-  import Svg from "$components/Svg.svelte";
   import { clsx } from "$lib/clsx";
   // import { hotkeys } from "$lib/hotkeys.svelte";
   import type { ReactionFor } from "$lib/types";
@@ -9,6 +8,8 @@
   import Heart from "./icons/reactions/Heart.svelte";
   import Haha from "./icons/reactions/Haha.svelte";
   import Wow from "./icons/reactions/Wow.svelte";
+  import Sad from "./icons/reactions/Sad.svelte";
+  import Angry from "./icons/reactions/Angry.svelte";
 
   interface ReactionBarProps extends HTMLFormAttributes {
     forId: number;
@@ -31,7 +32,7 @@
   method="POST"
   action="?/react"
   class={clsx(
-    "dark:bg-neutral-915 border-border-light dark:border-border-dark flex flex-row gap-2 rounded-full border bg-white p-1 shadow-md",
+    "dark:bg-neutral-915 border-border-light dark:border-border-dark z-10 flex flex-row gap-2 rounded-full border bg-white p-1 shadow-md",
     className
   )}
   use:enhance
@@ -39,16 +40,22 @@
 >
   <input type="hidden" name="forId" value={forId} />
   <input type="hidden" name="forType" value={forType} />
-  <button type="submit" name="reactionType" value="like">
-    <Like width="36" height="36" />
+  <button class="react-button" type="submit" name="reactionType" value="like">
+    <Like />
   </button>
-  <button type="submit" name="reactionType" value="love">
-    <Heart width="36" height="36" />
+  <button class="react-button" type="submit" name="reactionType" value="love">
+    <Heart />
   </button>
-  <button type="submit" name="reactionType" value="laugh">
-    <Haha width="36" height="36" />
+  <button class="react-button" type="submit" name="reactionType" value="laugh">
+    <Haha />
   </button>
-  <button type="submit" name="reactionType" value="wow">
-    <Wow width="36" height="36" />
+  <button class="react-button" type="submit" name="reactionType" value="wow">
+    <Wow animatable={false} />
+  </button>
+  <button class="react-button" type="submit" name="reactionType" value="sad">
+    <Sad />
+  </button>
+  <button class="react-button" type="submit" name="reactionType" value="angry">
+    <Angry />
   </button>
 </form>

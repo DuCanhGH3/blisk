@@ -139,37 +139,51 @@
     13% {
       @apply scale-y-[.01];
     }
-    0%, 11%, 15% {
+    0%,
+    11%,
+    15% {
       @apply scale-y-[1];
     }
-    25%, 33%, 37% {
+    25%,
+    33%,
+    37% {
       @apply translate-y-[-1.75px];
     }
     35% {
       @apply translate-y-[-1.75px] scale-y-[.01];
     }
-    50%, 53%, 57% {
+    50%,
+    53%,
+    57% {
       @apply translate-x-[2px] translate-y-[-1px] rotate-[-7deg] scale-x-[.95] scale-y-[1.02];
     }
     55% {
       @apply translate-x-[2px] translate-y-[-1px] rotate-[-7deg] scale-x-[.95] scale-y-[.01];
     }
-    75%, 80% {
+    75%,
+    80% {
       @apply translate-x-[-3.75px] translate-y-[1px] rotate-[17deg] scale-x-[.95] scale-y-[1.02];
     }
   }
 
   @keyframes mouth {
-    0%, 11%, 13%, 15% {
+    0%,
+    11%,
+    13%,
+    15% {
       @apply scale-y-[1];
     }
     25% {
       @apply translate-y-[-4px] scale-x-[.5] scale-y-[.5];
     }
-    33%, 37% {
+    33%,
+    37% {
       @apply translate-y-[-3px] scale-x-[.9] scale-y-[.9];
     }
-    50%, 53%, 55%, 57% {
+    50%,
+    53%,
+    55%,
+    57% {
       @apply translate-x-[2px] translate-y-[-1.5px] rotate-[5deg] scale-x-[.9] scale-y-[1.1];
     }
     80% {
@@ -178,16 +192,25 @@
   }
 
   @keyframes eyesbrow {
-    0%, 11%, 13%, 15% {
+    0%,
+    11%,
+    13%,
+    15% {
       @apply scale-y-[1.1];
     }
-    25%, 33%, 37% {
+    25%,
+    33%,
+    37% {
       @apply translate-y-[-1.5px] scale-y-[1.1];
     }
-    50%, 53%, 55%, 57% {
+    50%,
+    53%,
+    55%,
+    57% {
       @apply translate-x-[1.75px] translate-y-[-0.5px] rotate-[-7deg] scale-x-[.95] scale-y-[1.02];
     }
-    75%, 80% {
+    75%,
+    80% {
       @apply translate-x-[-3px] translate-y-[1.5px] rotate-[17deg] scale-x-[.9] scale-y-[1.02];
     }
   }
@@ -207,7 +230,7 @@
 
 @layer utilities {
   details.details-anim[open] > *:not(summary) {
-    @apply animate-fly-down;
+    @apply animate-fly;
   }
   details[open] > summary > .details-chevron {
     @apply rotate-90;
@@ -261,7 +284,11 @@
   }
   .button {
     @apply transition-colors-opacity min-w-max rounded-md px-5 py-2.5 text-center text-sm font-medium duration-100 focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-gray-800;
+    @apply border-border-light dark:border-border-dark border shadow-md;
     @apply bg-accent-light dark:bg-accent-dark [&:not(:disabled)]:hover:bg-accent-light/80 dark:[&:not(:disabled)]:hover:bg-accent-dark/80 text-white disabled:bg-gray-100 disabled:text-neutral-700 dark:text-black dark:disabled:bg-neutral-900 dark:disabled:text-neutral-400;
+  }
+  .button.light {
+    @apply text-accent-light dark:text-accent-dark dark:bg-neutral-915 bg-white [&:not(:disabled)]:hover:bg-neutral-150 dark:[&:not(:disabled)]:hover:bg-neutral-800;
   }
   .input:placeholder-shown:focus + .label {
     @apply top-0.5 translate-x-0 translate-y-0 text-xs text-neutral-700 dark:text-gray-300;
@@ -283,6 +310,29 @@
   }
   .text-error {
     @apply text-[#a51a12] dark:text-red-400;
+  }
+  .react-button {
+    @apply size-9 flex items-center justify-center transition-all duration-200 max-w-24 relative;
+    flex: calc(0.5 + var(--lerp, 0) * 1.5);
+  }
+  :is(.react-button:hover, .react-button:focus-visible) {
+    --lerp: 1;
+  }
+  .react-button:has(+ :is(.react-button:hover, .react-button:focus-visible)),
+  :is(.react-button:hover, .react-button:focus-visible) + .react-button {
+    --lerp: calc(sin(40deg));
+  }
+  .react-button:has(+ .react-button + :is(.react-button:hover, .react-button:focus-visible)),
+  :is(.react-button:hover, .react-button:focus-visible) + .react-button + .react-button {
+    --lerp: calc(sin(30deg));
+  }
+  .react-button:has(+ .react-button + .react-button + :is(.react-button:hover, .react-button:focus-visible)),
+  :is(.react-button:hover, .react-button:focus-visible) + .react-button + .react-button + .react-button {
+    --lerp: calc(sin(20deg));
+  }
+  .react-button:has(+ .react-button + .react-button + .react-button + :is(.react-button:hover, .react-button:focus-visible)),
+  :is(.react-button:hover, .react-button:focus-visible) + .react-button + .react-button + .react-button + .react-button {
+    --lerp:  calc(sin(10deg));
   }
   html[data-theme="light"] .visible-dark,
   html[data-theme="dark"] .visible-light {

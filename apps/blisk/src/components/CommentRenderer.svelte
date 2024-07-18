@@ -31,7 +31,13 @@
         <ThumbUp width={24} height={24} class="h-6 w-auto" />
         Like
       </CommentRendererButton>
-      <ReactionBar class="absolute top-0 translate-y-[calc(-100%-4px)]" id="reaction-bar-{comment.id}" forId={comment.id} forType="comment" />
+      <ReactionBar
+        id="reaction-bar-{comment.id}"
+        class="animate-fly absolute top-0 translate-y-[calc(-100%-4px)]"
+        style="--fly-translate:0.25rem"
+        forId={comment.id}
+        forType="comment"
+      />
     </details>
     <CommentRendererButton as="label" id="comment-toggle-label-{comment.id}" for="comment-toggle-{comment.id}">
       <CommentIcon width={24} height={24} class="h-6 w-auto" />
@@ -54,9 +60,7 @@
     <CommentForm parentId={comment.id} updateComments={(newComment) => comment.replies.unshift(newComment)} />
   </div>
   {#if comment.replies && comment.replies.length > 0}
-    <ul
-      class="flex flex-col gap-3 pt-3"
-    >
+    <ul class="flex flex-col gap-3 pt-3">
       {#each comment.replies as reply}
         <li>
           <svelte:self comment={reply} {username} />

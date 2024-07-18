@@ -1,16 +1,18 @@
-<script lang="ts">
+<script lang="ts" generics="T extends HTMLElement = HTMLElement, P extends any = any">
+  import type { Action } from "svelte/action";
   import type { HTMLTextareaAttributes } from "svelte/elements";
-
+  import { combineActions } from "$lib/combineActions";
   import { clsx } from "$lib/clsx";
 
   interface TextareaProps extends Omit<HTMLTextareaAttributes, "placeholder"> {
+    actions?: [Action<T, P>, P][];
     label: string;
     id: string;
     errorTextId?: string;
     errorText?: string | string[];
   }
 
-  const { label, id, errorTextId, errorText, oninput, ...rest }: TextareaProps = $props();
+  const { actions, label, id, errorTextId, errorText, oninput, ...rest }: TextareaProps = $props();
 </script>
 
 <div class="relative">
@@ -18,13 +20,14 @@
     {id}
     class={clsx(
       "textarea block min-h-[44px] w-full overflow-hidden rounded-lg px-2.5 pb-2.5 pt-4 text-sm shadow-md transition-opacity disabled:opacity-50",
-      "focus:border-accent-light dark:focus:border-accent-dark border border-border-light focus:outline-none dark:border-border-dark",
+      "focus:border-accent-light dark:focus:border-accent-dark border-border-light dark:border-border-dark border focus:outline-none",
       "dark:bg-neutral-915 bg-white text-black opacity-80 dark:text-white"
     )}
     aria-invalid={!!errorText}
     aria-describedby={errorTextId}
     placeholder=" "
     oninput={(ev) => (ev.currentTarget.style.height = `${Math.max(44, ev.currentTarget.offsetHeight, ev.currentTarget.scrollHeight)}px`)}
+    use:combineActions={actions}
     {...rest}
   ></textarea>
   <label class="label absolute left-2.5 block select-none font-medium transition-all duration-100 ease-in" for={id}>
