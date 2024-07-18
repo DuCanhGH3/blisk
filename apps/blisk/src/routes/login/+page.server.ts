@@ -53,20 +53,26 @@ export const actions: Actions = {
       cookies.set("token_type", res.data.token_type, cookiesOptions);
       cookies.set("token", res.data.id_token, cookiesOptions);
     } catch (err) {
-      console.log(err);
+      console.error(err);
       if (err instanceof Error && err.name === "TimeoutError") {
         return fail(500, { error: "Server is currently under heavy load." });
       }
       return fail(500, { error: "Internal Server Error" });
     }
   },
-  async logout({ locals }) {
+  async logout({ cookies, locals }) {
     try {
+      const cookiesOptions = {
+        httpOnly: true,
+        secure: true,
+        sameSite: "strict",
+        path: "/",
+      } as const;
+      cookies.delete("token_type", cookiesOptions);
+      cookies.delete("token", cookiesOptions);
       locals.user = null;
     } catch (err) {
-      if (err instanceof Error && err.name === "TimeoutError") {
-        return fail(500, { error: "Server is currently under heavy load." });
-      }
+      console.error(err);
       return fail(500, { error: "Internal Server Error" });
     }
   },

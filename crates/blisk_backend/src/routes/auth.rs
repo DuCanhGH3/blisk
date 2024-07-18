@@ -153,7 +153,7 @@ pub async fn issue_confirmation_token(
             format!("{}_{}", CONFIRMATION_TOKEN_PREFIX, sid)
         }
     };
-    redis_con.set(&redis_key, String::new())?;
+    let _: () = redis_con.set(&redis_key, String::new())?;
     let now = chrono::Local::now();
     let ttl = {
         if is_password_change {
@@ -163,7 +163,7 @@ pub async fn issue_confirmation_token(
         }
     };
     let exp = (now + ttl).timestamp();
-    redis_con.expire(&redis_key, ttl.num_seconds())?;
+    let _: () = redis_con.expire(&redis_key, ttl.num_seconds())?;
     let claims = TokenClaims { exp, uid, sid };
     Ok(encode(
         &Header::default(),
@@ -201,7 +201,7 @@ pub async fn verify_confirmation_token(
         return Err(AppError::TokenUsed);
     }
 
-    redis_con.del(redis_key.clone())?;
+    let _: () = redis_con.del(redis_key.clone())?;
 
     Ok(ConfirmationToken {
         uid: token.claims.uid,
