@@ -8,7 +8,7 @@ export const handle: Handle = async ({ event, resolve }) => {
   // Since we only use `event.locals.user` on the client (we authenticate the end-user to the server
   // via the JWT token in other cases), we limit this loading to GET requests only.
   if (event.request.method === "GET" && tokenType && token) {
-    const res = await fetchBackend<User>("/users/authenticate", {
+    const res = await fetchBackend<User>("/auth/authenticate", {
       authz: true,
       cookies: event.cookies,
       fetch: event.fetch,

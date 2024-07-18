@@ -9,7 +9,7 @@ interface LoadData {
 }
 
 export const load: PageServerLoad = async ({ cookies, fetch, params, setHeaders, url }) => {
-  const user = await fetchBackend<LoadData>(`/users/read?username=${params.name}`, {
+  const user = await fetchBackend<LoadData>(`/users?username=${params.name}`, {
     authz: false,
     cookies,
     fetch,

@@ -40,7 +40,7 @@ export const actions: Actions = {
       return fail(400, { validationError: data.error.flatten().fieldErrors });
     }
 
-    const res = await fetchBackend<{ id: number }>("/comments/create", {
+    const res = await fetchBackend<{ id: number }>("/comments", {
       authz: true,
       cookies,
       fetch,
@@ -69,7 +69,7 @@ export const actions: Actions = {
       return fail(400, { validationError: data.error.flatten().fieldErrors });
     }
 
-    const res = await fetchBackend<{ reaction_type: ReactionType }>("/reactions/create", {
+    const res = await fetchBackend<{ reaction_type: ReactionType }>("/reactions", {
       authz: true,
       cookies,
       fetch,
@@ -88,8 +88,8 @@ export const actions: Actions = {
 };
 
 export const load: PageServerLoad = async ({ cookies, fetch, params, setHeaders }) => {
-  const res = await fetchBackend<{ post: Post; comments: Comment[] }>(`/posts/read?post_id=${params.id}`, {
-    authz: false,
+  const res = await fetchBackend<{ post: Post; comments: Comment[] }>(`/posts?post_id=${params.id}`, {
+    authz: "optional",
     cookies,
     fetch,
     setHeaders,

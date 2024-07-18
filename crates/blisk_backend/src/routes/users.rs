@@ -1,12 +1,12 @@
+use crate::utils::errors::AppError;
+use crate::{
+    app::AppState,
+    utils::{errors::UserError, response::response, structs::AppJson},
+};
 use axum::{
     extract::{Query, State},
     http::StatusCode,
     response::Response,
-};
-
-use crate::{
-    app::AppState,
-    utils::{errors::AppError, response::response, structs::AppJson, users::errors::UserError},
 };
 
 #[derive(serde::Deserialize)]

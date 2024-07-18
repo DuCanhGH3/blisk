@@ -36,6 +36,7 @@ export interface Comment {
   path: string;
   content: string;
   author_name: string;
+  user_reaction: ReactionType | null;
   level: number;
   post_id: number;
   replies: Comment[];

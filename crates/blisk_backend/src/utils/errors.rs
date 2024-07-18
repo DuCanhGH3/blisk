@@ -5,14 +5,50 @@ use axum::{
 };
 use axum_typed_multipart::TypedMultipartError;
 
-use super::{
-    comments::errors::CommentsError,
-    posts::errors::PostsError,
-    response::ErrorResponse,
-    structs::AppJson,
-    uploads::errors::UploadsError,
-    users::errors::{AuthError, UserError},
-};
+use super::{response::ErrorResponse, structs::AppJson};
+
+#[derive(Debug, thiserror::Error)]
+pub enum AuthError {
+    #[error("this user either doesn't exist or has already been verified")]
+    AlreadyVerified,
+    #[error("this user is not valid")]
+    Invalid,
+    #[error("this error is not expected")]
+    Unexpected,
+}
+#[derive(Debug, thiserror::Error)]
+pub enum UserError {
+    #[error("user {0} cannot be found")]
+    UserNotFound(String),
+    #[error("this error is not expected")]
+    Unexpected,
+}
+#[derive(Debug, thiserror::Error)]
+pub enum CommentsError {
+    #[error("comment {0} cannot be found")]
+    CommentNotFound(i64),
+    #[error("this error is not expected")]
+    Unexpected,
+}
+#[derive(Debug, thiserror::Error)]
+pub enum PostsError {
+    #[error("post {0} cannot be found")]
+    PostNotFound(i64),
+    #[error("this error is not expected")]
+    Unexpected,
+}
+#[derive(Debug, thiserror::Error)]
+pub enum BooksError {
+    #[error("book {0} cannot be found")]
+    BookNotFound(i64),
+}
+#[derive(Debug, thiserror::Error)]
+pub enum UploadsError {
+    #[error("received an invalid filename: {0}")]
+    InvalidName(String),
+    #[error("received an IO error: {0}")]
+    IoError(#[from] std::io::Error),
+}
 
 #[derive(Debug, thiserror::Error)]
 pub enum AppError {

@@ -1,16 +1,22 @@
+use super::auth::UserClaims;
+use crate::{
+    app::AppState,
+    utils::{errors::AppError, response::response, structs::AppJson},
+};
 use axum::{extract::State, http::StatusCode, response::Response};
 use tracing::instrument;
 
-use crate::{
-    app::AppState,
-    utils::{
-        errors::AppError,
-        reactions::structs::PostReaction,
-        response::{response, SuccessResponse},
-        structs::AppJson,
-        users::structs::UserClaims,
-    },
-};
+#[derive(Clone, Debug, PartialEq, PartialOrd, sqlx::Type, serde::Deserialize, serde::Serialize)]
+#[sqlx(type_name = "preact", rename_all = "snake_case")]
+#[serde(rename_all = "snake_case")]
+pub enum PostReaction {
+    Like,
+    Love,
+    Laugh,
+    Wow,
+    Sad,
+    Angry,
+}
 
 #[derive(Debug, serde::Deserialize)]
 #[serde(rename_all = "snake_case")]

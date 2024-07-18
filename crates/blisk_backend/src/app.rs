@@ -52,18 +52,24 @@ impl Application {
         let port = listener.local_addr().unwrap().port();
         let app = Router::new()
             .route("/health", get(routes::health::health_check))
-            .route("/books/create", post(routes::books::create))
-            .route("/books/read", get(routes::books::read))
-            .route("/posts/create", post(routes::posts::create))
-            .route("/posts/read", get(routes::posts::read))
-            .route("/comments/create", post(routes::comments::create))
-            .route("/comments/read", get(routes::comments::read))
-            .route("/reactions/create", post(routes::reactions::create))
-            .route("/users/authenticate", post(routes::users::authenticate))
-            .route("/users/confirm", post(routes::users::confirm))
-            .route("/users/login", post(routes::users::login))
-            .route("/users/read", get(routes::users::read))
-            .route("/users/register", post(routes::users::register))
+            .route(
+                "/books",
+                post(routes::books::create).get(routes::books::read),
+            )
+            .route(
+                "/posts",
+                post(routes::posts::create).get(routes::posts::read),
+            )
+            .route(
+                "/comments",
+                post(routes::comments::create).get(routes::comments::read),
+            )
+            .route("/reactions", post(routes::reactions::create))
+            .route("/users", get(routes::users::read))
+            .route("/auth/authenticate", post(routes::auth::authenticate))
+            .route("/auth/confirm", post(routes::auth::confirm))
+            .route("/auth/login", post(routes::auth::login))
+            .route("/auth/register", post(routes::auth::register))
             .with_state(app_state);
         let server = axum::serve(listener, app);
 

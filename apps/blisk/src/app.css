@@ -315,23 +315,23 @@
     @apply size-9 flex items-center justify-center transition-all duration-200 max-w-24 relative;
     flex: calc(0.5 + var(--lerp, 0) * 1.5);
   }
-  :is(.react-button:hover, .react-button:focus-visible) {
+  :is(.react-button:hover, .react-button:active, .react-button:focus-visible) {
     --lerp: 1;
   }
-  .react-button:has(+ :is(.react-button:hover, .react-button:focus-visible)),
-  :is(.react-button:hover, .react-button:focus-visible) + .react-button {
+  .react-button:has(+ :is(.react-button:hover, .react-button:active, .react-button:focus-visible)),
+  :is(.react-button:hover, .react-button:active, .react-button:focus-visible) + .react-button {
     --lerp: calc(sin(40deg));
   }
-  .react-button:has(+ .react-button + :is(.react-button:hover, .react-button:focus-visible)),
-  :is(.react-button:hover, .react-button:focus-visible) + .react-button + .react-button {
+  .react-button:has(+ .react-button + :is(.react-button:hover, .react-button:active, .react-button:focus-visible)),
+  :is(.react-button:hover, .react-button:active, .react-button:focus-visible) + .react-button + .react-button {
     --lerp: calc(sin(30deg));
   }
-  .react-button:has(+ .react-button + .react-button + :is(.react-button:hover, .react-button:focus-visible)),
-  :is(.react-button:hover, .react-button:focus-visible) + .react-button + .react-button + .react-button {
+  .react-button:has(+ .react-button + .react-button + :is(.react-button:hover, .react-button:active, .react-button:focus-visible)),
+  :is(.react-button:hover, .react-button:active, .react-button:focus-visible) + .react-button + .react-button + .react-button {
     --lerp: calc(sin(20deg));
   }
-  .react-button:has(+ .react-button + .react-button + .react-button + :is(.react-button:hover, .react-button:focus-visible)),
-  :is(.react-button:hover, .react-button:focus-visible) + .react-button + .react-button + .react-button + .react-button {
+  .react-button:has(+ .react-button + .react-button + .react-button + :is(.react-button:hover, .react-button:active, .react-button:focus-visible)),
+  :is(.react-button:hover, .react-button:active, .react-button:focus-visible) + .react-button + .react-button + .react-button + .react-button {
     --lerp:  calc(sin(10deg));
   }
   html[data-theme="light"] .visible-dark,

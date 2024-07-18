@@ -1,12 +1,8 @@
-pub mod books;
-pub mod comments;
 pub mod constants;
 pub mod emails;
 pub mod errors;
-pub mod posts;
-pub mod reactions;
+pub mod password;
 pub mod response;
 pub mod structs;
 pub mod uploads;
-pub mod users;
 pub mod validators;

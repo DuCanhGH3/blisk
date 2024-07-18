@@ -9,8 +9,10 @@ export const successSchema = z.object({
   message: z.string().min(1, "`message` is unexpectedly empty."),
 });
 
+export type Authz = boolean | "optional";
+
 export interface BackendInit extends RequestInit {
-  authz: boolean;
+  authz: Authz;
   cookies: Cookies;
   fetch: typeof globalThis.fetch;
   setHeaders(headers: Record<string, string>): void;
@@ -27,14 +29,15 @@ export const fetchBackend = async <T>(url: `/${string}`, { authz, cookies, fetch
   if (authz) {
     const tokenType = cookies.get("token_type");
     const token = cookies.get("token");
-    if (!tokenType || !token || tokenType !== "Bearer") {
+    if (tokenType && token && tokenType === "Bearer") {
+      headers.set("Authorization", `${tokenType} ${token}`);
+    } else if (authz !== "optional") {
       setHeaders({
         "WWW-Authenticate":
           'Bearer realm="A protected resource requiring authorization", error="invalid_token", error_description="The access token is invalid."',
       });
       return { ok: false, status: 401, error: "You are unauthorized to make this request." };
     }
-    headers.set("Authorization", `${tokenType} ${token}`);
   }
   const res = await fetch(`${BACKEND_URL}${url}`, {
     ...init,

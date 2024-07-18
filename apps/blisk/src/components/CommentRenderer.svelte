@@ -17,7 +17,7 @@
 
   const { comment, username }: CommentProps = $props();
 
-  let currentReaction = $state<ReactionType | null>(null);
+  let currentReaction = $state<ReactionType | null>(comment.user_reaction);
 
   let reactionBar = $state<HTMLDetailsElement | null>(null);
 

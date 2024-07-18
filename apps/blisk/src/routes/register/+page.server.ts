@@ -32,7 +32,7 @@ export const actions: Actions = {
     if (!data.success) {
       return fail(400, { validationError: data.error.flatten().fieldErrors });
     }
-    const res = await fetchBackend("/users/register", {
+    const res = await fetchBackend("/auth/register", {
       authz: false,
       cookies,
       fetch,

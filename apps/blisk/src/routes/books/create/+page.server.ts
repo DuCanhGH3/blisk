@@ -18,7 +18,7 @@ export const actions: Actions = {
     if (!data.success) {
       return fail(400, { validationError: data.error.flatten().fieldErrors });
     }
-    const backendResponse = await fetchBackend<{ id: number }>("/books/create", {
+    const backendResponse = await fetchBackend<{ id: number }>("/books", {
       authz: true,
       cookies,
       fetch,
