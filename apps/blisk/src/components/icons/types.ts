@@ -1,7 +1,7 @@
 import type { SVGAttributes } from "svelte/elements";
 
-export interface ReactionProps extends Omit<SVGAttributes<SVGElement>, "xmlns" | "viewBox" | "fill"> {
+export interface IconProps extends Omit<SVGAttributes<SVGElement>, "xmlns" | "viewBox"> {}
+
+export interface ReactionProps extends Omit<IconProps, "fill"> {
   animatable?: boolean;
 }
-
-export interface IconProps extends Omit<SVGAttributes<SVGElement>, "xmlns" | "viewBox"> {}

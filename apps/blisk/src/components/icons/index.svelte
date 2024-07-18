@@ -1,4 +1,4 @@
-<svg xmlns="http://www.w3.org/2000/svg" class="sr-only">
+<svg xmlns="http://www.w3.org/2000/svg" class="sr-only" aria-hidden="true" tabindex="-1">
   <defs>
     <linearGradient id="face-gradient" x1="8" x2="8" y1="1.64" y2="16" gradientUnits="userSpaceOnUse">
       <stop offset="0" stop-color="#FEEA70" />

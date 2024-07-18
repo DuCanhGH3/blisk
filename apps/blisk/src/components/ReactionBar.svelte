@@ -1,8 +1,10 @@
 <script lang="ts">
   import { enhance } from "$app/forms";
+  import { goto } from "$app/navigation";
   import { clsx } from "$lib/clsx";
   // import { hotkeys } from "$lib/hotkeys.svelte";
-  import type { ReactionFor } from "$lib/types";
+  import type { ReactionFor, ReactionType } from "$lib/types";
+  import { isValidReaction } from "$lib/utils";
   import type { HTMLFormAttributes } from "svelte/elements";
   import Like from "./icons/reactions/Like.svelte";
   import Heart from "./icons/reactions/Heart.svelte";
@@ -14,9 +16,13 @@
   interface ReactionBarProps extends HTMLFormAttributes {
     forId: number;
     forType: ReactionFor;
+    updateReaction(type: ReactionType): void;
+    revertReaction(): void;
   }
 
-  const { forId, forType, class: className, ...props }: ReactionBarProps = $props();
+  const { forId, forType, updateReaction, revertReaction, class: className, ...props }: ReactionBarProps = $props();
+
+  let isProcessing = $state(false);
 
   // hotkeys([
   //   [
@@ -35,27 +41,41 @@
     "dark:bg-neutral-915 border-border-light dark:border-border-dark z-10 flex flex-row gap-2 rounded-full border bg-white p-1 shadow-md",
     className
   )}
-  use:enhance
+  use:enhance={({ formData }) => {
+    isProcessing = true;
+    const reactionType = formData.get("reactionType");
+    if (reactionType && isValidReaction(reactionType)) {
+      updateReaction(reactionType);
+    }
+    return async ({ result }) => {
+      if (result.type === "error" || result.type === "failure") {
+        revertReaction();
+      } else if (result.type === "redirect") {
+        goto(result.location, { invalidateAll: true });
+      }
+      isProcessing = false;
+    };
+  }}
   {...props}
 >
   <input type="hidden" name="forId" value={forId} />
   <input type="hidden" name="forType" value={forType} />
-  <button class="react-button" type="submit" name="reactionType" value="like">
-    <Like />
+  <button class="react-button" type="submit" name="reactionType" value="like" aria-label="Like">
+    <Like aria-hidden="true" tabindex={-1} />
   </button>
-  <button class="react-button" type="submit" name="reactionType" value="love">
-    <Heart />
+  <button class="react-button" type="submit" name="reactionType" value="love" aria-label="Love">
+    <Heart aria-hidden="true" tabindex={-1} />
   </button>
-  <button class="react-button" type="submit" name="reactionType" value="laugh">
-    <Haha />
+  <button class="react-button" type="submit" name="reactionType" value="laugh" aria-label="Haha">
+    <Haha aria-hidden="true" tabindex={-1} />
   </button>
-  <button class="react-button" type="submit" name="reactionType" value="wow">
-    <Wow animatable={false} />
+  <button class="react-button" type="submit" name="reactionType" value="wow" aria-label="Wow">
+    <Wow animatable={false} aria-hidden="true" tabindex={-1} />
   </button>
-  <button class="react-button" type="submit" name="reactionType" value="sad">
-    <Sad />
+  <button class="react-button" type="submit" name="reactionType" value="sad" aria-label="Sad">
+    <Sad aria-hidden="true" tabindex={-1} />
   </button>
-  <button class="react-button" type="submit" name="reactionType" value="angry">
-    <Angry />
+  <button class="react-button" type="submit" name="reactionType" value="angry" aria-label="Angry">
+    <Angry aria-hidden="true" tabindex={-1} />
   </button>
 </form>

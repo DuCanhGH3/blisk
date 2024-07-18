@@ -5,15 +5,60 @@
   import ThumbUp from "$components/icons/ThumbUp.svelte";
   import ReactionBar from "$components/ReactionBar.svelte";
   import { clsx } from "$lib/clsx";
-  import type { Comment } from "$lib/types";
+  import type { Comment, ReactionType } from "$lib/types";
   import CommentForm from "./CommentForm.svelte";
+  import Like from "./icons/reactions/Like.svelte";
+  import Heart from "./icons/reactions/Heart.svelte";
+  import Haha from "./icons/reactions/Haha.svelte";
+  import Wow from "./icons/reactions/Wow.svelte";
+  import Sad from "./icons/reactions/Sad.svelte";
+  import Angry from "./icons/reactions/Angry.svelte";
+  import type { IconProps, ReactionProps } from "./icons/types";
+  import type { Component } from "svelte";
 
   interface CommentProps {
     comment: Comment;
     username: string | undefined;
   }
 
+  let currentReaction = $state<ReactionType | null>(null);
+
   const { comment, username }: CommentProps = $props();
+
+  const mapReactionToIcon = {
+    like: {
+      icon: Like,
+      label: "Like",
+    },
+    love: {
+      icon: Heart,
+      label: "Love",
+    },
+    laugh: {
+      icon: Haha,
+      label: "Haha",
+    },
+    wow: {
+      icon: Wow,
+      label: "Wow",
+    },
+    sad: {
+      icon: Sad,
+      label: "Sad",
+    },
+    angry: {
+      icon: Angry,
+      label: "Angry",
+    },
+  } satisfies Record<ReactionType, { icon: Component<ReactionProps>; label: string }>;
+
+  const rendererButtonAttributes = {
+    width: 24,
+    height: 24,
+    class: "h-6 w-auto",
+    "aria-hidden": "true",
+    tabindex: -1,
+  } satisfies IconProps;
 </script>
 
 <div class="box flex flex-col gap-2 rounded-[21px] p-2.5 shadow-md">
@@ -28,8 +73,13 @@
   <div class="-m-1 mt-0 flex w-fit flex-row gap-2">
     <details class="relative">
       <CommentRendererButton as="summary" aria-describedby="reaction-bar-{comment.id}">
-        <ThumbUp width={24} height={24} class="h-6 w-auto" />
-        Like
+        {#if currentReaction === null}
+          <ThumbUp {...rendererButtonAttributes} /> Like
+        {:else}
+          {@const { icon, label } = mapReactionToIcon[currentReaction]}
+          <svelte:component this={icon} animatable={false} {...rendererButtonAttributes} />
+          {label}
+        {/if}
       </CommentRendererButton>
       <ReactionBar
         id="reaction-bar-{comment.id}"
@@ -37,15 +87,17 @@
         style="--fly-translate:0.25rem"
         forId={comment.id}
         forType="comment"
+        updateReaction={(reaction) => {
+          currentReaction = reaction;
+        }}
+        revertReaction={() => (currentReaction = null)}
       />
     </details>
     <CommentRendererButton as="label" id="comment-toggle-label-{comment.id}" for="comment-toggle-{comment.id}">
-      <CommentIcon width={24} height={24} class="h-6 w-auto" />
-      Comment
+      <CommentIcon {...rendererButtonAttributes} /> Comment
     </CommentRendererButton>
     <CommentRendererButton as="div">
-      <Share width={24} height={24} class="h-6 w-auto" />
-      Share
+      <Share {...rendererButtonAttributes} /> Share
     </CommentRendererButton>
   </div>
 </div>

@@ -8,3 +8,5 @@ export const BREAKPOINTS = {
 };
 
 export const OPTIMISTIC_ID = -9999;
+
+export const VALID_REACTIONS = ["like", "love", "laugh", "wow", "sad", "angry"] as const;

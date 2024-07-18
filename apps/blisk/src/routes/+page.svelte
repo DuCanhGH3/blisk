@@ -27,7 +27,6 @@
   };
 </script>
 
-<!-- svelte-ignore deprecated_event_handler -->
 <div class="flex w-full flex-col justify-center gap-10 self-stretch">
   <div class="relative h-full w-full">
     <button
@@ -56,7 +55,7 @@
         "border-border-light bg-white dark:border-border-dark dark:bg-neutral-915 hover:bg-neutral-100 dark:hover:bg-neutral-800"
       )}
       use:emblaCarouselSvelte={{ options: { containScroll: false, dragFree: true, loop: true }, plugins: [emblaAutoplay()] }}
-      on:emblaInit={onEmbiaInit}
+      onemblaInit={onEmbiaInit}
     >
       <div class="flex w-full">
         {#each Array.from({ length: 3 }) as _}

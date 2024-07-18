@@ -5,6 +5,7 @@
 </script>
 
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="none" {...props}>
+  <title>Angry</title>
   <path fill="url(#angry-gradient)" d="M16 8A8 8 0 1 1-.001 8 8 8 0 0 1 16 8" />
   <path
     fill="#000"

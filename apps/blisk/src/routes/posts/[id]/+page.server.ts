@@ -1,7 +1,7 @@
 import { fetchBackend } from "$lib/backend";
 import { error, fail } from "@sveltejs/kit";
 import type { Actions, PageServerLoad } from "./$types";
-import type { Comment, Post } from "$lib/types";
+import type { Comment, Post, ReactionType } from "$lib/types";
 import { z } from "zod";
 import { reactionTypeSchema } from "$lib/schemas";
 
@@ -69,7 +69,7 @@ export const actions: Actions = {
       return fail(400, { validationError: data.error.flatten().fieldErrors });
     }
 
-    const res = await fetchBackend("/reactions/create", {
+    const res = await fetchBackend<{ reaction_type: ReactionType }>("/reactions/create", {
       authz: true,
       cookies,
       fetch,
@@ -82,6 +82,8 @@ export const actions: Actions = {
     if (!res.ok) {
       return fail(res.status, { error: res.error });
     }
+
+    return { reactionType: res.data.reaction_type };
   },
 };
 

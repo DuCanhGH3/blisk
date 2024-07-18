@@ -1,6 +1,7 @@
 // See https://kit.svelte.dev/docs/types#app
 // for information about these interfaces
 import type { User } from "$lib/types";
+import { EmblaCarouselType } from "embla-carousel";
 
 declare global {
   namespace App {
@@ -24,5 +25,11 @@ declare global {
 
   interface Document {
     startViewTransition(updateCallback: () => Promise<void>): ViewTransition;
+  }
+
+  declare namespace svelteHTML {
+    interface HTMLAttributes<T> {
+      onemblaInit?: (evt: CustomEvent<EmblaCarouselType>) => void;
+    }
   }
 }

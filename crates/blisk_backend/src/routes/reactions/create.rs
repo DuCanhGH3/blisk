@@ -26,6 +26,11 @@ pub struct CreatePayload {
     reaction_type: PostReaction,
 }
 
+#[derive(serde::Serialize)]
+pub struct CreateResponse {
+    reaction_type: PostReaction,
+}
+
 #[instrument(name = "Creating a reaction...", skip(pool, claims), fields(
     uid = &claims.sub
 ))]
@@ -71,8 +76,6 @@ pub async fn create(
     Ok(response(
         StatusCode::CREATED,
         None,
-        AppJson(SuccessResponse {
-            message: "Reacted successfully!".to_owned(),
-        }),
+        AppJson(CreateResponse { reaction_type }),
     ))
 }

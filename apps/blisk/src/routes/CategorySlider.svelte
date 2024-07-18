@@ -1,4 +1,3 @@
-<!-- svelte-ignore deprecated_event_handler -->
 <script lang="ts">
   import ChevronLeft from "$components/icons/ChevronLeft.svelte";
   import ChevronRight from "$components/icons/ChevronRight.svelte";
@@ -58,7 +57,7 @@
     <div
       class="z-[2] mb-[-65px] flex h-full w-full overflow-x-hidden pb-[65px]"
       use:emblaCarousel={{ options: { align: "start", containScroll: false, dragFree: true, loop: true }, plugins: [] }}
-      on:emblaInit={onEmbiaInit}
+      onemblaInit={onEmbiaInit}
     >
       <div class="flex w-full flex-row">
         {#each Array.from({ length: 1 }) as _}
