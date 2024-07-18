@@ -149,6 +149,12 @@ export default {
           light: "#d4d4d4",
           dark: "#262626",
         },
+        yellow: {
+          75: "#FFF4CE",
+          150: "#EFE8C1",
+          925: "#665330",
+          1000: "#433519",
+        },
         neutral: {
           150: "#eeeeee",
           250: "#dddddd",
