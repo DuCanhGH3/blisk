@@ -50,28 +50,15 @@ pub async fn create(
     }): AppJson<CreatePayload>,
 ) -> Result<Response, AppError> {
     let mut transaction = pool.begin().await?;
-    let delele_query = match for_type {
-        CreateForType::Comment => sqlx::query!(
-            "DELETE FROM comment_reactions WHERE user_id = $1 AND comment_id = $2",
-            &claims.sub,
-            &post_id
-        ),
-        CreateForType::Post => sqlx::query!(
-            "DELETE FROM post_reactions WHERE user_id = $1 AND post_id = $2",
-            &claims.sub,
-            &post_id
-        ),
-    };
-    delele_query.execute(&mut *transaction).await?;
     let insert_query = match for_type {
         CreateForType::Comment => sqlx::query!(
-            "INSERT INTO comment_reactions (type, user_id, comment_id) VALUES ($1, $2, $3)",
+            "SELECT create_comment_reaction (rtype => $1, usid => $2, cid => $3)",
             &reaction_type as _,
             &claims.sub,
             &post_id
         ),
         CreateForType::Post => sqlx::query!(
-            "INSERT INTO post_reactions (type, user_id, post_id) VALUES ($1, $2, $3)",
+            "SELECT create_post_reaction (rtype => $1, usid => $2, pid => $3)",
             &reaction_type as _,
             &claims.sub,
             &post_id

@@ -12,6 +12,7 @@
   import Wow from "./icons/reactions/Wow.svelte";
   import Sad from "./icons/reactions/Sad.svelte";
   import Angry from "./icons/reactions/Angry.svelte";
+  import { OPTIMISTIC_ID } from "$lib/constants";
 
   interface ReactionBarProps extends HTMLFormAttributes {
     forId: number;
@@ -23,6 +24,10 @@
   const { forId, forType, updateReaction, revertReaction, class: className, ...props }: ReactionBarProps = $props();
 
   let isProcessing = $state(false);
+
+  const isForOptimisticComment = $derived(forType === "comment" && forId === OPTIMISTIC_ID);
+
+  const disabled = $derived(isForOptimisticComment || isProcessing);
 
   // hotkeys([
   //   [
@@ -60,22 +65,22 @@
 >
   <input type="hidden" name="forId" value={forId} />
   <input type="hidden" name="forType" value={forType} />
-  <button class="react-button" type="submit" name="reactionType" value="like" aria-label="Like" disabled={isProcessing}>
+  <button class="react-button" type="submit" name="reactionType" value="like" aria-label="Like" {disabled}>
     <Like aria-hidden="true" tabindex={-1} />
   </button>
-  <button class="react-button" type="submit" name="reactionType" value="love" aria-label="Love" disabled={isProcessing}>
+  <button class="react-button" type="submit" name="reactionType" value="love" aria-label="Love" {disabled}>
     <Heart aria-hidden="true" tabindex={-1} />
   </button>
-  <button class="react-button" type="submit" name="reactionType" value="laugh" aria-label="Haha" disabled={isProcessing}>
+  <button class="react-button" type="submit" name="reactionType" value="laugh" aria-label="Haha" {disabled}>
     <Haha aria-hidden="true" tabindex={-1} />
   </button>
-  <button class="react-button" type="submit" name="reactionType" value="wow" aria-label="Wow" disabled={isProcessing}>
+  <button class="react-button" type="submit" name="reactionType" value="wow" aria-label="Wow" {disabled}>
     <Wow animatable={false} aria-hidden="true" tabindex={-1} />
   </button>
-  <button class="react-button" type="submit" name="reactionType" value="sad" aria-label="Sad" disabled={isProcessing}>
+  <button class="react-button" type="submit" name="reactionType" value="sad" aria-label="Sad" {disabled}>
     <Sad aria-hidden="true" tabindex={-1} />
   </button>
-  <button class="react-button" type="submit" name="reactionType" value="angry" aria-label="Angry" disabled={isProcessing}>
+  <button class="react-button" type="submit" name="reactionType" value="angry" aria-label="Angry" {disabled}>
     <Angry aria-hidden="true" tabindex={-1} />
   </button>
 </form>
