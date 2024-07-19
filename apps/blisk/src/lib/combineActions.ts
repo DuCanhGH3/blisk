@@ -1,7 +1,7 @@
 import type { Action, ActionReturn } from "svelte/action";
 
-export const combineActions = <T extends HTMLElement = HTMLElement, P extends any = any>(node: T, actions: [Action<T, P>, P][] | undefined) => {
-  let actionReturns: (ActionReturn<P> | void)[] = [];
+export const combineActions = <T extends HTMLElement = HTMLElement, P = any>(node: T, actions: [Action<T, P>, P][] | undefined) => {
+  const actionReturns: (ActionReturn<P> | void)[] = [];
 
   if (actions) {
     for (const actionEntry of actions) {

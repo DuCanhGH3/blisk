@@ -18,14 +18,14 @@
 
   const emblaPrev = () => {
     if (!emblaApi) return;
-    const { index } = emblaApi?.internalEngine();
+    const { index } = emblaApi.internalEngine();
     const next = index.add(-10).get();
     emblaApi.scrollTo(next, false);
   };
 
   const emblaNext = () => {
     if (!emblaApi) return;
-    const { index } = emblaApi?.internalEngine();
+    const { index } = emblaApi.internalEngine();
     const next = index.add(10).get();
     emblaApi.scrollTo(next, false);
   };

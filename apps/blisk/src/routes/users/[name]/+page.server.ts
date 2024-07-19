@@ -8,7 +8,7 @@ interface LoadData {
   posts: Post[];
 }
 
-export const load: PageServerLoad = async ({ cookies, fetch, params, setHeaders, url }) => {
+export const load: PageServerLoad = async ({ cookies, fetch, params, setHeaders }) => {
   const user = await fetchBackend<LoadData>(`/users?username=${params.name}`, {
     authz: false,
     cookies,

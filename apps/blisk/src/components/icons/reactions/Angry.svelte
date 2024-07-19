@@ -1,6 +1,7 @@
 <script lang="ts">
   import type { ReactionProps } from "../types";
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { animatable = true, ...props }: ReactionProps = $props();
 </script>
 

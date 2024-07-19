@@ -28,7 +28,7 @@ declare global {
   }
 
   declare namespace svelteHTML {
-    interface HTMLAttributes<T> {
+    interface HTMLAttributes<_> {
       onemblaInit?: (evt: CustomEvent<EmblaCarouselType>) => void;
     }
   }

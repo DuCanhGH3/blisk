@@ -1,6 +1,6 @@
 <script lang="ts">
   import type { Action } from "svelte/action";
-  import { Set } from "svelte/reactivity";
+  import { SvelteSet } from "svelte/reactivity";
   import { enhance } from "$app/forms";
   import Input from "$components/Input.svelte";
   import NavLink from "$components/layouts/NavLink.svelte";
@@ -10,7 +10,7 @@
 
   let isLoading = $state(false);
   let observer = $state<IntersectionObserver | null>(null);
-  let activeIds = $state<Set<string>>(new Set());
+  const activeIds = $state<SvelteSet<string>>(new SvelteSet());
 
   $effect(() => {
     observer = new IntersectionObserver(

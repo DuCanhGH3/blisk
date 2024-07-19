@@ -51,6 +51,7 @@ export const fetchBackend = async <T>(url: `/${string}`, { authz, cookies, fetch
     try {
       json = await res.json();
     } catch (err) {
+      console.error(err);
       json = { error: "An unexpected error occurred." };
     }
     const validatedJson = await errorSchema.spa(json);

@@ -1,7 +1,7 @@
 <script lang="ts">
-  import type { SVGAttributes } from "svelte/elements";
+  import type { IconProps } from "./types";
 
-  interface $$Props extends SVGAttributes<SVGElement> {}
+  const { ...props }: IconProps = $props();
 </script>
 
 <svg
@@ -13,7 +13,7 @@
   stroke-linecap="round"
   stroke-linejoin="round"
   aria-hidden="true"
-  {...$$restProps}
+  {...props}
 >
   <path d="M14 8v-2a2 2 0 0 0 -2 -2h-7a2 2 0 0 0 -2 2v12a2 2 0 0 0 2 2h7a2 2 0 0 0 2 -2v-2" />
   <path d="M9 12h12l-3 -3" />

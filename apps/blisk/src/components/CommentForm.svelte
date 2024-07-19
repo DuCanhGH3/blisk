@@ -3,7 +3,8 @@
   import type { Comment } from "$lib/types";
   import { OPTIMISTIC_ID } from "$lib/constants";
   import { page } from "$app/stores";
-  import Input from "$components/Input.svelte";
+  import CommentIcon from "./icons/Comment.svelte";
+  import Textarea from "./Textarea.svelte";
 
   interface CommentFormProps {
     parentId: number | null;
@@ -19,7 +20,7 @@
 
 <form
   method="POST"
-  action="?/comment{!isParentComment ? `&parentId=${parentId}` : ""}"
+  action="?/comment{!isParentComment ? `&parentId=${parentId}` : ''}"
   class="flex flex-row gap-2"
   use:enhance={({ formData }) => {
     isProcessing = true;
@@ -33,6 +34,7 @@
         path: "Top",
         content,
         author_name,
+        user_reaction: null,
         level: 1,
         post_id,
         replies: [],
@@ -49,16 +51,18 @@
     };
   }}
 >
-  <div class="flex-1">
-    <Input
-      id="{idPrefix}-content-input"
-      disabled={isParentOptimistic}
-      label="Content"
-      name="content"
-      type="text"
-      errorText={$page.form?.validationError?.content}
-      errorTextId="{idPrefix}-content-error-text"
-    />
-  </div>
-  <button class="button" disabled={isParentOptimistic || isProcessing}>{isParentComment ? "Comment" : "Reply"}</button>
+  <Textarea
+    id="{idPrefix}-content-input"
+    class="peer"
+    disabled={isParentOptimistic}
+    label="Content"
+    name="content"
+    rows={5}
+    errorText={$page.form?.validationError?.content}
+    errorTextId="{idPrefix}-content-error-text"
+  />
+  <button class="button absolute bottom-1 right-1 !rounded-full !p-2" disabled={isParentOptimistic || isProcessing}>
+    <CommentIcon width={20} height={20} class="h-auto w-5" aria-hidden="true" tabindex={-1} />
+    <span class="sr-only">{isParentComment ? "Comment" : "Reply"}</span>
+  </button>
 </form>

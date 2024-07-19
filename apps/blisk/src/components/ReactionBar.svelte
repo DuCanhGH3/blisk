@@ -60,22 +60,22 @@
 >
   <input type="hidden" name="forId" value={forId} />
   <input type="hidden" name="forType" value={forType} />
-  <button class="react-button" type="submit" name="reactionType" value="like" aria-label="Like">
+  <button class="react-button" type="submit" name="reactionType" value="like" aria-label="Like" disabled={isProcessing}>
     <Like aria-hidden="true" tabindex={-1} />
   </button>
-  <button class="react-button" type="submit" name="reactionType" value="love" aria-label="Love">
+  <button class="react-button" type="submit" name="reactionType" value="love" aria-label="Love" disabled={isProcessing}>
     <Heart aria-hidden="true" tabindex={-1} />
   </button>
-  <button class="react-button" type="submit" name="reactionType" value="laugh" aria-label="Haha">
+  <button class="react-button" type="submit" name="reactionType" value="laugh" aria-label="Haha" disabled={isProcessing}>
     <Haha aria-hidden="true" tabindex={-1} />
   </button>
-  <button class="react-button" type="submit" name="reactionType" value="wow" aria-label="Wow">
+  <button class="react-button" type="submit" name="reactionType" value="wow" aria-label="Wow" disabled={isProcessing}>
     <Wow animatable={false} aria-hidden="true" tabindex={-1} />
   </button>
-  <button class="react-button" type="submit" name="reactionType" value="sad" aria-label="Sad">
+  <button class="react-button" type="submit" name="reactionType" value="sad" aria-label="Sad" disabled={isProcessing}>
     <Sad aria-hidden="true" tabindex={-1} />
   </button>
-  <button class="react-button" type="submit" name="reactionType" value="angry" aria-label="Angry">
+  <button class="react-button" type="submit" name="reactionType" value="angry" aria-label="Angry" disabled={isProcessing}>
     <Angry aria-hidden="true" tabindex={-1} />
   </button>
 </form>
