@@ -31,13 +31,10 @@
     if (typeof author_name === "string" && typeof content === "string" && !Number.isNaN(post_id)) {
       comment = {
         id: OPTIMISTIC_ID,
-        path: "Top",
         content,
         author_name,
         user_reaction: null,
-        level: 1,
-        post_id,
-        replies: [],
+        children: [],
       } satisfies Comment;
       updateComments(comment);
     }

@@ -33,12 +33,9 @@ export interface Post {
 
 export interface Comment {
   id: number;
-  path: string;
   content: string;
   author_name: string;
   user_reaction: ReactionType | null;
-  level: number;
-  post_id: number;
   children: Comment[];
 }
 
