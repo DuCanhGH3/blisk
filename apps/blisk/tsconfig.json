@@ -10,7 +10,7 @@
     "sourceMap": true,
     "strict": true,
     "moduleResolution": "bundler",
-    "types": ["@serwist/vite/typings", "@cloudflare/workers-types/index.d.ts"]
+    "types": ["@serwist/vite/typings"]
   },
   "exclude": ["node_modules/**", "src/worker-declarations.d.ts", "src/service-worker.ts"],
   "references": [{ "path": "./tsconfig.worker.json" }]
