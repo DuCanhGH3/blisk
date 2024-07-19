@@ -18,7 +18,7 @@
   const { comment, username }: CommentProps = $props();
 
   let currentReaction = $state<ReactionType | null>(comment.user_reaction);
-  let replies = $state(comment.replies ?? []);
+  let replies = $state(comment.children ?? []);
   let reactionBar = $state<HTMLDetailsElement | null>(null);
 
   const rendererButtonAttributes = {

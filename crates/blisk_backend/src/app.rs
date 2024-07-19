@@ -39,10 +39,10 @@ impl Application {
             .acquire_timeout(std::time::Duration::from_secs(2))
             .connect_lazy_with(pool_options);
 
-        sqlx::migrate!()
-            .run(&pool)
-            .await
-            .expect("Failed to migrate database");
+        // sqlx::migrate!()
+        //     .run(&pool)
+        //     .await
+        //     .expect("Failed to migrate database");
 
         let redis_client = redis::Client::open(SETTINGS.redis.uri.as_str())
             .expect("Failed to create a Redis client");

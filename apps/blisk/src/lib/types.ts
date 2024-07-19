@@ -39,7 +39,7 @@ export interface Comment {
   user_reaction: ReactionType | null;
   level: number;
   post_id: number;
-  replies: Comment[];
+  children: Comment[];
 }
 
 export interface Book {

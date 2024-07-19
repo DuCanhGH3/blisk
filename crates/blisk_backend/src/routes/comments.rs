@@ -22,7 +22,7 @@ pub struct Comment {
     #[sqlx(default)]
     pub user_reaction: Option<PostReaction>,
     #[sqlx(default)]
-    pub replies: Option<sqlx::types::Json<Vec<Comment>>>,
+    pub children: Option<sqlx::types::Json<Vec<Comment>>>,
 }
 
 pub async fn read_base<'c>(
@@ -36,38 +36,25 @@ pub async fn read_base<'c>(
 
     let comments = sqlx::query_as(
         "SELECT
-        c.id,
-        c.content,
-        u.name AS author_name,
-        ucr.type AS user_reaction,
-        COALESCE((
-            SELECT JSON_AGG(rp.*)
-            FROM (
-                SELECT
-                    rp.id,
-                    rp.content,
-                    urp.name AS author_name,
-                    urr.type AS user_reaction
-                FROM comments rp
-                JOIN users urp
-                ON rp.author_id = urp.id
-                LEFT JOIN comment_reactions urr
-                ON urr.comment_id = rp.id AND urr.user_id = $4
-                WHERE rp.path = c.path || TEXT2LTREE(c.id::TEXT)
-                ORDER BY rp.id DESC
-                LIMIT 5
-            ) rp
-        ), '[]'::JSON) as replies
-    FROM comments c
-    JOIN users u
-    ON c.author_id = u.id
-    LEFT JOIN comment_reactions ucr
-    ON ucr.comment_id = c.id AND ucr.user_id = $4
-    WHERE c.post_id = $1 AND c.path = 'Top'
-    GROUP BY c.id, u.name, ucr.type
-    ORDER BY c.id DESC
-    LIMIT $2
-    OFFSET $3",
+            c.id,
+            c.content,
+            u.name as author_name,
+            ucr.type as user_reaction,
+            fetch_replies(
+                request_uid => $4,
+                parent_id => c.id,
+                parent_path => c.path,
+                current_level => 5
+            ) AS children
+        FROM comments c
+        JOIN users u
+        ON c.author_id = u.id
+        LEFT JOIN comment_reactions ucr
+        ON ucr.comment_id = c.id AND ucr.user_id = $4
+        WHERE c.post_id = $1 AND c.path = 'Top'
+        ORDER BY c.id DESC
+        LIMIT $2
+        OFFSET $3",
     )
     .bind(&post_id)
     .bind(&limit)
