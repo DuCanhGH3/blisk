@@ -1,9 +1,9 @@
-import { fetchBackend } from "$lib/backend";
 import { error, fail } from "@sveltejs/kit";
-import type { Actions, PageServerLoad } from "./$types";
-import type { Comment, Post, ReactionType } from "$lib/types";
 import { z } from "zod";
-import { reactionTypeSchema } from "$lib/schemas";
+import { fetchBackend } from "$lib/backend";
+import { reactionForSchema, reactionTypeSchema } from "$lib/schemas";
+import type { Comment, Post, ReactionType } from "$lib/types";
+import type { Actions, PageServerLoad } from "./$types";
 
 const postIdSchema = z
   .number({ coerce: true, message: "Post ID is not a number!" })
@@ -21,7 +21,7 @@ const commentSchema = z.object({
 });
 
 const reactionSchema = z.object({
-  for_type: z.union([z.literal("post"), z.literal("comment")], { message: "Reaction must be for a post or a comment!" }),
+  for_type: reactionForSchema,
   post_id: postIdSchema,
   reaction_type: reactionTypeSchema,
 });

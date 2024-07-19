@@ -39,10 +39,19 @@ export const fetchBackend = async <T>(url: `/${string}`, { authz, cookies, fetch
       return { ok: false, status: 401, error: "You are unauthorized to make this request." };
     }
   }
-  const res = await fetch(`${BACKEND_URL}${url}`, {
-    ...init,
-    headers,
-  });
+  let res: Response;
+  try {
+    res = await fetch(`${BACKEND_URL}${url}`, {
+      ...init,
+      headers,
+    });
+  } catch (err) {
+    console.log(err);
+    if (err instanceof Error && err.name === "TimeoutError") {
+      return { ok: false, status: 500, error: "Server is currently under heavy load. Sorry for the inconvenience." };
+    }
+    return { ok: false, status: 500, error: "Internal Server Error" };
+  }
   if (res.status >= 300 && res.status <= 308 && res.headers.has("Location")) {
     redirect(res.status, new URL(res.headers.get("Location")!));
   }

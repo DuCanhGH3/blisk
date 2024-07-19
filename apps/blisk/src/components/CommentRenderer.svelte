@@ -18,7 +18,7 @@
   const { comment, username }: CommentProps = $props();
 
   let currentReaction = $state<ReactionType | null>(comment.user_reaction);
-
+  let replies = $state(comment.replies ?? []);
   let reactionBar = $state<HTMLDetailsElement | null>(null);
 
   const rendererButtonAttributes = {
@@ -34,7 +34,7 @@
   <div class="flex flex-row items-center gap-2">
     <img src="/no-avatar.webp" class="border-border-light dark:border-border-dark size-10 select-none rounded-full border shadow-lg" alt="" />
     <span class="flex flex-col gap-1">
-      <a href="/users/{comment.author_name}" class="link sm text-sm">{comment.author_name}</a>
+      <a href="/users/{comment.author_name}" class="link sm text-sm">{comment.author_name} {comment.id}</a>
       <span class="text-comment text-xs">Just now</span>
     </span>
   </div>
@@ -83,11 +83,11 @@
 >
   <input class="peer sr-only" type="checkbox" checked={false} id="comment-toggle-{comment.id}" />
   <div class="hidden pt-3 peer-checked:block">
-    <CommentForm parentId={comment.id} updateComments={(newComment) => comment.replies.unshift(newComment)} />
+    <CommentForm parentId={comment.id} updateComments={(newComment) => replies.unshift(newComment)} />
   </div>
-  {#if comment.replies && comment.replies.length > 0}
+  {#if replies && replies.length > 0}
     <ul class="flex flex-col gap-3 pt-3">
-      {#each comment.replies as reply}
+      {#each replies as reply(reply.id)}
         <li>
           <svelte:self comment={reply} {username} />
         </li>

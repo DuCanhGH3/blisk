@@ -54,9 +54,6 @@ export const actions: Actions = {
       cookies.set("token", res.data.id_token, cookiesOptions);
     } catch (err) {
       console.error(err);
-      if (err instanceof Error && err.name === "TimeoutError") {
-        return fail(500, { error: "Server is currently under heavy load." });
-      }
       return fail(500, { error: "Internal Server Error" });
     }
   },
