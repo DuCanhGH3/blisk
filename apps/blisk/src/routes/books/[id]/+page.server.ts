@@ -1,11 +1,17 @@
-import { fetchBackend } from "$lib/backend";
+import { createReaction, fetchBackend } from "$lib/backend";
 import { error } from "@sveltejs/kit";
-import type { PageServerLoad } from "./$types";
+import type { Actions, PageServerLoad } from "./$types";
 import type { Book } from "$lib/types";
+
+export const actions: Actions = {
+  async react({ cookies, fetch, request, setHeaders }) {
+    return await createReaction(await request.formData(), fetch, cookies, setHeaders);
+  },
+};
 
 export const load: PageServerLoad = async ({ cookies, params, setHeaders }) => {
   const res = await fetchBackend<Book>(`/books?book_id=${params.id}`, {
-    authz: false,
+    authz: "optional",
     cookies,
     fetch,
     setHeaders,

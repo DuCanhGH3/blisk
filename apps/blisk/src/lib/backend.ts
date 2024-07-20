@@ -1,13 +1,7 @@
 import { BACKEND_URL } from "$env/static/private";
-import { redirect, type Cookies } from "@sveltejs/kit";
-import { z } from "zod";
-
-export const errorSchema = z.object({
-  error: z.string().min(1, "`error` is unexpectedly empty."),
-});
-export const successSchema = z.object({
-  message: z.string().min(1, "`message` is unexpectedly empty."),
-});
+import { fail, redirect, type Cookies } from "@sveltejs/kit";
+import type { ReactionType, SetHeaders } from "./types";
+import { errorSchema, reactionSchema } from "./schemas";
 
 export type Authz = boolean | "optional";
 
@@ -15,7 +9,7 @@ export interface BackendInit extends RequestInit {
   authz: Authz;
   cookies: Cookies;
   fetch: typeof globalThis.fetch;
-  setHeaders(headers: Record<string, string>): void;
+  setHeaders: SetHeaders;
 }
 
 export type BackendResult<T> = { ok: true; data: T } | { ok: false; status: number; error: string };
@@ -70,4 +64,32 @@ export const fetchBackend = async <T>(url: `/${string}`, { authz, cookies, fetch
     return { ok: false, status: res.status, error: validatedJson.data.error };
   }
   return { ok: true, data: await res.json() };
+};
+
+export const createReaction = async (formData: FormData, fetch: typeof globalThis.fetch, cookies: Cookies, setHeaders: SetHeaders) => {
+  const data = await reactionSchema.spa({
+    post_id: formData.get("forId"),
+    for_type: formData.get("forType"),
+    reaction_type: formData.get("reactionType"),
+  });
+
+  if (!data.success) {
+    return fail(400, { validationError: data.error.flatten().fieldErrors });
+  }
+
+  const res = await fetchBackend<{ reaction_type: ReactionType }>("/reactions", {
+    authz: true,
+    cookies,
+    fetch,
+    setHeaders,
+    method: "POST",
+    body: JSON.stringify(data.data),
+    signal: AbortSignal.timeout(10000),
+  });
+
+  if (!res.ok) {
+    return fail(res.status, { error: res.error });
+  }
+
+  return { reactionType: res.data.reaction_type };
 };

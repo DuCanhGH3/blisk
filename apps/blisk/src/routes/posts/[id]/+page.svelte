@@ -17,12 +17,14 @@
       {data.post.content}
     </div>
   </article>
-  <CommentForm parentId={null} updateComments={(newComment) => comments.unshift(newComment)} />
-  <ul class="flex flex-col gap-3" id="comments">
-    {#each comments as comment (comment.id)}
-      <li in:fly={{ duration: 100, easing: quintOut, y: -25 }}>
-        <CommentRenderer {comment} username={data.user?.name} />
-      </li>
-    {/each}
-  </ul>
+  <div id="comments" class="flex flex-col gap-3">
+    <CommentForm parentId={null} updateComments={(newComment) => comments.unshift(newComment)} />
+    <ul class="flex flex-col gap-3">
+      {#each comments as comment (comment.id)}
+        <li in:fly={{ duration: 100, easing: quintOut, y: -25 }}>
+          <CommentRenderer {comment} username={data.user?.name} />
+        </li>
+      {/each}
+    </ul>
+  </div>
 </div>

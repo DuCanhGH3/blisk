@@ -29,6 +29,7 @@ export interface Post {
   content: string;
   author_name: string;
   reaction: BookReaction;
+  user_reaction: ReactionType | null;
 }
 
 export interface Comment {
@@ -48,3 +49,5 @@ export interface Book {
 export type ReactionFor = z.infer<typeof reactionForSchema>;
 
 export type ReactionType = z.infer<typeof reactionTypeSchema>;
+
+export type SetHeaders = (headers: Record<string, string>) => void;

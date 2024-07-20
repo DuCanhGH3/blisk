@@ -1,17 +1,30 @@
 <script lang="ts" generics="T extends keyof SvelteHTMLElements">
+  import { clsx } from "$lib/clsx";
   import type { SvelteHTMLElements } from "svelte/elements";
 
   type PostRendererButtonProps = Omit<SvelteHTMLElements[T], "class"> & {
     as: T;
+    hoverable?: boolean;
+    customColors?: string;
   };
 
-  const { as, children, ...props }: PostRendererButtonProps = $props();
+  const {
+    as,
+    hoverable = true,
+    customColors = clsx("dark:bg-neutral-915 bg-white", hoverable && "hover:bg-neutral-250 dark:hover:bg-neutral-800"),
+    children,
+    ...props
+  }: PostRendererButtonProps = $props();
 </script>
 
 <!-- We hard-code this element's height to 40px so that its radii is predictable (20px) -->
 <svelte:element
   this={as}
-  class="border-border-light dark:border-border-dark dark:bg-neutral-915 flex h-10 flex-1 select-none items-center justify-center gap-1 rounded-full border bg-white p-1 text-base shadow-md"
+  class={clsx(
+    "select-none items-center justify-center gap-1 rounded-full p-1 text-base shadow-md",
+    "border-border-light dark:border-border-dark flex h-10 flex-1 border transition-colors duration-100",
+    customColors
+  )}
   {...props}
 >
   {#if children}

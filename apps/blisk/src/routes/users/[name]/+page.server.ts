@@ -1,6 +1,6 @@
-import { fetchBackend } from "$lib/backend";
+import { createReaction, fetchBackend } from "$lib/backend";
 import { error } from "@sveltejs/kit";
-import type { PageServerLoad } from "./$types";
+import type { Actions, PageServerLoad } from "./$types";
 import type { Post } from "$lib/types";
 
 interface LoadData {
@@ -8,9 +8,15 @@ interface LoadData {
   posts: Post[];
 }
 
+export const actions: Actions = {
+  async react({ cookies, fetch, request, setHeaders }) {
+    return await createReaction(await request.formData(), fetch, cookies, setHeaders);
+  },
+};
+
 export const load: PageServerLoad = async ({ cookies, fetch, params, setHeaders }) => {
   const user = await fetchBackend<LoadData>(`/users?username=${params.name}`, {
-    authz: false,
+    authz: "optional",
     cookies,
     fetch,
     setHeaders,

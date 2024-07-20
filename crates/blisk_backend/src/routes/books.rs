@@ -1,4 +1,4 @@
-use super::posts::Post;
+use super::{auth::OptionalUserClaims, posts::Post};
 use crate::{
     app::AppState,
     utils::{
@@ -44,7 +44,7 @@ pub async fn create(
     ))
 }
 
-#[derive(serde::Serialize)]
+#[derive(serde::Serialize, sqlx::FromRow)]
 struct Book {
     title: String,
     summary: String,
@@ -58,49 +58,50 @@ pub struct ReadQuery {
 
 pub async fn read(
     State(AppState { pool, .. }): State<AppState>,
+    OptionalUserClaims(claims): OptionalUserClaims,
     Query(ReadQuery { book_id }): Query<ReadQuery>,
 ) -> Result<Response, AppError> {
+    let uid = claims.as_ref().map(|claims| claims.sub);
     if let Some(bid) = book_id {
         let mut transaction = pool.begin().await?;
-        let book = sqlx::query_as!(Book, r#"
+        let book: Book = sqlx::query_as(r#"
             SELECT 
                 b.title,
                 b.summary,
-                COALESCE(JSON_AGG(rv) FILTER (WHERE rv IS NOT NULL), '[]'::JSON) AS "reviews!: sqlx::types::Json<Vec<Post>>" 
-            FROM books b
-            LEFT JOIN LATERAL (
-                SELECT rv.id, rv.title, rv.content, rvu.name as author_name, rv.reaction
-                FROM posts rv
-                JOIN users rvu ON rv.author_id = rvu.id
-                WHERE rv.book_id = b.id
-                ORDER BY rv.id DESC
-                LIMIT 2
-            ) rv ON TRUE
+                COALESCE(JSONB_AGG(rv), '[]'::JSONB) AS reviews
+            FROM books b, LATERAL (
+                SELECT * FROM fetch_posts(
+                    request_uid => $2,
+                    request_limit => 5,
+                    request_offset => 0
+                )
+            ) rv
             WHERE b.id = $1
             GROUP BY b.id
-        "#, &bid)
+        "#)
+        .bind(&bid)
+        .bind(&uid)
         .fetch_one(&mut *transaction)
         .await?;
         transaction.commit().await?;
         Ok(response(StatusCode::OK, None, AppJson(book)))
     } else {
         let mut transaction = pool.begin().await?;
-        let books_list = sqlx::query_as!(Book, r#"
+        let books_list: Vec<Book> = sqlx::query_as(r#"
             SELECT 
                 b.title,
                 b.summary,
-                COALESCE(JSON_AGG(rv) FILTER (WHERE rv IS NOT NULL), '[]'::JSON) AS "reviews!: sqlx::types::Json<Vec<Post>>" 
-            FROM books b
-            LEFT JOIN LATERAL (
-                SELECT rv.id, rv.title, rv.content, rvu.name as author_name, rv.reaction
-                FROM posts rv
-                JOIN users rvu ON rv.author_id = rvu.id
-                WHERE rv.book_id = b.id
-                ORDER BY rv.id DESC
-                LIMIT 2
-            ) rv ON TRUE
+                COALESCE(JSONB_AGG(rv), '[]'::JSONB) AS reviews
+            FROM books b, LATERAL (
+                SELECT * FROM fetch_posts(
+                    request_uid => $1,
+                    request_limit => 5,
+                    request_offset => 0
+                )
+            ) rv
             GROUP BY b.id
         "#)
+        .bind(&uid)
         .fetch_all(&mut *transaction)
         .await?;
         transaction.commit().await?;

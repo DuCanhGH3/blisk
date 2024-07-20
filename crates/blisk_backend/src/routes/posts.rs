@@ -1,6 +1,7 @@
 use super::{
     auth::{OptionalUserClaims, UserClaims},
     comments::{self, Comment},
+    reactions::PostReaction,
 };
 use crate::{
     app::AppState,
@@ -25,13 +26,14 @@ pub enum Reaction {
     Dislike,
 }
 
-#[derive(serde::Serialize, serde::Deserialize)]
+#[derive(serde::Serialize, serde::Deserialize, sqlx::FromRow)]
 pub struct Post {
     pub id: i64,
     pub title: String,
     pub content: String,
     pub author_name: String,
     pub reaction: Reaction,
+    pub user_reaction: Option<PostReaction>,
 }
 
 #[derive(serde::Deserialize)]
@@ -92,20 +94,24 @@ pub async fn read(
     claims: OptionalUserClaims,
     Query(ReadQuery { post_id }): Query<ReadQuery>,
 ) -> Result<Response, AppError> {
+    let uid = claims.0.as_ref().map(|claims| claims.sub);
     let mut transaction = pool.begin().await?;
-    let post = sqlx::query_as!(
-        Post,
+    let post: Post = sqlx::query_as(
         r#"SELECT
             p.id,
             p.title,
             p.content,
             u.name as author_name,
-            p.reaction AS "reaction!: Reaction"
+            p.reaction AS reaction,
+            ucr.type AS user_reaction
         FROM posts p
         JOIN users u ON p.author_id = u.id
+        LEFT JOIN post_reactions ucr
+        ON ucr.post_id = $1 AND ucr.user_id = $2
         WHERE p.id = $1"#,
-        &post_id,
     )
+    .bind(&post_id)
+    .bind(&uid)
     .fetch_one(&mut *transaction)
     .await
     .map_err(|e| match e {

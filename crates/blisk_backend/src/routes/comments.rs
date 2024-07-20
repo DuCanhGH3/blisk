@@ -42,9 +42,10 @@ pub async fn read_base<'c>(
             ucr.type as user_reaction,
             fetch_replies(
                 request_uid => $4,
+                request_pid => $1,
                 parent_id => c.id,
                 parent_path => c.path,
-                current_level => 5
+                current_level => 4
             ) AS children
         FROM comments c
         JOIN users u
