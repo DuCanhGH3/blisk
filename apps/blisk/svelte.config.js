@@ -18,7 +18,7 @@ const config = {
     },
     csp: {
       directives: {
-        "script-src": ["self", "strict-dynamic", "sha256-DjP3mqXEHW08gJZjCdT8u4O2YkjsRGagw6vMJOyKiN4="],
+        "script-src": ["self", "wasm-unsafe-eval", "strict-dynamic", "sha256-DjP3mqXEHW08gJZjCdT8u4O2YkjsRGagw6vMJOyKiN4="],
       },
     },
     inlineStyleThreshold: 2048,

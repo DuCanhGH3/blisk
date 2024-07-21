@@ -13,6 +13,15 @@
 }
 
 @layer base {
+  html[data-theme="dark"] .shiki,
+  html[data-theme="dark"] .shiki span:not([class^="twoslash-"]) {
+    color: var(--shiki-dark) !important;
+    background-color: var(--shiki-dark-bg) !important;
+    /* Optional, if you also want font styles */
+    font-style: var(--shiki-dark-font-style) !important;
+    font-weight: var(--shiki-dark-font-weight) !important;
+    text-decoration: var(--shiki-dark-text-decoration) !important;
+  }
   * {
     @apply relative box-border min-w-0 border-solid;
   }
@@ -288,7 +297,7 @@
     @apply bg-accent-light dark:bg-accent-dark [&:not(:disabled)]:hover:bg-accent-light/80 dark:[&:not(:disabled)]:hover:bg-accent-dark/80 text-white disabled:bg-gray-100 disabled:text-neutral-700 dark:text-black dark:disabled:bg-neutral-900 dark:disabled:text-neutral-400;
   }
   .button.light {
-    @apply text-accent-light dark:text-accent-dark dark:bg-neutral-915 bg-white [&:not(:disabled)]:hover:bg-neutral-150 dark:[&:not(:disabled)]:hover:bg-neutral-800;
+    @apply text-accent-light dark:text-accent-dark dark:bg-neutral-915 [&:not(:disabled)]:hover:bg-neutral-150 bg-white dark:[&:not(:disabled)]:hover:bg-neutral-800;
   }
   .input:placeholder-shown:focus + .label {
     @apply top-0.5 translate-x-0 translate-y-0 text-xs text-neutral-700 dark:text-gray-300;
@@ -312,7 +321,7 @@
     @apply text-[#a51a12] dark:text-red-400;
   }
   .react-button {
-    @apply size-9 flex items-center justify-center transition-all duration-200 max-w-24 relative;
+    @apply relative flex size-9 max-w-24 items-center justify-center transition-all duration-200;
     flex: calc(0.5 + var(--lerp, 0) * 1.5);
   }
   :is(.react-button:hover, .react-button:active, .react-button:focus-visible) {
@@ -332,7 +341,7 @@
   }
   .react-button:has(+ .react-button + .react-button + .react-button + :is(.react-button:hover, .react-button:active, .react-button:focus-visible)),
   :is(.react-button:hover, .react-button:active, .react-button:focus-visible) + .react-button + .react-button + .react-button + .react-button {
-    --lerp:  calc(sin(10deg));
+    --lerp: calc(sin(10deg));
   }
   html[data-theme="light"] .visible-dark,
   html[data-theme="dark"] .visible-light {

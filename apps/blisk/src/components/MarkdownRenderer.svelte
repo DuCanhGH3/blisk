@@ -8,7 +8,7 @@
 
   const { source }: MarkdownRendererProps = $props();
 
-  const tokens = lexer(source);
+  const tokens = $derived(lexer(source));
 </script>
 
 <Parser {tokens} />

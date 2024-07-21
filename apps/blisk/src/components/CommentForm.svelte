@@ -41,6 +41,7 @@
     return async ({ result, update }) => {
       if (result.type === "success" && comment !== null && typeof result.data?.id === "number") {
         comment.id = result.data.id;
+        await update({ reset: true, invalidateAll: false });
       } else {
         await update();
       }
