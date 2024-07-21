@@ -9,6 +9,7 @@
   import CommentForm from "./CommentForm.svelte";
   import type { IconProps } from "./icons/types";
   import { reactionRender } from "./renderer-constants";
+  import MarkdownRenderer from "./MarkdownRenderer.svelte";
 
   interface CommentProps {
     comment: Comment;
@@ -17,6 +18,7 @@
 
   const { comment, username }: CommentProps = $props();
 
+  let previousReaction: ReactionType | null = null;
   let currentReaction = $state<ReactionType | null>(comment.user_reaction);
   let replies = $state(comment.children ?? []);
   let reactionBar = $state<HTMLDetailsElement | null>(null);
@@ -38,7 +40,7 @@
       <span class="text-comment text-xs">Just now</span>
     </span>
   </div>
-  <div>{comment.content}</div>
+  <MarkdownRenderer source={comment.content} />
   <div class="-m-1 mt-0 flex w-fit flex-row gap-2">
     <details bind:this={reactionBar} class="relative">
       {#if currentReaction === null}
@@ -59,12 +61,16 @@
         forId={comment.id}
         forType="comment"
         updateReaction={(reaction) => {
+          previousReaction = currentReaction;
           currentReaction = reaction;
           if (reactionBar) {
             reactionBar.open = false;
           }
         }}
-        revertReaction={() => (currentReaction = null)}
+        revertReaction={() => {
+          currentReaction = previousReaction;
+          previousReaction = null;
+        }}
       />
     </details>
     <CommentRendererButton as="label" id="comment-toggle-label-{comment.id}" for="comment-toggle-{comment.id}">
@@ -87,7 +93,7 @@
   </div>
   {#if replies && replies.length > 0}
     <ul class="flex flex-col gap-3 pt-3">
-      {#each replies as reply(reply.id)}
+      {#each replies as reply (reply.id)}
         <li>
           <svelte:self comment={reply} {username} />
         </li>

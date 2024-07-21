@@ -12,16 +12,7 @@ export interface User {
   role: string;
 }
 
-export type BookReaction =
-  | "overwhelmingly_positive"
-  | "very_positive"
-  | "positive"
-  | "mostly_positive"
-  | "mixed"
-  | "mostly_negative"
-  | "negative"
-  | "very_negative"
-  | "overwhelmingly_negative";
+export type BookReaction = "like" | "dislike";
 
 export interface Post {
   id: number;

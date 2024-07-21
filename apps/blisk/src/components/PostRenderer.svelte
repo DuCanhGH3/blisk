@@ -14,6 +14,7 @@
 
   const { post }: PostRendererProps = $props();
 
+  let previousReaction: ReactionType | null = null;
   let currentReaction = $state<ReactionType | null>(post.user_reaction);
   let reactionBar = $state<HTMLDetailsElement | null>(null);
 
@@ -46,7 +47,7 @@
         {@const { icon, label, colors } = reactionRender[currentReaction]}
         <PostRendererButton customColors={colors} as="summary" aria-describedby="reaction-bar-{post.id}">
           <svelte:component this={icon} animatable={false} {...rendererButtonAttributes} />
-          <span class="text-black dark:text-white">{label}</span>
+          <span class="mb-[-1px] text-black dark:text-white">{label}</span>
         </PostRendererButton>
       {/if}
       <ReactionBar
@@ -56,12 +57,16 @@
         forId={post.id}
         forType="post"
         updateReaction={(reaction) => {
+          previousReaction = currentReaction;
           currentReaction = reaction;
           if (reactionBar) {
             reactionBar.open = false;
           }
         }}
-        revertReaction={() => (currentReaction = null)}
+        revertReaction={() => {
+          currentReaction = previousReaction;
+          previousReaction = null;
+        }}
       />
     </details>
     <PostRendererButton as="a" href="/posts/{post.id}#comments">
