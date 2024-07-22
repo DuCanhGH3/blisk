@@ -5,6 +5,6 @@
   const { tokens }: RendererProps<Tokens.Paragraph> = $props();
 </script>
 
-<p>
+<p class="pb-4">
   <Parser {tokens} />
 </p>

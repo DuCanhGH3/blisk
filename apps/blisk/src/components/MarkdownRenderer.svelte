@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { lexer } from "marked";
+  import { markdown } from "./markdown/index.js";
   import Parser from "./markdown/Parser.svelte";
 
   interface MarkdownRendererProps {
@@ -8,7 +8,7 @@
 
   const { source }: MarkdownRendererProps = $props();
 
-  const tokens = $derived(lexer(source));
+  const tokens = $derived(markdown.lexer(source));
 </script>
 
 <Parser {tokens} />

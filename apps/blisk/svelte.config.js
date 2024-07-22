@@ -18,7 +18,13 @@ const config = {
     },
     csp: {
       directives: {
+        "frame-src": ["self"],
+        "connect-src": ["self"],
+        "font-src": ["self"],
+        "img-src": ["self", "https://wsrv.nl"],
+        "object-src": ["self"],
         "script-src": ["self", "wasm-unsafe-eval", "strict-dynamic", "sha256-DjP3mqXEHW08gJZjCdT8u4O2YkjsRGagw6vMJOyKiN4="],
+        "style-src": ["self", "https:", "unsafe-inline"],
       },
     },
     inlineStyleThreshold: 2048,

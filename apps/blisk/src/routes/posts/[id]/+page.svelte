@@ -3,6 +3,7 @@
   import CommentForm from "$components/CommentForm.svelte";
   import { fly } from "svelte/transition";
   import { quintOut } from "svelte/easing";
+  import MarkdownRenderer from "$components/MarkdownRenderer.svelte";
 
   const { data } = $props();
 
@@ -14,14 +15,14 @@
     <h1 class="order-2">{data.post.title}</h1>
     <h2 class="text-comment order-1 text-xl">{data.post.author_name}</h2>
     <div class="order-3 mt-4">
-      {data.post.content}
+      <MarkdownRenderer source={data.post.content} />
     </div>
   </article>
   <div id="comments" class="flex flex-col gap-3">
     <CommentForm parentId={null} updateComments={(newComment) => comments.unshift(newComment)} />
     <ul class="flex flex-col gap-3">
       {#each comments as comment (comment.id)}
-        <li in:fly={{ duration: 100, easing: quintOut, y: -25 }}>
+        <li in:fly={{ duration: 100, easing: quintOut, y: -50 }}>
           <CommentRenderer {comment} username={data.user?.name} />
         </li>
       {/each}
