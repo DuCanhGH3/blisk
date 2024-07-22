@@ -8,7 +8,12 @@
 
 <div class="mx-auto flex w-full flex-col gap-8 p-4 md:p-10">
   <div>
-    <img src="/AGI2.webp" alt="" class="h-48 w-full select-none rounded-3xl object-cover shadow-lg transition-all duration-150 md:h-60 lg:h-96" />
+    <img
+      src="/AGI2.webp"
+      alt=""
+      height={384}
+      class="h-48 w-full select-none rounded-3xl object-cover shadow-lg transition-all duration-150 md:h-60 lg:h-96"
+    />
     <div class="flex flex-row items-center gap-8 px-8">
       <img
         src="/no-avatar.webp"

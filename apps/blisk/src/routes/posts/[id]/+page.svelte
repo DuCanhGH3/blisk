@@ -9,8 +9,8 @@
   let comments = $state(data.comments);
 </script>
 
-<div class="flex w-full max-w-6xl flex-col gap-8 p-2 md:py-8">
-  <article class="flex flex-col gap-8">
+<article class="flex w-full max-w-6xl flex-col gap-8 p-2 md:py-8">
+  <div class="flex flex-col gap-8">
     <h1 class="-order-1">{data.post.title}</h1>
     <div class="-order-2 flex flex-row items-center gap-4 font-semibold leading-10 tracking-tight">
       <img src="/no-avatar.webp" class="border-border-light dark:border-border-dark size-12 select-none rounded-full border shadow-lg" alt="" />
@@ -26,15 +26,11 @@
       </div>
     </div>
     <MarkdownRenderer source={data.post.content} />
-  </article>
-  <div id="comments" class="flex flex-col gap-3">
-    <CommentForm parentId={null} updateComments={(newComment) => comments.unshift(newComment)} />
-    <ul class="flex flex-col gap-3">
-      {#each comments as comment (comment.id)}
-        <li>
-          <CommentRenderer {comment} username={data.user?.name} />
-        </li>
-      {/each}
-    </ul>
   </div>
-</div>
+  <section id="comments" class="flex flex-col gap-3">
+    <CommentForm parentId={null} updateComments={(newComment) => comments.unshift(newComment)} />
+    {#each comments as comment (comment.id)}
+      <CommentRenderer {comment} username={data.user?.name} />
+    {/each}
+  </section>
+</article>

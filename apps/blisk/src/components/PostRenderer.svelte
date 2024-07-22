@@ -4,6 +4,7 @@
   import Share from "./icons/Share.svelte";
   import ThumbUp from "./icons/ThumbUp.svelte";
   import type { IconProps } from "./icons/types";
+  import MarkdownRenderer from "./MarkdownRenderer.svelte";
   import PostRendererButton from "./PostRendererButton.svelte";
   import ReactionBar from "./ReactionBar.svelte";
   import { reactionRender } from "./renderer-constants";
@@ -28,16 +29,16 @@
 </script>
 
 <article class="box flex flex-col gap-3 rounded-[31px] p-4 shadow-md">
-  <h3 class="order-2">{post.title}</h3>
-  <h4 class="order-1 flex flex-row gap-2">
+  <h3 class="-order-1">{post.title}</h3>
+  <h4 class="-order-2 flex flex-row gap-2">
     <img src="/no-avatar.webp" class="border-border-light dark:border-border-dark size-10 select-none rounded-full border shadow-lg" alt="" />
     <span class="flex flex-col gap-1">
       {post.author_name}
       <span class="text-comment text-sm">Just now</span>
     </span>
   </h4>
-  <div class="order-3 text-base font-normal">{post.content}</div>
-  <div class="order-4 -m-1 flex flex-row gap-3">
+  <MarkdownRenderer source={post.content} />
+  <div class="order-1 -m-1 flex flex-row gap-3">
     <details bind:this={reactionBar} class="relative flex-1">
       {#if !currentReaction}
         <PostRendererButton as="summary" aria-describedby="reaction-bar-{post.id}">
