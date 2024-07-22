@@ -25,7 +25,7 @@
       className
     )}
     aria-invalid={!!errorText}
-    aria-describedby={errorTextId}
+    aria-describedby={errorText ? errorTextId : undefined}
     placeholder=" "
     oninput={(ev) => (ev.currentTarget.style.height = `${Math.max(44, ev.currentTarget.offsetHeight, ev.currentTarget.scrollHeight)}px`)}
     use:combineActions={actions}
