@@ -5,6 +5,6 @@
   const { tokens }: RendererProps<Tokens.Blockquote> = $props();
 </script>
 
-<blockquote class="text-comment border-neutral-600 dark:border-neutral-400 border-l-2 px-4">
+<blockquote class="text-comment border-l-2 border-neutral-600 px-4 mb-4 dark:border-neutral-400 [&>:first-child]:!mt-0 [&>:last-child]:!mb-0">
   <Parser {tokens} />
 </blockquote>
