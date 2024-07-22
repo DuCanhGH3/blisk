@@ -48,16 +48,22 @@
     @apply text-balance break-words;
   }
   h1 {
-    @apply text-4xl font-semibold leading-10 tracking-tight;
+    @apply text-[2.625rem] font-semibold leading-10 tracking-tight;
   }
   h2 {
-    @apply text-3xl font-semibold leading-10 tracking-tight;
+    @apply text-4xl font-semibold leading-10 tracking-tight;
   }
   h3 {
-    @apply text-2xl font-semibold leading-7 tracking-tight;
+    @apply text-3xl font-semibold leading-7 tracking-tight;
   }
   h4 {
+    @apply text-2xl font-medium leading-5 tracking-tight;
+  }
+  h5 {
     @apply text-xl font-medium leading-5 tracking-tight;
+  }
+  h6 {
+    @apply text-lg font-normal leading-5 tracking-tight;
   }
   details > summary {
     @apply cursor-pointer select-none list-none;

@@ -11,4 +11,6 @@
   const tokens = $derived(markdown.lexer(source));
 </script>
 
-<Parser {tokens} />
+<div class="[&>:first-child]:!mt-0 [&>:last-child]:!mb-0">
+  <Parser {tokens} />
+</div>
