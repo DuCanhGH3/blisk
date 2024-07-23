@@ -6,9 +6,7 @@
 </script>
 
 <div class="w-full overflow-x-auto">
-  <table
-    class="[&_:is(td,th)]:border-border-light dark:[&_:is(td,th)]:border-border-dark table-auto border-collapse border-spacing-4 [&_:is(td,th)]:border"
-  >
+  <table class="table-auto border-collapse border-spacing-4">
     <thead>
       <tr>
         {#each header as headerItem}
