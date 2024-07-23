@@ -6,11 +6,11 @@
 </script>
 
 {#if header}
-  <th>
+  <th class="dark:bg-neutral-915 bg-white transition-colors duration-100 px-2 py-1">
     <Parser {tokens} />
   </th>
 {:else}
-  <td>
+  <td class="dark:bg-neutral-915 bg-white transition-colors duration-100 px-2 py-1">
     <Parser {tokens} />
   </td>
 {/if}

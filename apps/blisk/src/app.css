@@ -47,22 +47,22 @@
   blockquote {
     @apply text-balance break-words;
   }
-  h1 {
+  h1, .h1 {
     @apply text-[2.625rem] font-semibold leading-10 tracking-tight;
   }
-  h2 {
+  h2, .h2 {
     @apply text-4xl font-semibold leading-10 tracking-tight;
   }
-  h3 {
+  h3, .h3 {
     @apply text-3xl font-semibold leading-7 tracking-tight;
   }
-  h4 {
+  h4, .h4 {
     @apply text-2xl font-medium leading-5 tracking-tight;
   }
-  h5 {
+  h5, .h5 {
     @apply text-xl font-medium leading-5 tracking-tight;
   }
-  h6 {
+  h6, .h6 {
     @apply text-lg font-normal leading-5 tracking-tight;
   }
   details > summary {

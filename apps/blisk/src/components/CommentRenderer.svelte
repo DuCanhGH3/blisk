@@ -33,16 +33,17 @@
 </script>
 
 <article>
+  <h3 class="sr-only">A comment from user {comment.author_name}</h3>
   <div class="box flex flex-col gap-2 rounded-[21px] p-2.5 shadow-md">
     <div class="flex flex-row items-center gap-2">
       <img src="/no-avatar.webp" class="border-border-light dark:border-border-dark size-10 select-none rounded-full border shadow-lg" alt="" />
       <span class="flex flex-col gap-1">
-        <a href="/users/{comment.author_name}" class="link sm text-sm">{comment.author_name} {comment.id}</a>
+        <a href="/users/{comment.author_name}" class="link sm text-sm">{comment.author_name}</a>
         <span class="text-comment text-xs">Just now</span>
       </span>
     </div>
-    <MarkdownRenderer source={comment.content} />
-    <div class="-m-1 mt-0 flex w-fit flex-row gap-2">
+    <MarkdownRenderer source={comment.content} startingHeading={4} />
+    <div class="-m-1 mt-0 flex w-fit flex-row flex-wrap gap-2">
       <details bind:this={reactionBar} class="relative">
         {#if currentReaction === null}
           <CommentRendererButton as="summary" aria-describedby="reaction-bar-{comment.id}">

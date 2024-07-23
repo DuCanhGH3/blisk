@@ -56,11 +56,11 @@
 <input bind:files {id} class="sr-only" type="file" {accept} {multiple} aria-invalid={!!errorText} aria-describedby={errorTextId} {...props} />
 {#if !!errorText && errorTextId}
   {#if typeof errorText === "string"}
-    <p class="text-error" id={errorTextId}>{errorText}</p>
+    <p class="text-error-light dark:text-error-dark" id={errorTextId}>{errorText}</p>
   {:else}
     <div id={errorTextId} class="flex flex-col gap-2">
       {#each errorText as error}
-        <p class="text-error">{error}</p>
+        <p class="text-error-light dark:text-error-dark">{error}</p>
       {/each}
     </div>
   {/if}

@@ -40,7 +40,7 @@
       <button class="button filled" disabled={isLoading} type="submit">Login</button>
       <a class="link" href="/register">New? Register a new account!</a>
       {#if form?.error}
-        <p class="text-error">{form.error}</p>
+        <p class="text-error-light dark:text-error-dark">{form.error}</p>
       {/if}
     </form>
   </div>

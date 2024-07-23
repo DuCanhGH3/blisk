@@ -90,7 +90,7 @@
       {/if}
       <button class="button" type="submit" disabled={isLoading}>Post</button>
       {#if form?.error}
-        <p class="text-error">{form.error}</p>
+        <p class="text-error-light dark:text-error-dark">{form.error}</p>
       {/if}
     </form>
   </div>

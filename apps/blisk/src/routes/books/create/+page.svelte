@@ -93,7 +93,7 @@
         <button class="button !px-20 !py-3" type="submit" disabled={isLoading}>Create</button>
         <a class="button light !px-20 !py-3" href="/books">Cancel</a>
         {#if form?.error}
-          <p class="text-error">{form.error}</p>
+          <p class="text-error-light dark:text-error-dark">{form.error}</p>
         {/if}
       </div>
     </form>

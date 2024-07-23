@@ -3,6 +3,7 @@
   import Comment from "./icons/Comment.svelte";
   import Share from "./icons/Share.svelte";
   import ThumbUp from "./icons/ThumbUp.svelte";
+  import ThumbUpFilled from "./icons/ThumbUpFilled.svelte";
   import type { IconProps } from "./icons/types";
   import MarkdownRenderer from "./MarkdownRenderer.svelte";
   import PostRendererButton from "./PostRendererButton.svelte";
@@ -29,17 +30,29 @@
 </script>
 
 <article class="box flex flex-col gap-3 rounded-[31px] p-4 shadow-md">
-  <h3 class="-order-1">{post.title}</h3>
-  <h4 class="-order-2 flex flex-row gap-2">
+  <h3 class="-order-1 h1 mb-4">{post.title}</h3>
+  <div class="-order-2 flex flex-row flex-wrap gap-2 font-semibold leading-10 tracking-tight">
     <img src="/no-avatar.webp" class="border-border-light dark:border-border-dark size-10 select-none rounded-full border shadow-lg" alt="" />
-    <span class="flex flex-col gap-1">
-      {post.author_name}
-      <span class="text-comment text-sm">Just now</span>
-    </span>
-  </h4>
-  <MarkdownRenderer source={post.content} />
-  <div class="order-1 -m-1 flex flex-row gap-3">
-    <details bind:this={reactionBar} class="relative flex-1">
+    <div>
+      <div class="text-comment flex flex-row flex-wrap items-center gap-1 text-sm">
+        <a href="/users/{post.author_name}" class="link sm">{post.author_name}</a>
+        <span>•</span>
+        <div>Just now</div>
+      </div>
+      <div class="flex flex-row flex-wrap items-center gap-1 text-base">
+        {#if post.reaction === "like"}
+          <ThumbUpFilled width={20} height={20} class="fill-accent-light dark:fill-accent-dark h-auto w-5" aria-hidden tabindex={-1} />
+          <span class="text-accent-light dark:text-accent-dark">Recommended</span>
+        {:else}
+          <ThumbUpFilled width={20} height={20} class="fill-error-light dark:fill-error-dark h-auto w-5 -scale-y-100" aria-hidden tabindex={-1} />
+          <span class="text-error-light dark:text-error-dark">Not recommended</span>
+        {/if}
+      </div>
+    </div>
+  </div>
+  <MarkdownRenderer source={post.content} startingHeading={4} />
+  <div class="order-1 -m-1 flex flex-row flex-wrap gap-3">
+    <details bind:this={reactionBar} class="relative flex-grow">
       {#if !currentReaction}
         <PostRendererButton as="summary" aria-describedby="reaction-bar-{post.id}">
           <ThumbUp {...rendererButtonAttributes} /> <span class="mb-[-1px]">Like</span>
@@ -71,11 +84,11 @@
       />
     </details>
     <PostRendererButton as="a" href="/posts/{post.id}#comments">
-      <Comment width={24} height={24} class="h-6 w-auto" />
+      <Comment {...rendererButtonAttributes} />
       <span class="mb-[-1px]">Comment</span>
     </PostRendererButton>
     <PostRendererButton as="div">
-      <Share width={24} height={24} class="h-6 w-auto" />
+      <Share {...rendererButtonAttributes} />
       <span class="mb-[-1px]">Share</span>
     </PostRendererButton>
   </div>

@@ -42,3 +42,5 @@ export type ReactionFor = z.infer<typeof reactionForSchema>;
 export type ReactionType = z.infer<typeof reactionTypeSchema>;
 
 export type SetHeaders = (headers: Record<string, string>) => void;
+
+export type HeadingLevel = 1 | 2 | 3 | 4 | 5 | 6;

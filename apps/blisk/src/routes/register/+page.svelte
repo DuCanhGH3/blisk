@@ -48,7 +48,7 @@
       <button class="button filled" disabled={isLoading} type="submit">Register</button>
       <a class="link" href="/login">Already have an account?</a>
       {#if form?.error}
-        <p class="text-error">{form.error}</p>
+        <p class="text-error-light dark:text-error-dark">{form.error}</p>
       {/if}
     </form>
   </div>
