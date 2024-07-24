@@ -56,6 +56,12 @@ pub async fn create(
 }
 
 #[derive(serde::Serialize, serde::Deserialize)]
+struct BookAuthor {
+    id: i64,
+    name: String,
+}
+
+#[derive(serde::Serialize, serde::Deserialize)]
 struct BookCategory {
     id: i64,
     name: String,
@@ -65,8 +71,9 @@ struct BookCategory {
 struct Book {
     title: String,
     summary: String,
-    reviews: sqlx::types::Json<Vec<Post>>,
+    authors: sqlx::types::Json<Vec<BookAuthor>>,
     categories: sqlx::types::Json<Vec<BookCategory>>,
+    reviews: sqlx::types::Json<Vec<Post>>,
 }
 
 #[derive(serde::Deserialize)]
@@ -87,6 +94,7 @@ pub async fn read(
             r#"SELECT
                 b.title AS "title!: String",
                 b.summary AS "summary!: String",
+                b.authors AS "authors!: sqlx::types::Json<Vec<BookAuthor>>",
                 b.categories AS "categories!: sqlx::types::Json<Vec<BookCategory>>",
                 COALESCE(JSONB_AGG(rv) FILTER (WHERE rv.id IS NOT NULL), '[]'::JSONB) AS "reviews!: sqlx::types::Json<Vec<Post>>"
             FROM book_view b
@@ -99,7 +107,7 @@ pub async fn read(
                 OFFSET 0
             ) rv ON TRUE
             WHERE b.id = $1
-            GROUP BY b.id, b.title, b.summary, b.categories"#,
+            GROUP BY b.id, b.title, b.summary, b.authors, b.categories"#,
             &bid,
             &uid as &_
         )
@@ -118,6 +126,7 @@ pub async fn read(
             r#"SELECT 
                 b.title AS "title!: String",
                 b.summary AS "summary!: String",
+                b.authors AS "authors!: sqlx::types::Json<Vec<BookAuthor>>",
                 b.categories AS "categories!: sqlx::types::Json<Vec<BookCategory>>",
                 COALESCE(JSONB_AGG(rv) FILTER (WHERE rv.id IS NOT NULL), '[]'::JSONB) AS "reviews!: sqlx::types::Json<Vec<Post>>"
             FROM book_view b
@@ -129,7 +138,7 @@ pub async fn read(
                 LIMIT 5
                 OFFSET 0
             ) rv ON TRUE
-            GROUP BY b.id, b.title, b.summary, b.categories"#,
+            GROUP BY b.id, b.title, b.summary, b.authors, b.categories"#,
             &uid as &_
         )
         .fetch_all(&mut *transaction)

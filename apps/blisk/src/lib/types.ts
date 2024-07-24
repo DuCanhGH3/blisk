@@ -31,6 +31,11 @@ export interface Comment {
   children: Comment[];
 }
 
+export interface BookAuthor {
+  id: number;
+  name: string;
+}
+
 export interface BookCategory {
   id: number;
   name: string;
@@ -39,8 +44,9 @@ export interface BookCategory {
 export interface Book {
   title: string;
   summary: string;
-  reviews: Post[];
+  authors: BookAuthor[];
   categories: BookCategory[];
+  reviews: Post[];
 }
 
 export type ReactionFor = z.infer<typeof reactionForSchema>;
