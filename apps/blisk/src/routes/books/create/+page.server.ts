@@ -24,7 +24,10 @@ export const actions: Actions = {
       fetch,
       setHeaders,
       method: "POST",
-      body: formData,
+      body: JSON.stringify({
+        ...data.data,
+        categories: [1, 2, 3],
+      }),
     });
     if (!backendResponse.ok) {
       return fail(backendResponse.status, { error: backendResponse.error });

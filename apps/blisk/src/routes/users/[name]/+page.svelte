@@ -26,8 +26,8 @@
       </h1>
     </div>
   </div>
-  <div class="flex w-full flex-col gap-4 lg:flex-row">
-    <div class="flex flex-[2_2_0] flex-col gap-4">
+  <div class="flex w-full flex-col gap-4 lg:flex-row-reverse">
+    <div class="sticky top-4 flex flex-[2_2_0] flex-col gap-4">
       <h2>About {data.data.name}</h2>
       <div class="box md">here comes a quote</div>
       <div class="box md">

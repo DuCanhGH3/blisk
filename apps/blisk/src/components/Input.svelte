@@ -3,8 +3,9 @@
   import type { HTMLInputAttributes } from "svelte/elements";
   import { clsx } from "$lib/clsx";
   import { combineActions } from "$lib/combineActions";
+  import type { RequireFields } from "$lib/types";
 
-  interface InputProps extends Omit<HTMLInputAttributes, "placeholder"> {
+  interface InputProps extends RequireFields<Omit<HTMLInputAttributes, "placeholder">, "name"> {
     actions?: [Action<T, P>, P][];
     label: string;
     id: string;

@@ -1,9 +1,5 @@
 -- Add up migration script here
-CREATE OR REPLACE FUNCTION fetch_posts(
-  request_uid BIGINT,
-  request_limit NUMERIC,
-  request_offset NUMERIC
-)
+CREATE OR REPLACE FUNCTION fetch_posts(request_uid BIGINT)
 RETURNS TABLE (
   id BIGINT,
   title TEXT,
@@ -27,10 +23,7 @@ BEGIN
   JOIN users rvu
   ON rv.author_id = rvu.id
   LEFT JOIN post_reactions upr
-  ON upr.post_id = rv.id AND upr.user_id = request_uid
-  ORDER BY rv.id DESC
-  LIMIT request_limit
-  OFFSET request_offset;
+  ON upr.post_id = rv.id AND upr.user_id = request_uid;
 END;
 $$
 LANGUAGE plpgsql;

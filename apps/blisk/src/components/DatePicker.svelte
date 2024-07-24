@@ -1,11 +1,11 @@
 <script lang="ts" generics="T extends HTMLElement = HTMLElement, P extends any = any">
   import type { Action } from "svelte/action";
-  import type { HTMLTextareaAttributes } from "svelte/elements";
-  import { combineActions } from "$lib/combineActions";
+  import type { HTMLInputAttributes } from "svelte/elements";
   import { clsx } from "$lib/clsx";
+  import { combineActions } from "$lib/combineActions";
   import type { RequireFields } from "$lib/types";
 
-  interface TextareaProps extends RequireFields<Omit<HTMLTextareaAttributes, "placeholder">, "name"> {
+  interface DatePickerProps extends RequireFields<Omit<HTMLInputAttributes, "type" | "placeholder">, "name"> {
     actions?: [Action<T, P>, P][];
     label: string;
     id: string;
@@ -13,25 +13,28 @@
     errorText?: string | string[];
   }
 
-  const { actions, label, id, errorTextId, errorText, class: className, oninput, ...rest }: TextareaProps = $props();
+  const { actions, label, id, errorTextId, errorText, ...rest }: DatePickerProps = $props();
 </script>
 
 <div class="relative w-full">
-  <textarea
-    {id}
+  <div
     class={clsx(
-      "textarea block min-h-[44px] w-full overflow-hidden rounded-lg px-2.5 pb-2.5 pt-4 text-sm shadow-md transition-opacity disabled:opacity-50",
+      "datepicker block h-[44px] w-full rounded-lg px-2.5 pb-2.5 pt-4 text-sm shadow-md transition-opacity disabled:opacity-50",
       "focus:border-accent-light dark:focus:border-accent-dark border-border-light dark:border-border-dark border focus:outline-none",
-      "dark:bg-neutral-915 bg-white text-black opacity-80 dark:text-white",
-      className
+      "dark:bg-neutral-915 bg-white text-black opacity-80 dark:text-white"
     )}
-    aria-invalid={!!errorText}
-    aria-describedby={errorText ? errorTextId : undefined}
-    placeholder=" "
-    oninput={(ev) => (ev.currentTarget.style.height = `${Math.max(44, ev.currentTarget.offsetHeight, ev.currentTarget.scrollHeight)}px`)}
-    use:combineActions={actions}
-    {...rest}
-  ></textarea>
+  >
+    <input
+      {id}
+      type="date"
+      class="dark:bg-neutral-915 bg-white text-black opacity-80 dark:text-white"
+      aria-invalid={!!errorText}
+      aria-describedby={errorText ? errorTextId : undefined}
+      placeholder=" "
+      use:combineActions={actions}
+      {...rest}
+    />
+  </div>
   <label class="label absolute left-2.5 block select-none font-medium transition-all duration-100 ease-in" for={id}>
     {label}
   </label>

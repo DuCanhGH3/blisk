@@ -56,6 +56,7 @@ export const actions: Actions = {
       console.error(err);
       return fail(500, { error: "Internal Server Error" });
     }
+    redirect(303, `${base}/`);
   },
   async logout({ cookies, locals }) {
     try {

@@ -1,5 +1,6 @@
 <script>
   import { enhance } from "$app/forms";
+  import { goto } from "$app/navigation";
   import Input from "$components/Input.svelte";
 
   const { form } = $props();
@@ -14,9 +15,13 @@
       class="flex w-full flex-col gap-3"
       use:enhance={() => {
         isLoading = true;
-        return async ({ update }) => {
+        return async ({ result, update }) => {
           isLoading = false;
-          await update();
+          if (result.type === "redirect") {
+            goto(result.location, { replaceState: true, invalidateAll: true });
+          } else {
+            await update();
+          }
         };
       }}
     >

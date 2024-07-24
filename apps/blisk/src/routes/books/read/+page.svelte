@@ -1,11 +1,10 @@
 <script lang="ts">
   import type { Action } from "svelte/action";
   import { enhance } from "$app/forms";
-  import Input from "$components/Input.svelte";
   import NavLink from "$components/layouts/NavLink.svelte";
-  import Textarea from "$components/Textarea.svelte";
+  import DatePicker from "$components/DatePicker.svelte";
 
-  const { form } = $props();
+  const { data, form } = $props();
 
   let isLoading = $state(false);
   let observer = $state<IntersectionObserver | null>(null);
@@ -46,13 +45,13 @@
   };
 
   const links = [
-    ["#create-book-title", "Title"],
-    ["#create-book-content", "Content"],
+    ["#read-book-starting", "Starting date"],
+    ["#read-book-ending", "Ending date"],
   ] as const;
 </script>
 
 <div class="h-full w-full p-2 md:py-8">
-  <h1 class="h2 mb-8" use:trackActive={observer}>Create a book draft</h1>
+  <h1 class="h2 mb-8" use:trackActive={observer}>Read a book</h1>
   <div class="relative flex w-full flex-col gap-4 xl:flex-row xl:justify-between">
     <nav class="top-0 flex shrink-0 flex-col gap-[5px] xl:sticky xl:max-h-dvh xl:w-[200px] print:hidden" aria-label="Table of contents">
       {#each links as [href, title]}
@@ -70,30 +69,43 @@
         };
       }}
     >
-      <Input
-        name="title"
-        label="Title"
-        id="create-book-title"
+      <DatePicker
+        name="startingDate"
+        label="Starting date"
+        id="read-book-starting"
         required
-        errorTextId="create-book-title-error"
-        errorText={form?.validationError?.title}
+        value={data.now}
+        min={data.now}
+        max={data.oneYearLater}
+        errorTextId="read-book-starting-error"
+        errorText={form?.validationError?.startingDate}
         actions={[[trackActive, observer]]}
       />
-      <Textarea
-        name="summary"
-        label="Synopsis"
-        id="create-book-content"
-        rows={5}
+      <DatePicker
+        name="endingDate"
+        label="Ending date"
+        id="read-book-ending"
         required
-        errorTextId="create-book-content-error"
-        errorText={form?.validationError?.summary}
+        value={data.now}
+        min={data.now}
+        max={data.oneYearLater}
+        errorTextId="read-book-ending-error"
+        errorText={form?.validationError?.endingDate}
         actions={[[trackActive, observer]]}
       />
       <div class="flex w-full flex-row-reverse items-center gap-4">
-        <button class="button !px-20 !py-3" type="submit" disabled={isLoading}>Create</button>
+        <button class="button !px-20 !py-3" type="submit" disabled={isLoading}>Start reading</button>
         <a class="button light !px-20 !py-3" href="/books">Cancel</a>
-        {#if form?.error}
-          <p class="text-error-light dark:text-error-dark">{form.error}</p>
+        {#if !!form?.error}
+          {#if typeof form.error === "string"}
+            <p class="text-error-light dark:text-error-dark">{form.error}</p>
+          {:else}
+            <div class="flex flex-row gap-2">
+              {#each form.error as error}
+                <p class="text-error-light dark:text-error-dark">{error}</p>
+              {/each}
+            </div>
+          {/if}
         {/if}
       </div>
     </form>

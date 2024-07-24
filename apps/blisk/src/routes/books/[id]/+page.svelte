@@ -1,5 +1,6 @@
 <script lang="ts">
   import PostRenderer from "$components/PostRenderer.svelte";
+  import { clsx } from "$lib/clsx.js";
 
   const { data } = $props();
 </script>
@@ -19,25 +20,19 @@
       </span>
     </div>
     <div class="flex flex-1 flex-col gap-2">
-      <h1 class="pt-4 text-5xl">Dune</h1>
+      <h1 class="pt-4 text-5xl">{data.book.title}</h1>
       <h2 class="sr-only">About this book</h2>
       <p class="text-comment text-3xl font-semibold leading-10 tracking-tight" aria-label="This book was written by Frank Herbert in 1965">
         Frank Herbert • 1965
       </p>
       <p class="max-h-72 overflow-y-auto lg:max-h-full">
-        Dune is set in the distant future in a feudal interstellar society in which various noble houses control planetary fiefs. It tells the story
-        of young Paul Atreides, whose family accepts the stewardship of the planet Arrakis. While the planet is an inhospitable and sparsely populated
-        desert wasteland, it is the only source of melange, or "spice", a drug that extends life and enhances mental abilities. Melange is also
-        necessary for space navigation, which requires a kind of multidimensional awareness and foresight that only the drug provides. As melange can
-        only be produced on Arrakis, control of the planet is a coveted and dangerous undertaking. The story explores the multilayered interactions of
-        politics, religion, ecology, technology, and human emotion as the factions of the empire confront each other in a struggle for the control of
-        Arrakis and its spice.
+        {data.book.summary}
       </p>
     </div>
   </div>
   <h2 class="sr-only">Statistics</h2>
   <div class="w-full overflow-x-auto">
-    <table class="w-full table-auto border-separate border-spacing-2">
+    <table class="w-full table-auto border-separate border-spacing-4">
       <tbody class="[&>tr>th]:text-left">
         <tr>
           <th>Author</th>
@@ -53,7 +48,19 @@
         </tr>
         <tr>
           <th>Genre</th>
-          <td>Science fiction</td>
+          <td class="flex flex-row flex-wrap gap-1">
+            {#each data.book.categories as category}
+              <a
+                class={clsx(
+                  "rounded-md px-2 transition-colors duration-100",
+                  "dark:hover:bg-accent-dark bg-neutral-250 hover:bg-accent-light hover:text-white dark:bg-neutral-800 dark:hover:text-black"
+                )}
+                href="/books/categories/{category.id}"
+              >
+                {category.name}
+              </a>
+            {/each}
+          </td>
         </tr>
         <tr>
           <th>Pages</th>

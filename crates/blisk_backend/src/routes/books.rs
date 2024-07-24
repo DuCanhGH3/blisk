@@ -2,9 +2,9 @@ use super::{auth::OptionalUserClaims, posts::Post};
 use crate::{
     app::AppState,
     utils::{
-        errors::AppError,
+        errors::{AppError, BooksError},
         response::response,
-        structs::{AppJson, AppMultipart},
+        structs::AppJson,
     },
 };
 use axum::{
@@ -12,12 +12,12 @@ use axum::{
     http::StatusCode,
     response::Response,
 };
-use axum_typed_multipart::TryFromMultipart;
 
-#[derive(TryFromMultipart)]
+#[derive(serde::Deserialize)]
 pub struct CreatePayload {
     title: String,
     summary: String,
+    categories: Vec<i64>,
 }
 #[derive(serde::Serialize)]
 pub struct CreateResponse {
@@ -26,7 +26,11 @@ pub struct CreateResponse {
 
 pub async fn create(
     State(AppState { pool, .. }): State<AppState>,
-    AppMultipart(CreatePayload { title, summary }): AppMultipart<CreatePayload>,
+    AppJson(CreatePayload {
+        title,
+        summary,
+        categories,
+    }): AppJson<CreatePayload>,
 ) -> Result<Response, AppError> {
     let mut transaction = pool.begin().await?;
     let bid: i64 = sqlx::query_scalar!(
@@ -36,6 +40,13 @@ pub async fn create(
     )
     .fetch_one(&mut *transaction)
     .await?;
+    sqlx::query!(
+        "INSERT INTO book_to_category (book_id, category_id) SELECT $1, * FROM UNNEST($2::BIGINT[])",
+        &bid,
+        &categories[..]
+    )
+    .execute(&mut *transaction)
+    .await?;
     transaction.commit().await?;
     Ok(response(
         StatusCode::CREATED,
@@ -44,11 +55,18 @@ pub async fn create(
     ))
 }
 
+#[derive(serde::Serialize, serde::Deserialize)]
+struct BookCategory {
+    id: i64,
+    name: String,
+}
+
 #[derive(serde::Serialize, sqlx::FromRow)]
 struct Book {
     title: String,
     summary: String,
     reviews: sqlx::types::Json<Vec<Post>>,
+    categories: sqlx::types::Json<Vec<BookCategory>>,
 }
 
 #[derive(serde::Deserialize)]
@@ -64,44 +82,56 @@ pub async fn read(
     let uid = claims.as_ref().map(|claims| claims.sub);
     if let Some(bid) = book_id {
         let mut transaction = pool.begin().await?;
-        let book: Book = sqlx::query_as(r#"
-            SELECT 
-                b.title,
-                b.summary,
-                COALESCE(JSONB_AGG(rv), '[]'::JSONB) AS reviews
-            FROM books b, LATERAL (
-                SELECT * FROM fetch_posts(
-                    request_uid => $2,
-                    request_limit => 5,
-                    request_offset => 0
-                )
-            ) rv
+        let book = sqlx::query_as!(
+            Book,
+            r#"SELECT
+                b.title AS "title!: String",
+                b.summary AS "summary!: String",
+                b.categories AS "categories!: sqlx::types::Json<Vec<BookCategory>>",
+                COALESCE(JSONB_AGG(rv) FILTER (WHERE rv.id IS NOT NULL), '[]'::JSONB) AS "reviews!: sqlx::types::Json<Vec<Post>>"
+            FROM book_view b
+            LEFT JOIN LATERAL (
+                SELECT *
+                FROM fetch_posts(request_uid => $2) rv
+                WHERE rv.book_id = $1
+                ORDER BY rv.id DESC
+                LIMIT 5
+                OFFSET 0
+            ) rv ON TRUE
             WHERE b.id = $1
-            GROUP BY b.id
-        "#)
-        .bind(&bid)
-        .bind(&uid)
+            GROUP BY b.id, b.title, b.summary, b.categories"#,
+            &bid,
+            &uid as &_
+        )
         .fetch_one(&mut *transaction)
-        .await?;
+        .await
+        .map_err(|e| match e {
+            sqlx::Error::RowNotFound => BooksError::BookNotFound(bid),
+            _ => BooksError::Unexpected,
+         })?;
         transaction.commit().await?;
         Ok(response(StatusCode::OK, None, AppJson(book)))
     } else {
         let mut transaction = pool.begin().await?;
-        let books_list: Vec<Book> = sqlx::query_as(r#"
-            SELECT 
-                b.title,
-                b.summary,
-                COALESCE(JSONB_AGG(rv), '[]'::JSONB) AS reviews
-            FROM books b, LATERAL (
-                SELECT * FROM fetch_posts(
-                    request_uid => $1,
-                    request_limit => 5,
-                    request_offset => 0
-                )
-            ) rv
-            GROUP BY b.id
-        "#)
-        .bind(&uid)
+        let books_list = sqlx::query_as!(
+            Book,
+            r#"SELECT 
+                b.title AS "title!: String",
+                b.summary AS "summary!: String",
+                b.categories AS "categories!: sqlx::types::Json<Vec<BookCategory>>",
+                COALESCE(JSONB_AGG(rv) FILTER (WHERE rv.id IS NOT NULL), '[]'::JSONB) AS "reviews!: sqlx::types::Json<Vec<Post>>"
+            FROM book_view b
+            LEFT JOIN LATERAL (
+                SELECT *
+                FROM fetch_posts(request_uid => $1) rv
+                WHERE rv.book_id = b.id
+                ORDER BY rv.id DESC
+                LIMIT 5
+                OFFSET 0
+            ) rv ON TRUE
+            GROUP BY b.id, b.title, b.summary, b.categories"#,
+            &uid as &_
+        )
         .fetch_all(&mut *transaction)
         .await?;
         transaction.commit().await?;

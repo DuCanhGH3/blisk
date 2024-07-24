@@ -47,22 +47,28 @@
   blockquote {
     @apply text-balance break-words;
   }
-  h1, .h1 {
+  h1,
+  .h1 {
     @apply text-[2.625rem] font-semibold leading-10 tracking-tight;
   }
-  h2, .h2 {
+  h2,
+  .h2 {
     @apply text-4xl font-semibold leading-10 tracking-tight;
   }
-  h3, .h3 {
+  h3,
+  .h3 {
     @apply text-3xl font-semibold leading-7 tracking-tight;
   }
-  h4, .h4 {
+  h4,
+  .h4 {
     @apply text-2xl font-medium leading-5 tracking-tight;
   }
-  h5, .h5 {
+  h5,
+  .h5 {
     @apply text-xl font-medium leading-5 tracking-tight;
   }
-  h6, .h6 {
+  h6,
+  .h6 {
     @apply text-lg font-normal leading-5 tracking-tight;
   }
   details > summary {
@@ -305,23 +311,18 @@
   .button.light {
     @apply text-accent-light dark:text-accent-dark dark:bg-neutral-915 [&:not(:disabled)]:hover:bg-neutral-150 bg-white dark:[&:not(:disabled)]:hover:bg-neutral-800;
   }
-  .input:placeholder-shown:focus + .label {
+  .datepicker + .label,
+  .input:placeholder-shown:focus + .label,
+  .input:not(:placeholder-shown) + .label,
+  .textarea:placeholder-shown:focus + .label,
+  .textarea:not(:placeholder-shown) + .label {
     @apply top-0.5 translate-x-0 translate-y-0 text-xs text-neutral-700 dark:text-gray-300;
   }
   .input:placeholder-shown:not(:focus) + .label {
     @apply top-1/2 -translate-y-1/2 translate-x-0 text-sm text-black dark:text-white;
   }
-  .input:not(:placeholder-shown) + .label {
-    @apply top-0.5 text-xs text-neutral-700 dark:text-gray-300;
-  }
-  .textarea:placeholder-shown:focus + .label {
-    @apply top-0.5 translate-x-0 translate-y-0 text-xs text-neutral-700 dark:text-gray-300;
-  }
   .textarea:placeholder-shown:not(:focus) + .label {
     @apply top-[12px] translate-x-0 text-sm text-black dark:text-white;
-  }
-  .textarea:not(:placeholder-shown) + .label {
-    @apply top-0.5 text-xs text-neutral-700 dark:text-gray-300;
   }
   .text-error {
     @apply text-[#a51a12] dark:text-red-400;

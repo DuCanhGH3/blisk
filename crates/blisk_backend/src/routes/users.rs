@@ -42,10 +42,11 @@ pub async fn read(
 ) -> Result<Response, AppError> {
     let uid = claims.as_ref().map(|claims| claims.sub);
     let mut transaction = pool.begin().await?;
-    let user: ReadResponse = sqlx::query_as(
+    let user = sqlx::query_as!(
+        ReadResponse,
         r#"SELECT
             u.name,
-            COALESCE(JSONB_AGG(p), '[]'::JSONB) AS posts
+            COALESCE(JSONB_AGG(p), '[]'::JSONB) AS "posts!: sqlx::types::Json<Vec<ReadResponsePost>>"
         FROM users u
         LEFT JOIN LATERAL (
             SELECT
@@ -54,17 +55,16 @@ pub async fn read(
                 content,
                 reaction,
                 user_reaction
-            FROM fetch_posts(
-                request_uid => $2,
-                request_limit => 5,
-                request_offset => 0
-            )
+            FROM fetch_posts(request_uid => $2)
+            ORDER BY id DESC
+            LIMIT 5
+            OFFSET 0
         ) p ON TRUE
         WHERE u.name = $1
         GROUP BY u.id"#,
+        &username,
+        &uid as &_,
     )
-    .bind(&username)
-    .bind(&uid)
     .fetch_one(&mut *transaction)
     .await
     .map_err(|e| match e {

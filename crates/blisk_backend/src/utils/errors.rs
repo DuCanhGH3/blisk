@@ -41,6 +41,8 @@ pub enum PostsError {
 pub enum BooksError {
     #[error("book {0} cannot be found")]
     BookNotFound(i64),
+    #[error("this error is not expected")]
+    Unexpected,
 }
 #[derive(Debug, thiserror::Error)]
 pub enum UploadsError {
@@ -62,6 +64,8 @@ pub enum AppError {
     CommentsError(#[from] CommentsError),
     #[error("error while processing a post: {0}")]
     PostsError(#[from] PostsError),
+    #[error("error while processing a book: {0}")]
+    BooksError(#[from] BooksError),
     #[error("error while uploading a file: {0}")]
     UploadsError(#[from] UploadsError),
     #[error("error was not expected {0}")]
@@ -150,6 +154,18 @@ impl IntoResponse for AppError {
                         StatusCode::INTERNAL_SERVER_ERROR,
                         "Internal Server Error".to_owned(),
                     ),
+                }
+            }
+            AppError::BooksError(error) => {
+                match error {
+                    BooksError::BookNotFound(_) => (
+                        StatusCode::NOT_FOUND,
+                        format!("Book not found")
+                    ),
+                    BooksError::Unexpected => (
+                        StatusCode::INTERNAL_SERVER_ERROR,
+                        "Internal Server Error".to_owned()
+                    )
                 }
             }
             AppError::UploadsError(error) => {
