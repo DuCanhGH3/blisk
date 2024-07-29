@@ -36,7 +36,7 @@
     @apply scroll-smooth;
   }
   body {
-    @apply bg-neutral-50 font-sans font-normal text-black dark:bg-neutral-950 dark:text-white;
+    @apply bg-wood bg-neutral-50 font-sans font-normal text-black dark:bg-[#856940] dark:text-white;
   }
   h1,
   h2,
@@ -99,7 +99,7 @@
   }
 
   .book:hover {
-    transform: rotateX(-5deg) rotateY(-20deg) rotateZ(-15deg) translateX(-50px) translateY(50px);
+    transform: rotateX(-5deg) rotateY(-20deg) rotateZ(-15deg) translateX(-40px) translateY(-20px);
   }
 
   .book-side {

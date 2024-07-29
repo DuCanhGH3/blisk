@@ -140,6 +140,9 @@ export default {
         "haha-eyes": "laughing-eyes 2.5s ease-out 0s infinite",
         "haha-mouth": "laughing-mouth 2.5s ease-out 0s infinite",
       },
+      backgroundImage: {
+        wood: "url('/wood-pattern.png')",
+      },
       colors: {
         error: {
           light: "#a51a12",
