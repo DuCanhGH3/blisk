@@ -33,7 +33,7 @@
     <div
       class="relative w-full border-[8px] border-t-0 border-x-[#856940] border-b-[#6b5330] border-t-transparent px-4 shadow-[inset_0_0_20px_5px_#000000]"
     >
-      <h2 class="py-4 text-[#050300]">science fiction</h2>
+      <h2 class="py-4">science fiction</h2>
       <div
         class="mx-[-4px] mb-[-4px] overflow-x-hidden"
         use:emblaCarousel={{ options: { align: "start", containScroll: false, dragFree: true, loop: true }, plugins: [] }}
@@ -48,6 +48,6 @@
         </div>
       </div>
     </div>
-    <div class="bg-wood h-[20px] bg-[#856940] last:hidden" aria-hidden="true"></div>
+    <div class="bg-wood h-[20px] bg-[#d8a85f] last:hidden" aria-hidden="true"></div>
   {/each}
 </div>

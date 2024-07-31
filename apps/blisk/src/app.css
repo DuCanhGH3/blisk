@@ -36,7 +36,7 @@
     @apply scroll-smooth;
   }
   body {
-    @apply bg-wood bg-neutral-50 font-sans font-normal text-black dark:bg-[#856940] dark:text-white;
+    @apply bg-neutral-50 font-sans font-normal text-black dark:bg-neutral-950 dark:text-white;
   }
   h1,
   h2,

@@ -3,14 +3,15 @@
   import CommentForm from "$components/CommentForm.svelte";
   import MarkdownRenderer from "$components/MarkdownRenderer.svelte";
   import { reactionRender } from "$components/renderer-constants.js";
-  import type { ReactionType } from "$lib/types.js";
+  import type { Comment, ReactionType } from "$lib/types.js";
   import type { IconProps } from "$components/icons/types.js";
   import ThumbUp from "$components/icons/ThumbUp.svelte";
   import ReactionBar from "$components/ReactionBar.svelte";
-  import Comment from "$components/icons/Comment.svelte";
+  import CommentIcon from "$components/icons/Comment.svelte";
   import Share from "$components/icons/Share.svelte";
   import CommentRendererButton from "$components/CommentRendererButton.svelte";
   import ThumbUpFilled from "$components/icons/ThumbUpFilled.svelte";
+  import VirtualScroller from "$components/VirtualScroller.svelte";
 
   const { data } = $props();
 
@@ -28,7 +29,7 @@
   } satisfies IconProps;
 </script>
 
-<article class="flex w-full max-w-6xl flex-col gap-8 p-2 md:py-8">
+<article class="flex h-full w-full max-w-6xl flex-col gap-8 p-2 md:py-8">
   <div class="flex flex-col gap-8">
     <h1 class="-order-1">{data.post.title}</h1>
     <div class="-order-2 flex flex-row flex-wrap items-center gap-4 font-semibold leading-10 tracking-tight">
@@ -84,7 +85,7 @@
         />
       </details>
       <CommentRendererButton as="a" href="#comments">
-        <Comment {...rendererButtonAttributes} />
+        <CommentIcon {...rendererButtonAttributes} />
         <span class="mb-[-1px]">Comment</span>
       </CommentRendererButton>
       <CommentRendererButton as="div">
@@ -93,11 +94,17 @@
       </CommentRendererButton>
     </div>
   </div>
-  <section id="comments" class="flex flex-col gap-3">
+  <section id="comments" class="flex h-full flex-col gap-3">
     <h2 class="sr-only">Comments</h2>
     <CommentForm parentId={null} updateComments={(newComment) => comments.unshift(newComment)} />
-    {#each comments as comment (comment.id)}
+    <!-- {#each comments as comment (comment.id)}
       <CommentRenderer {comment} username={data.user?.name} />
-    {/each}
+    {/each} -->
+    {#snippet renderer(comment: Comment)}
+      <div class="mb-3">
+        <CommentRenderer {comment} username={data.user?.name} />
+      </div>
+    {/snippet}
+    <VirtualScroller items={comments} {renderer} />
   </section>
 </article>
