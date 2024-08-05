@@ -1,6 +1,5 @@
 <script lang="ts" generics="T extends { id: number | string }">
-  import { browser } from "$app/environment";
-  import type { Snippet } from "svelte";
+  import { tick, type Snippet } from "svelte";
 
   interface VirtualScrollerProps {
     items: T[];
@@ -28,7 +27,7 @@
     }
 
     rangeSum(l: number, r: number) {
-      return this.sum(r) - (l > 0 ? this.sum(l - 1) : 0);
+      return this.sum(r) - this.sum(l - 1);
     }
 
     sum(r: number) {
@@ -47,28 +46,24 @@
   }
 
   let container = $state<HTMLDivElement | null>(null);
-  // TODO: add a function that calculates `start` and `end`,
-  // which should also be used when `items` is updated. 
+  // During SSR, render the whole thing.
   let start = $state(0);
   let end = $state(items.length - 1);
   const rows = $state<(HTMLDivElement | null)[]>([]);
-  let height = $state<number[]>(Array.from({ length: items.length }, () => 0));
-  let heightTree = $state<HeightTree>(new HeightTree(height));
+  let height = $state<number[]>(null!);
+  let heightTree = $state<HeightTree | null>(null);
 
   const visible = $derived(items.slice(start, end + 1));
+  const paddingTop = $derived(start > 0 && heightTree ? heightTree.sum(start - 1) : 0);
+  const paddingBottom = $derived(end < items.length - 1 && heightTree ? heightTree.rangeSum(end + 1, items.length - 1) : 0);
 
-  const handleScroll = () => {
-    if (!container) return;
-    for (let i = 0; i <= visible.length; ++i) {
-      const row = rows[i];
-      if (row) {
-        let offset = row.offsetHeight;
-        if (offset !== height[start + i]) {
-          heightTree.add(i, offset - height[start + i]);
-          height[start + i] = offset;
-        }
-      }
-    }
+  /**
+   * The bulk of the virtual scroller. Requires that all elements' heights have been calculated.
+   * The way we do that is to initially render the whole thing, create a height map, then run this
+   * function. 
+   */
+  const recalculate = () => {
+    if (!container || !heightTree) return;
     let tl = 0;
     let tr = items.length - 1;
     let containerTop = container.getBoundingClientRect().y;
@@ -105,24 +100,49 @@
     }
     end = tr;
   };
+
+  const refresh = async () => {
+    start = 0;
+    end = items.length - 1;
+    await tick();
+    heightTree = null;
+    height = Array.from({ length: items.length }, () => 0);
+    for (let i = start; i <= end; ++i) {
+      const row = rows[i - start];
+      if (row) {
+        height[i] = row.offsetHeight;
+      }
+    }
+    heightTree = new HeightTree(height);
+    recalculate();
+  };
+
+  const handleLayout = () => {
+    if (!heightTree) return;
+    for (let i = 0; i <= visible.length; ++i) {
+      const row = rows[i];
+      if (row) {
+        let offset = row.offsetHeight;
+        if (offset !== height[start + i]) {
+          heightTree.add(start + i, offset - height[start + i]);
+          height[start + i] = offset;
+        }
+      }
+    }
+    recalculate();
+  };
+
+  $effect(() => {
+    refresh();
+  });
 </script>
 
-<svelte:window onscroll={handleScroll} />
+<svelte:window onscroll={handleLayout} onresize={handleLayout} />
 
-{#if browser}
-  {@const paddingTop = start > 0 ? heightTree.sum(start - 1) : 0}
-  {@const paddingBottom = end < items.length - 1 ? heightTree.rangeSum(end + 1, items.length - 1) : 0}
-  <div bind:this={container} style="padding-top:{paddingTop}px;padding-bottom:{paddingBottom}px">
-    {#each visible as item, i (item.id)}
-      <div bind:this={rows[i]}>
-        {@render renderer(item)}
-      </div>
-    {/each}
-  </div>
-{:else}
-  <div>
-    {#each items as item}
+<div bind:this={container} style="padding-top:{paddingTop}px;padding-bottom:{paddingBottom}px">
+  {#each visible as item, i (item.id)}
+    <div bind:this={rows[i]}>
       {@render renderer(item)}
-    {/each}
-  </div>
-{/if}
+    </div>
+  {/each}
+</div>

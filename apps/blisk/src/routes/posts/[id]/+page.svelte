@@ -101,7 +101,7 @@
       <CommentRenderer {comment} username={data.user?.name} />
     {/each} -->
     {#snippet renderer(comment: Comment)}
-      <div class="mb-3">
+      <div class="pb-3">
         <CommentRenderer {comment} username={data.user?.name} />
       </div>
     {/snippet}
