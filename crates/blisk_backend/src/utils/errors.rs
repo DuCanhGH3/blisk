@@ -27,6 +27,8 @@ pub enum UserError {
 pub enum CommentsError {
     #[error("comment {0} cannot be found")]
     CommentNotFound(i64),
+    #[error("comment {0} was non-existent, or an unauthorized personnel tried to update it")]
+    UpdateUnauthorized(i64),
     #[error("this error is not expected")]
     Unexpected,
 }
@@ -34,6 +36,8 @@ pub enum CommentsError {
 pub enum PostsError {
     #[error("post {0} cannot be found")]
     PostNotFound(i64),
+    #[error("post {0} was non-existent, or an unauthorized personnel tried to update it")]
+    UpdateUnauthorized(i64),
     #[error("this error is not expected")]
     Unexpected,
 }
@@ -137,7 +141,10 @@ impl IntoResponse for AppError {
             AppError::CommentsError(error) => {
                 match error {
                     CommentsError::CommentNotFound(_) => {
-                        (StatusCode::NOT_FOUND, "Post not found".to_owned())
+                        (StatusCode::NOT_FOUND, "Post not found.".to_owned())
+                    }
+                    CommentsError::UpdateUnauthorized(id) => {
+                        (StatusCode::UNAUTHORIZED, format!("Comment {id} is either not yours or not found."))
                     }
                     CommentsError::Unexpected => (
                         StatusCode::INTERNAL_SERVER_ERROR,
@@ -148,7 +155,10 @@ impl IntoResponse for AppError {
             AppError::PostsError(error) => {
                 match error {
                     PostsError::PostNotFound(_) => {
-                        (StatusCode::NOT_FOUND, "Post not found".to_owned())
+                        (StatusCode::NOT_FOUND, "Post not found.".to_owned())
+                    }
+                    PostsError::UpdateUnauthorized(id) => {
+                        (StatusCode::UNAUTHORIZED, format!("Post {id} is either not yours or not found."))
                     }
                     PostsError::Unexpected => (
                         StatusCode::INTERNAL_SERVER_ERROR,

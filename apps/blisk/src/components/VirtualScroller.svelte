@@ -1,4 +1,6 @@
 <script lang="ts" generics="T extends { id: number | string }">
+  // Note: since the virtual scroller destroys any component not in view,
+  // states will not work properly.
   import { tick, type Snippet } from "svelte";
 
   interface VirtualScrollerProps {

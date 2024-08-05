@@ -1,6 +1,8 @@
 <script lang="ts">
   import PostRenderer from "$components/PostRenderer.svelte";
+  import VirtualScroller from "$components/VirtualScroller.svelte";
   import { clsx } from "$lib/clsx";
+  import type { Post } from "$lib/types";
   import LinkButton from "./LinkButton.svelte";
 
   const { data } = $props();
@@ -67,13 +69,14 @@
     <section id="reviews" class="flex basis-2/3 flex-col gap-6">
       <h2 class="text-3xl">Reviews</h2>
       {#if data.book.reviews.length > 0}
-        {#each data.book.reviews as post}
-          <PostRenderer {post} />
-        {/each}
+        {#snippet renderer(post: Post)}
+          <div class="pb-6">
+            <PostRenderer {post} />
+          </div>
+        {/snippet}
+        <VirtualScroller items={data.book.reviews} {renderer} />
       {:else}
-        <p class="text-lg font-semibold leading-3 tracking-tight">
-          There's no review yet!
-        </p>
+        <p class="text-lg font-semibold leading-3 tracking-tight">There's no review yet!</p>
       {/if}
     </section>
   </div>

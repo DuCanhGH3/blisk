@@ -58,11 +58,17 @@ impl Application {
             )
             .route(
                 "/posts",
-                post(routes::posts::create).get(routes::posts::read),
+                post(routes::posts::create)
+                    .get(routes::posts::read)
+                    .patch(routes::posts::update)
+                    .delete(routes::posts::delete),
             )
             .route(
                 "/comments",
-                post(routes::comments::create).get(routes::comments::read),
+                post(routes::comments::create)
+                    .get(routes::comments::read)
+                    .patch(routes::comments::update)
+                    .delete(routes::comments::delete),
             )
             .route("/reactions", post(routes::reactions::create))
             .route("/users", get(routes::users::read))

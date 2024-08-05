@@ -1,5 +1,7 @@
 <script lang="ts">
   import PostRenderer from "$components/PostRenderer.svelte";
+  import VirtualScroller from "$components/VirtualScroller.svelte";
+  import type { Post } from "$lib/types.js";
 
   const { data } = $props();
 
@@ -27,7 +29,7 @@
     </div>
   </div>
   <div class="flex w-full flex-col gap-8 md:gap-14 lg:flex-row-reverse">
-    <div class="lg:sticky lg:top-14 flex h-fit flex-[2_2_0] flex-col gap-4">
+    <div class="flex h-fit flex-[2_2_0] flex-col gap-4 lg:sticky lg:top-14">
       <h2>About {data.data.name}</h2>
       <div class="box md">here comes a quote</div>
       <div class="box md">
@@ -75,15 +77,18 @@
           <a href="#top" class="bg-neutral-250 flex items-center justify-center rounded-[3px] px-2.5 py-1 dark:bg-neutral-800">Dislikes</a>
         </div>
       </div>
-      <div class="flex flex-col items-center gap-4">
-        {#each data.data.posts as post}
-          <PostRenderer
-            post={{
-              ...post,
-              author_name: data.data.name,
-            }}
-          />
-        {/each}
+      <div>
+        {#snippet renderer(post: Post)}
+          <div class="pb-4">
+            <PostRenderer
+              post={{
+                ...post,
+                author_name: data.data.name,
+              }}
+            />
+          </div>
+        {/snippet}
+        <VirtualScroller items={data.data.posts} {renderer} />
       </div>
     </article>
   </div>

@@ -4,12 +4,16 @@ use super::{
 };
 use crate::{
     app::AppState,
-    utils::{errors::AppError, response::response, structs::AppJson},
+    utils::{
+        errors::{AppError, CommentsError},
+        response::response,
+        structs::AppJson,
+    },
 };
 use axum::{
     extract::{Query, State},
     http::StatusCode,
-    response::Response,
+    response::{IntoResponse, Response},
 };
 use sqlx::Postgres;
 use tracing::instrument;
@@ -34,19 +38,20 @@ pub async fn read_base<'c>(
 ) -> Result<Vec<Comment>, AppError> {
     let uid = claims.as_ref().map(|claims| claims.sub);
 
-    let comments = sqlx::query_as(
-        "SELECT
+    let comments = sqlx::query_as!(
+        Comment,
+        r#"SELECT
             c.id,
             c.content,
-            u.name as author_name,
-            ucr.type as user_reaction,
+            u.name as "author_name: _",
+            ucr.type as "user_reaction: _",
             fetch_replies(
                 request_uid => $4,
                 request_pid => $1,
                 parent_id => c.id,
                 parent_path => c.path,
                 current_level => 4
-            ) AS children
+            ) AS "children: sqlx::types::Json<Vec<Comment>>"
         FROM comments c
         JOIN users u
         ON c.author_id = u.id
@@ -55,12 +60,12 @@ pub async fn read_base<'c>(
         WHERE c.post_id = $1 AND c.path = 'Top'
         ORDER BY c.id DESC
         LIMIT $2
-        OFFSET $3",
+        OFFSET $3"#,
+        &post_id,
+        &limit,
+        &offset,
+        &uid as &_,
     )
-    .bind(&post_id)
-    .bind(&limit)
-    .bind(&offset)
-    .bind(&uid)
     .fetch_all(&mut **transaction)
     .await?;
 
@@ -134,4 +139,58 @@ pub async fn read(
     let comments_list = read_base(&mut transaction, &claims, post_id, 20, offset).await?;
     transaction.commit().await?;
     Ok(response(StatusCode::OK, None, AppJson(comments_list)))
+}
+
+#[derive(serde::Deserialize)]
+pub struct UpdatePayload {
+    id: i64,
+    content: String,
+}
+
+#[instrument(name = "Updating a comment", skip(pool, claims), fields(uid = %claims.sub))]
+pub async fn update(
+    State(AppState { pool, .. }): State<AppState>,
+    claims: UserClaims,
+    AppJson(UpdatePayload { id, content }): AppJson<UpdatePayload>,
+) -> Result<impl IntoResponse, AppError> {
+    let mut transaction = pool.begin().await?;
+    let update_result = sqlx::query!(
+        "UPDATE comments SET content = $2 WHERE id = $1 AND author_id = $3",
+        &id,
+        &content,
+        &claims.sub
+    )
+    .execute(&mut *transaction)
+    .await?;
+    if update_result.rows_affected() == 0 {
+        return Err(CommentsError::UpdateUnauthorized(id))?;
+    }
+    transaction.commit().await?;
+    Ok(StatusCode::NO_CONTENT)
+}
+
+#[derive(serde::Deserialize)]
+pub struct DeletePayload {
+    id: i64,
+}
+
+#[instrument(name = "Deleting a comment", skip(pool, claims), fields(uid = %claims.sub))]
+pub async fn delete(
+    State(AppState { pool, .. }): State<AppState>,
+    claims: UserClaims,
+    AppJson(DeletePayload { id }): AppJson<DeletePayload>,
+) -> Result<impl IntoResponse, AppError> {
+    let mut transaction = pool.begin().await?;
+    let delete_result = sqlx::query!(
+        "DELETE FROM comments WHERE id = $1 AND author_id = $2",
+        &id,
+        &claims.sub
+    )
+    .execute(&mut *transaction)
+    .await?;
+    if delete_result.rows_affected() == 0 {
+        return Err(CommentsError::UpdateUnauthorized(id))?;
+    }
+    transaction.commit().await?;
+    Ok(StatusCode::NO_CONTENT)
 }

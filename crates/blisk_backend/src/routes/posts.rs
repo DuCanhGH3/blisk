@@ -14,7 +14,7 @@ use crate::{
 use axum::{
     extract::{Query, State},
     http::StatusCode,
-    response::Response,
+    response::{IntoResponse, Response},
 };
 use tracing::instrument;
 
@@ -96,22 +96,23 @@ pub async fn read(
 ) -> Result<Response, AppError> {
     let uid = claims.0.as_ref().map(|claims| claims.sub);
     let mut transaction = pool.begin().await?;
-    let post: Post = sqlx::query_as(
+    let post = sqlx::query_as!(
+        Post,
         r#"SELECT
             p.id,
             p.title,
             p.content,
             u.name as author_name,
-            p.reaction AS reaction,
-            ucr.type AS user_reaction
+            p.reaction AS "reaction: _",
+            ucr.type AS "user_reaction: _"
         FROM posts p
         JOIN users u ON p.author_id = u.id
         LEFT JOIN post_reactions ucr
         ON ucr.post_id = $1 AND ucr.user_id = $2
         WHERE p.id = $1"#,
+        &post_id,
+        &uid as &_,
     )
-    .bind(&post_id)
-    .bind(&uid)
     .fetch_one(&mut *transaction)
     .await
     .map_err(|e| match e {
@@ -125,4 +126,78 @@ pub async fn read(
         None,
         AppJson(ReadResponse { post, comments }),
     ))
+}
+
+#[derive(serde::Deserialize)]
+pub struct UpdatePayload {
+    id: i64,
+    title: Option<String>,
+    content: Option<String>,
+    reaction: Option<Reaction>,
+}
+
+#[instrument(name = "Updating a post", skip(pool, claims), fields(uid = %claims.sub))]
+pub async fn update(
+    State(AppState { pool, .. }): State<AppState>,
+    claims: UserClaims,
+    AppJson(UpdatePayload {
+        id,
+        title,
+        content,
+        reaction,
+    }): AppJson<UpdatePayload>,
+) -> Result<impl IntoResponse, AppError> {
+    let mut transaction = pool.begin().await?;
+    let post = sqlx::query!(
+        r#"SELECT title, content, reaction AS "reaction: Reaction" FROM posts WHERE id = $1 AND author_id = $2"#,
+        &id,
+        &claims.sub
+    )
+    .fetch_one(&mut *transaction)
+    .await
+    .map_err(|err| match err {
+        sqlx::Error::RowNotFound => PostsError::UpdateUnauthorized(id),
+        _ => PostsError::Unexpected,
+    })?;
+    let update_result = sqlx::query!(
+        "UPDATE posts SET title = $3, content = $4, reaction = $5 WHERE id = $1 AND author_id = $2",
+        &id,
+        &claims.sub,
+        &title.unwrap_or_else(|| post.title),
+        &content.unwrap_or_else(|| post.content),
+        &reaction.unwrap_or_else(|| post.reaction) as &_,
+    )
+    .execute(&mut *transaction)
+    .await?;
+    if update_result.rows_affected() == 0 {
+        return Err(PostsError::UpdateUnauthorized(id))?;
+    }
+    transaction.commit().await?;
+    Ok(StatusCode::NO_CONTENT)
+}
+
+#[derive(serde::Deserialize)]
+pub struct DeletePayload {
+    id: i64,
+}
+
+#[instrument(name = "Deleting a post", skip(pool, claims), fields(uid = %claims.sub))]
+pub async fn delete(
+    State(AppState { pool, .. }): State<AppState>,
+    claims: UserClaims,
+    AppJson(DeletePayload { id }): AppJson<DeletePayload>,
+) -> Result<impl IntoResponse, AppError> {
+    let mut transaction = pool.begin().await?;
+    let delete_result = sqlx::query!(
+        "DELETE FROM posts WHERE id = $1 AND author_id = $2",
+        &id,
+        &claims.sub
+    )
+    .execute(&mut *transaction)
+    .await?;
+    if delete_result.rows_affected() == 0 {
+        return Err(PostsError::UpdateUnauthorized(id))?;
+    }
+    transaction.commit().await?;
+    Ok(StatusCode::NO_CONTENT)
 }
