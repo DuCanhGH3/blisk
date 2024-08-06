@@ -8,10 +8,10 @@
 
   interface CommentFormProps {
     parentId: number | null;
-    updateComments(newComment: Comment): void;
+    updateReplies(newReply: Comment): void;
   }
 
-  const { parentId, updateComments }: CommentFormProps = $props();
+  const { parentId, updateReplies }: CommentFormProps = $props();
   const isParentComment = $derived(parentId === null);
   const isParentOptimistic = $derived(parentId === OPTIMISTIC_ID);
   const idPrefix = $derived(parentId !== null ? `reply-${parentId}` : "comment");
@@ -36,7 +36,7 @@
         user_reaction: null,
         children: [],
       } satisfies Comment;
-      updateComments(comment);
+      updateReplies(comment);
     }
     return async ({ result, update }) => {
       if (result.type === "success" && comment !== null && typeof result.data?.id === "number") {

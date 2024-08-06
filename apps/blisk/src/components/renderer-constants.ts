@@ -6,7 +6,7 @@ import Haha from "./icons/reactions/Haha.svelte";
 import Wow from "./icons/reactions/Wow.svelte";
 import Sad from "./icons/reactions/Sad.svelte";
 import Angry from "./icons/reactions/Angry.svelte";
-import type { ReactionProps } from "./icons/types";
+import type { IconProps, ReactionProps } from "./icons/types";
 
 export const reactionRender = {
   like: {
@@ -40,3 +40,11 @@ export const reactionRender = {
     colors: "bg-orange-200 hover:bg-orange-300 dark:bg-orange-950 dark:hover:bg-orange-900",
   },
 } satisfies Record<ReactionType, { icon: Component<ReactionProps>; label: string; colors: string }>;
+
+export const rendererButtonAttributes = {
+  width: 24,
+  height: 24,
+  class: "h-6 w-auto",
+  "aria-hidden": "true",
+  tabindex: -1,
+} satisfies IconProps;

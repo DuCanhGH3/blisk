@@ -1,4 +1,5 @@
 <script lang="ts">
+  // Component is (mostly) stateless so that it works with the virtual scroller.
   import CommentRendererButton from "$components/CommentRendererButton.svelte";
   import CommentIcon from "$components/icons/Comment.svelte";
   import Share from "$components/icons/Share.svelte";
@@ -7,35 +8,38 @@
   import { clsx } from "$lib/clsx";
   import type { Comment, ReactionType } from "$lib/types";
   import CommentForm from "./CommentForm.svelte";
-  import type { IconProps } from "./icons/types";
-  import { reactionRender } from "./renderer-constants";
+  import { rendererButtonAttributes, reactionRender } from "./renderer-constants";
   import MarkdownRenderer from "./MarkdownRenderer.svelte";
 
   interface CommentProps {
+    /**
+     * The comment to be rendered. Must be a state for the component to work
+     * properly.
+     */
     comment: Comment;
-    username: string | undefined;
-    updateReaction?(reaction: ReactionType | null): void;
+    /**
+     * Called whenever the user's reaction to a comment is updated. Used for
+     * updating said comment's `user_reaction` state.
+     * @param reaction
+     */
+    updateReaction(comment: Comment, reaction: ReactionType | null): void;
+    /**
+     * Called whenever a reply is added to a comment. Used for updating said comment's
+     * `replies` state.
+     * @param reaction
+     */
+    updateReplies(comment: Comment, newReply: Comment): void;
   }
 
-  const { comment, username, updateReaction: updateReactionState }: CommentProps = $props();
+  const { comment, updateReaction: updateReactionState, updateReplies }: CommentProps = $props();
 
   let previousReaction: ReactionType | null = null;
-  let currentReaction = $state<ReactionType | null>(comment.user_reaction);
-  let replies = $state(comment.children ?? []);
+
   let reactionBar = $state<HTMLDetailsElement | null>(null);
 
-  const rendererButtonAttributes = {
-    width: 24,
-    height: 24,
-    class: "h-6 w-auto",
-    "aria-hidden": "true",
-    tabindex: -1,
-  } satisfies IconProps;
-
   const updateReaction = (reaction: ReactionType | null) => {
-    previousReaction = currentReaction;
-    currentReaction = reaction;
-    updateReactionState?.(reaction);
+    previousReaction = comment.user_reaction;
+    updateReactionState(comment, reaction);
   };
 </script>
 
@@ -52,12 +56,12 @@
     <MarkdownRenderer source={comment.content} startingHeading={4} />
     <div class="-m-1 mt-0 flex w-fit flex-row flex-wrap gap-2">
       <details bind:this={reactionBar} class="relative">
-        {#if currentReaction === null}
+        {#if !comment.user_reaction}
           <CommentRendererButton as="summary" aria-describedby="reaction-bar-{comment.id}">
             <ThumbUp {...rendererButtonAttributes} /> Like
           </CommentRendererButton>
         {:else}
-          {@const { icon, label, colors } = reactionRender[currentReaction]}
+          {@const { icon, label, colors } = reactionRender[comment.user_reaction]}
           <CommentRendererButton customColors={colors} as="summary" aria-describedby="reaction-bar-{comment.id}">
             <svelte:component this={icon} animatable={false} {...rendererButtonAttributes} />
             <span class="text-black dark:text-white">{label}</span>
@@ -97,13 +101,18 @@
   >
     <input class="peer sr-only" type="checkbox" checked={false} id="comment-toggle-{comment.id}" />
     <div class="hidden pt-3 peer-checked:block">
-      <CommentForm parentId={comment.id} updateComments={(newComment) => replies.unshift(newComment)} />
+      <CommentForm
+        parentId={comment.id}
+        updateReplies={(reply) => {
+          updateReplies(comment, reply);
+        }}
+      />
     </div>
-    {#if replies && replies.length > 0}
+    {#if comment.children && comment.children.length > 0}
       <ul class="flex flex-col gap-3 pt-3">
-        {#each replies as reply (reply.id)}
+        {#each comment.children as reply (reply.id)}
           <li>
-            <svelte:self comment={reply} {username} />
+            <svelte:self comment={reply} updateReaction={updateReactionState} {updateReplies} />
           </li>
         {/each}
       </ul>

@@ -28,7 +28,7 @@ export interface Comment {
   content: string;
   author_name: string;
   user_reaction: ReactionType | null;
-  children: Comment[];
+  children: Comment[] | null;
 }
 
 export interface BookAuthor {

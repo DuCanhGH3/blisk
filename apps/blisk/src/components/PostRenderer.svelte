@@ -1,39 +1,39 @@
 <script lang="ts">
+  // Component is (mostly) stateless so that it works with the virtual scroller.
   import type { Post, ReactionType } from "$lib/types";
   import Comment from "./icons/Comment.svelte";
   import Share from "./icons/Share.svelte";
   import ThumbUp from "./icons/ThumbUp.svelte";
   import ThumbUpFilled from "./icons/ThumbUpFilled.svelte";
-  import type { IconProps } from "./icons/types";
   import MarkdownRenderer from "./MarkdownRenderer.svelte";
   import PostRendererButton from "./PostRendererButton.svelte";
   import ReactionBar from "./ReactionBar.svelte";
-  import { reactionRender } from "./renderer-constants";
+  import { rendererButtonAttributes, reactionRender } from "./renderer-constants";
 
   interface PostRendererProps {
+    /**
+     * The post to be rendered. Must be a state for the component to work
+     * properly.
+     */
     post: Post;
-    updateReaction?(reaction: ReactionType | null): void;
+    /**
+     * Called whenever the user's reaction to the post is updated. Used for
+     * updating the reaction state.
+     * @param reaction
+     */
+    updateReaction(reaction: ReactionType | null): void;
   }
 
   const { post, updateReaction: updateReactionState }: PostRendererProps = $props();
 
   let previousReaction: ReactionType | null = null;
-  let currentReaction = $state<ReactionType | null>(post.user_reaction);
+
   let reactionBar = $state<HTMLDetailsElement | null>(null);
 
   const updateReaction = (reaction: ReactionType | null) => {
-    previousReaction = currentReaction;
-    currentReaction = reaction;
-    updateReactionState?.(reaction);
+    previousReaction = post.user_reaction;
+    updateReactionState(reaction);
   };
-
-  const rendererButtonAttributes = {
-    width: 24,
-    height: 24,
-    class: "h-6 w-auto",
-    "aria-hidden": "true",
-    tabindex: -1,
-  } satisfies IconProps;
 </script>
 
 <article class="box flex flex-col gap-3 rounded-[31px] p-4 shadow-md">
@@ -60,12 +60,12 @@
   <MarkdownRenderer source={post.content} startingHeading={4} />
   <div class="order-1 -m-1 flex flex-row flex-wrap gap-3">
     <details bind:this={reactionBar} class="relative flex-grow">
-      {#if !currentReaction}
+      {#if !post.user_reaction}
         <PostRendererButton as="summary" aria-describedby="reaction-bar-{post.id}">
           <ThumbUp {...rendererButtonAttributes} /> <span class="mb-[-1px]">Like</span>
         </PostRendererButton>
       {:else}
-        {@const { icon, label, colors } = reactionRender[currentReaction]}
+        {@const { icon, label, colors } = reactionRender[post.user_reaction]}
         <PostRendererButton customColors={colors} as="summary" aria-describedby="reaction-bar-{post.id}">
           <svelte:component this={icon} animatable={false} {...rendererButtonAttributes} />
           <span class="mb-[-1px] text-black dark:text-white">{label}</span>

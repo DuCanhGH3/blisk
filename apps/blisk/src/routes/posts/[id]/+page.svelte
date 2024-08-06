@@ -96,14 +96,17 @@
   </div>
   <section id="comments" class="flex h-full flex-col gap-3">
     <h2 class="sr-only">Comments</h2>
-    <CommentForm parentId={null} updateComments={(newComment) => comments.unshift(newComment)} />
+    <CommentForm parentId={null} updateReplies={(newComment) => comments.unshift(newComment)} />
     {#snippet renderer(comment: Comment)}
       <div class="pb-3">
         <CommentRenderer
           {comment}
-          username={data.user?.name}
-          updateReaction={(reaction) => {
+          updateReaction={(comment, reaction) => {
             comment.user_reaction = reaction;
+          }}
+          updateReplies={(comment, reply) => {
+            if (!comment.children) comment.children = [];
+            comment.children.unshift(reply);
           }}
         />
       </div>

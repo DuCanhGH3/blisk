@@ -33,6 +33,16 @@ export interface ParseAcceptLanguageOptions {
   ignoreWildcard?: boolean;
 }
 
+/**
+ * Parse the `Accept-Language` header.
+ * 
+ * Source: https://github.com/donavon/intl-parse-accept-language/blob/be8c28ba716b0fb48414d70ed7ff863c0876ef55/src/index.ts
+ * 
+ * License: MIT
+ * 
+ * @param options
+ * @returns 
+ */
 export const parseAcceptLanguage = ({
   acceptLanguage,
   validate = (locale: string) => locale,
@@ -51,7 +61,7 @@ export const parseAcceptLanguage = ({
 
       const numQ = Number(q.replace(/q ?=/, ""));
 
-      if (isNaN(numQ)) {
+      if (Number.isNaN(numQ)) {
         return [0, trimmedLocale];
       }
 
@@ -71,6 +81,18 @@ export const parseAcceptLanguage = ({
     });
 };
 
+/**
+ * Create a range used for iterating.
+ * 
+ * Source: https://github.com/sodiray/radash/blob/069b26cdd7d62e6ac16a0ad3baa1c9abcca420bc/src/array.ts#L321-L334
+ * 
+ * License: MIT
+ * 
+ * @param startOrLength 
+ * @param end 
+ * @param mapper 
+ * @param step 
+ */
 export function* range<T = number>(startOrLength: number, end?: number, mapper: (i: number) => T = (i) => i as T, step: number = 1): Generator<T> {
   const start = end ? startOrLength : 0;
   const final = end ?? startOrLength;
