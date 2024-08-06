@@ -6,6 +6,8 @@
   import LinkButton from "./LinkButton.svelte";
 
   const { data } = $props();
+
+  const reviews = $state(data.book.reviews);
 </script>
 
 <div class="mx-auto flex h-full w-full flex-col gap-8 p-4 md:p-10">
@@ -71,10 +73,15 @@
       {#if data.book.reviews.length > 0}
         {#snippet renderer(post: Post)}
           <div class="pb-6">
-            <PostRenderer {post} />
+            <PostRenderer
+              {post}
+              updateReaction={(reaction) => {
+                post.user_reaction = reaction;
+              }}
+            />
           </div>
         {/snippet}
-        <VirtualScroller items={data.book.reviews} {renderer} />
+        <VirtualScroller items={reviews} {renderer} />
       {:else}
         <p class="text-lg font-semibold leading-3 tracking-tight">There's no review yet!</p>
       {/if}

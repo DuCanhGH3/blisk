@@ -5,6 +5,13 @@
 
   const { data } = $props();
 
+  const posts = $state(
+    data.data.posts.map((post) => ({
+      ...post,
+      author_name: data.data.name,
+    }))
+  );
+
   const days = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 </script>
 
@@ -81,14 +88,14 @@
         {#snippet renderer(post: Post)}
           <div class="pb-4">
             <PostRenderer
-              post={{
-                ...post,
-                author_name: data.data.name,
+              {post}
+              updateReaction={(reaction) => {
+                post.user_reaction = reaction;
               }}
             />
           </div>
         {/snippet}
-        <VirtualScroller items={data.data.posts} {renderer} />
+        <VirtualScroller items={posts} {renderer} />
       </div>
     </article>
   </div>

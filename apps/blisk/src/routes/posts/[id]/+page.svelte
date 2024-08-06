@@ -97,12 +97,15 @@
   <section id="comments" class="flex h-full flex-col gap-3">
     <h2 class="sr-only">Comments</h2>
     <CommentForm parentId={null} updateComments={(newComment) => comments.unshift(newComment)} />
-    <!-- {#each comments as comment (comment.id)}
-      <CommentRenderer {comment} username={data.user?.name} />
-    {/each} -->
     {#snippet renderer(comment: Comment)}
       <div class="pb-3">
-        <CommentRenderer {comment} username={data.user?.name} />
+        <CommentRenderer
+          {comment}
+          username={data.user?.name}
+          updateReaction={(reaction) => {
+            comment.user_reaction = reaction;
+          }}
+        />
       </div>
     {/snippet}
     <VirtualScroller items={comments} {renderer} />

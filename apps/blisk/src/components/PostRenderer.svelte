@@ -12,13 +12,20 @@
 
   interface PostRendererProps {
     post: Post;
+    updateReaction?(reaction: ReactionType | null): void;
   }
 
-  const { post }: PostRendererProps = $props();
+  const { post, updateReaction: updateReactionState }: PostRendererProps = $props();
 
   let previousReaction: ReactionType | null = null;
   let currentReaction = $state<ReactionType | null>(post.user_reaction);
   let reactionBar = $state<HTMLDetailsElement | null>(null);
+
+  const updateReaction = (reaction: ReactionType | null) => {
+    previousReaction = currentReaction;
+    currentReaction = reaction;
+    updateReactionState?.(reaction);
+  };
 
   const rendererButtonAttributes = {
     width: 24,
@@ -30,7 +37,7 @@
 </script>
 
 <article class="box flex flex-col gap-3 rounded-[31px] p-4 shadow-md">
-  <h3 class="-order-1 h1 mb-4">{post.title}</h3>
+  <h3 class="h1 -order-1 mb-4">{post.title}</h3>
   <div class="-order-2 flex flex-row flex-wrap gap-2 font-semibold leading-10 tracking-tight">
     <img src="/no-avatar.webp" class="border-border-light dark:border-border-dark size-10 select-none rounded-full border shadow-lg" alt="" />
     <div>
@@ -71,14 +78,13 @@
         forId={post.id}
         forType="post"
         updateReaction={(reaction) => {
-          previousReaction = currentReaction;
-          currentReaction = reaction;
+          updateReaction(reaction);
           if (reactionBar) {
             reactionBar.open = false;
           }
         }}
         revertReaction={() => {
-          currentReaction = previousReaction;
+          updateReaction(previousReaction);
           previousReaction = null;
         }}
       />

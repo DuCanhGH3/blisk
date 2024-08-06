@@ -14,9 +14,10 @@
   interface CommentProps {
     comment: Comment;
     username: string | undefined;
+    updateReaction?(reaction: ReactionType | null): void;
   }
 
-  const { comment, username }: CommentProps = $props();
+  const { comment, username, updateReaction: updateReactionState }: CommentProps = $props();
 
   let previousReaction: ReactionType | null = null;
   let currentReaction = $state<ReactionType | null>(comment.user_reaction);
@@ -30,6 +31,12 @@
     "aria-hidden": "true",
     tabindex: -1,
   } satisfies IconProps;
+
+  const updateReaction = (reaction: ReactionType | null) => {
+    previousReaction = currentReaction;
+    currentReaction = reaction;
+    updateReactionState?.(reaction);
+  };
 </script>
 
 <article>
@@ -63,14 +70,13 @@
           forId={comment.id}
           forType="comment"
           updateReaction={(reaction) => {
-            previousReaction = currentReaction;
-            currentReaction = reaction;
+            updateReaction(reaction);
             if (reactionBar) {
               reactionBar.open = false;
             }
           }}
           revertReaction={() => {
-            currentReaction = previousReaction;
+            updateReaction(previousReaction);
             previousReaction = null;
           }}
         />

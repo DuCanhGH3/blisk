@@ -1,4 +1,5 @@
 <script lang="ts" generics="T extends { id: number | string }">
+  import { range } from "$lib/utils";
   // Note: since the virtual scroller destroys any component not in view,
   // states will not work properly.
   import { tick, type Snippet } from "svelte";
@@ -55,7 +56,6 @@
   let height = $state<number[]>(null!);
   let heightTree = $state<HeightTree | null>(null);
 
-  const visible = $derived(items.slice(start, end + 1));
   const paddingTop = $derived(start > 0 && heightTree ? heightTree.sum(start - 1) : 0);
   const paddingBottom = $derived(end < items.length - 1 && heightTree ? heightTree.rangeSum(end + 1, items.length - 1) : 0);
 
@@ -121,7 +121,7 @@
 
   const handleLayout = () => {
     if (!heightTree) return;
-    for (let i = 0; i <= visible.length; ++i) {
+    for (let i = 0; i <= end - start + 1; ++i) {
       const row = rows[i];
       if (row) {
         let offset = row.offsetHeight;
@@ -142,7 +142,7 @@
 <svelte:window onscroll={handleLayout} onresize={handleLayout} />
 
 <div bind:this={container} style="padding-top:{paddingTop}px;padding-bottom:{paddingBottom}px">
-  {#each visible as item, i (item.id)}
+  {#each range(start, end, (i) => items[i]) as item, i (item.id)}
     <div bind:this={rows[i]}>
       {@render renderer(item)}
     </div>
