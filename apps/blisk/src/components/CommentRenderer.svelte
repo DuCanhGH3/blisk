@@ -6,7 +6,7 @@
   import ThumbUp from "$components/icons/ThumbUp.svelte";
   import ReactionBar from "$components/ReactionBar.svelte";
   import { clsx } from "$lib/clsx";
-  import type { ClientComment, ReactionType } from "$lib/types";
+  import type { Comment, ReactionType } from "$lib/types";
   import CommentForm from "./CommentForm.svelte";
   import { rendererButtonAttributes, reactionRender } from "./renderer-constants";
   import MarkdownRenderer from "./MarkdownRenderer.svelte";
@@ -20,7 +20,7 @@
     /**
      * The comment to be rendered. Must be a state for the component to work properly.
      */
-    comment: ClientComment;
+    comment: Comment;
   }
 
   let { comment = $bindable() }: CommentProps = $props();
@@ -30,7 +30,7 @@
   let reactionBar = $state<HTMLDetailsElement | null>(null);
 
   const toggleEditingMode = () => {
-    comment.isEditing = !comment.isEditing;
+    comment.is_editing = !comment.is_editing;
   };
 
   const updateReaction = (reaction: ReactionType | null) => {
@@ -38,7 +38,7 @@
     comment.user_reaction = reaction;
   };
 
-  const updateReplies = (reply: ClientComment) => {
+  const updateReplies = (reply: Comment) => {
     if (!comment.children) comment.children = [];
     comment.children.unshift(reply);
   };
@@ -54,7 +54,7 @@
         <span class="text-comment text-xs">Just now</span>
       </span>
     </div>
-    {#if !comment.isEditing}
+    {#if !comment.is_editing}
       <MarkdownRenderer source={comment.content} startingHeading={4} />
       <div class="-m-1 mt-0 flex w-fit flex-row flex-wrap gap-2">
         <details bind:this={reactionBar} class="relative">

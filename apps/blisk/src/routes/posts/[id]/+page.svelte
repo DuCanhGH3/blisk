@@ -3,7 +3,7 @@
   import CommentForm from "$components/CommentForm.svelte";
   import MarkdownRenderer from "$components/MarkdownRenderer.svelte";
   import { reactionRender } from "$components/renderer-constants.js";
-  import type { ClientComment, ReactionType, Ref } from "$lib/types.js";
+  import type { Comment, ReactionType, Ref } from "$lib/types.js";
   import type { IconProps } from "$components/icons/types.js";
   import ThumbUp from "$components/icons/ThumbUp.svelte";
   import ReactionBar from "$components/ReactionBar.svelte";
@@ -15,13 +15,7 @@
 
   const { data } = $props();
 
-  let comments = $state<ClientComment[]>(
-    data.comments.map((comment) => ({
-      ...comment,
-      isEditing: false,
-      editText: comment.content,
-    }))
-  );
+  let comments = $state<Comment[]>(data.comments);
   let previousReaction: ReactionType | null = null;
   let currentReaction = $state<ReactionType | null>(data.post.user_reaction);
   let reactionBar = $state<HTMLDetailsElement | null>(null);
@@ -103,7 +97,7 @@
   <section id="comments" class="flex h-full flex-col gap-3">
     <h2 class="sr-only">Comments</h2>
     <CommentForm parentId={null} updateReplies={(newComment) => comments.unshift(newComment)} />
-    {#snippet renderer(comment: Ref<ClientComment>)}
+    {#snippet renderer(comment: Ref<Comment>)}
       <div class="pb-3">
         <CommentRenderer bind:comment={comment.ref} />
       </div>

@@ -29,13 +29,12 @@ export interface Comment {
   author_name: string;
   user_reaction: ReactionType | null;
   children: Comment[] | null;
-}
-
-export interface ClientComment extends Comment {
-  isEditing: boolean;
-  editText: string;
-  isProcessingEdit?: boolean | undefined;
-  oldContent?: string | undefined;
+  // The following are states that will be attached
+  // to the object as the user uses the app.
+  edit_text?: string;
+  is_editing?: boolean;
+  is_processing_edit?: boolean | undefined;
+  old_content?: string | undefined;
   error?: FormError<"content"> | undefined;
 }
 

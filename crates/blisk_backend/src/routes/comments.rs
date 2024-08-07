@@ -43,8 +43,8 @@ pub async fn read_base<'c>(
         r#"SELECT
             c.id,
             c.content,
-            u.name as "author_name: _",
-            ucr.type as "user_reaction: _",
+            u.name AS "author_name: _",
+            ucr.type AS "user_reaction: _",
             fetch_replies(
                 request_uid => $4,
                 request_pid => $1,
