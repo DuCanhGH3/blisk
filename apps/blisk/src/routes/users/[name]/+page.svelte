@@ -1,7 +1,7 @@
 <script lang="ts">
   import PostRenderer from "$components/PostRenderer.svelte";
   import VirtualScroller from "$components/VirtualScroller.svelte";
-  import type { Post } from "$lib/types.js";
+  import type { Post, Ref } from "$lib/types.js";
 
   const { data } = $props();
 
@@ -85,14 +85,9 @@
         </div>
       </div>
       <div>
-        {#snippet renderer(post: Post)}
+        {#snippet renderer(post: Ref<Post>)}
           <div class="pb-4">
-            <PostRenderer
-              {post}
-              updateReaction={(reaction) => {
-                post.user_reaction = reaction;
-              }}
-            />
+            <PostRenderer post={post.ref} />
           </div>
         {/snippet}
         <VirtualScroller items={posts} {renderer} />

@@ -1,4 +1,5 @@
 <script lang="ts" generics="T extends { id: number | string }">
+  import type { Ref } from "$lib/types";
   import { range } from "$lib/utils";
   // Note: since the virtual scroller destroys any component not in view,
   // states will not work properly.
@@ -6,7 +7,12 @@
 
   interface VirtualScrollerProps {
     items: T[];
-    renderer: Snippet<[T]>;
+    /**
+     * The data renderer. Should be stateless to work properly.
+     * We pass `Ref<T>` instead of `T` so that binding is possible,
+     * allowing the component to assign its states to the data.
+     */
+    renderer: Snippet<[Ref<T>]>;
   }
 
   const { items, renderer }: VirtualScrollerProps = $props();
@@ -144,7 +150,7 @@
 <div bind:this={container} style="padding-top:{paddingTop}px;padding-bottom:{paddingBottom}px">
   {#each range(start, end, (i) => items[i]) as item, i (item.id)}
     <div bind:this={rows[i]}>
-      {@render renderer(item)}
+      {@render renderer({ ref: item })}
     </div>
   {/each}
 </div>

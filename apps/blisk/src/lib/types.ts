@@ -31,6 +31,11 @@ export interface Comment {
   children: Comment[] | null;
 }
 
+export interface ClientComment extends Comment {
+  isEditing: boolean;
+  editText: string;
+}
+
 export interface BookAuthor {
   id: number;
   name: string;
@@ -56,3 +61,5 @@ export type ReactionType = z.infer<typeof reactionTypeSchema>;
 export type SetHeaders = (headers: Record<string, string>) => void;
 
 export type HeadingLevel = 1 | 2 | 3 | 4 | 5 | 6;
+
+export type Ref<T> = { ref: T };

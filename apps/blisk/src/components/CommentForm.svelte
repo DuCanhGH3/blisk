@@ -1,6 +1,6 @@
 <script lang="ts">
   import { enhance } from "$app/forms";
-  import type { Comment } from "$lib/types";
+  import type { ClientComment } from "$lib/types";
   import { OPTIMISTIC_ID } from "$lib/constants";
   import { page } from "$app/stores";
   import CommentIcon from "./icons/Comment.svelte";
@@ -8,7 +8,7 @@
 
   interface CommentFormProps {
     parentId: number | null;
-    updateReplies(newReply: Comment): void;
+    updateReplies(newReply: ClientComment): void;
   }
 
   const { parentId, updateReplies }: CommentFormProps = $props();
@@ -27,7 +27,7 @@
     const content = formData.get("content");
     const author_name = $page.data.user?.name;
     const post_id = Number.parseInt($page.params.id);
-    let comment = $state<Comment | null>(null);
+    let comment = $state<ClientComment | null>(null);
     if (typeof author_name === "string" && typeof content === "string" && !Number.isNaN(post_id)) {
       comment = {
         id: OPTIMISTIC_ID,
@@ -35,7 +35,9 @@
         author_name,
         user_reaction: null,
         children: [],
-      } satisfies Comment;
+        isEditing: false,
+        editText: content,
+      } satisfies ClientComment;
       updateReplies(comment);
     }
     return async ({ result, update }) => {

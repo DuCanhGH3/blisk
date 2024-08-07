@@ -1,10 +1,13 @@
 import { error, fail } from "@sveltejs/kit";
-import { createReaction, fetchBackend } from "$lib/backend";
+import { createReaction, editComment, fetchBackend } from "$lib/backend";
 import type { Comment, Post } from "$lib/types";
 import type { Actions, PageServerLoad } from "./$types";
 import { commentSchema } from "$lib/schemas";
 
 export const actions: Actions = {
+  async react({ cookies, fetch, request, setHeaders }) {
+    return await createReaction(await request.formData(), fetch, cookies, setHeaders);
+  },
   async comment({ cookies, fetch, params, request, setHeaders, url }) {
     const formData = await request.formData();
 
@@ -34,8 +37,8 @@ export const actions: Actions = {
 
     return { id: res.data.id };
   },
-  async react({ cookies, fetch, request, setHeaders }) {
-    return await createReaction(await request.formData(), fetch, cookies, setHeaders);
+  async editComment({ cookies, fetch, request, setHeaders }) {
+    return await editComment(await request.formData(), fetch, cookies, setHeaders);
   },
 };
 

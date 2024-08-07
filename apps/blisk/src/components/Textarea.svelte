@@ -1,6 +1,6 @@
 <script lang="ts" generics="T extends HTMLElement = HTMLElement, P extends any = any">
   import type { Action } from "svelte/action";
-  import type { HTMLTextareaAttributes } from "svelte/elements";
+  import type { FormEventHandler, HTMLTextareaAttributes } from "svelte/elements";
   import { combineActions } from "$lib/combineActions";
   import { clsx } from "$lib/clsx";
   import type { RequireFields } from "$lib/types";
@@ -13,7 +13,11 @@
     errorText?: string | string[];
   }
 
-  const { actions, label, id, errorTextId, errorText, class: className, oninput, ...rest }: TextareaProps = $props();
+  let { actions, label, id, errorTextId, errorText, value = $bindable(), class: className, oninput, ...rest }: TextareaProps = $props();
+
+  const oninputHandler: FormEventHandler<HTMLTextAreaElement> = (ev) => {
+    ev.currentTarget.style.height = `${Math.max(44, ev.currentTarget.offsetHeight, ev.currentTarget.scrollHeight)}px`;
+  };
 </script>
 
 <div class="relative w-full">
@@ -28,7 +32,8 @@
     aria-invalid={!!errorText}
     aria-describedby={errorText ? errorTextId : undefined}
     placeholder=" "
-    oninput={(ev) => (ev.currentTarget.style.height = `${Math.max(44, ev.currentTarget.offsetHeight, ev.currentTarget.scrollHeight)}px`)}
+    bind:value
+    oninput={oninputHandler}
     use:combineActions={actions}
     {...rest}
   ></textarea>

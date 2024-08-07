@@ -3,7 +3,7 @@
   import CommentForm from "$components/CommentForm.svelte";
   import MarkdownRenderer from "$components/MarkdownRenderer.svelte";
   import { reactionRender } from "$components/renderer-constants.js";
-  import type { Comment, ReactionType } from "$lib/types.js";
+  import type { ClientComment, ReactionType, Ref } from "$lib/types.js";
   import type { IconProps } from "$components/icons/types.js";
   import ThumbUp from "$components/icons/ThumbUp.svelte";
   import ReactionBar from "$components/ReactionBar.svelte";
@@ -15,7 +15,13 @@
 
   const { data } = $props();
 
-  let comments = $state(data.comments);
+  let comments = $state<ClientComment[]>(
+    data.comments.map((comment) => ({
+      ...comment,
+      isEditing: false,
+      editText: comment.content,
+    }))
+  );
   let previousReaction: ReactionType | null = null;
   let currentReaction = $state<ReactionType | null>(data.post.user_reaction);
   let reactionBar = $state<HTMLDetailsElement | null>(null);
@@ -56,19 +62,19 @@
       <details bind:this={reactionBar} class="relative">
         {#if !currentReaction}
           <CommentRendererButton as="summary" aria-describedby="reaction-bar-{data.post.id}">
-            <ThumbUp {...rendererButtonAttributes} /> <span class="mb-[-1px]">Like</span>
+            <ThumbUp {...rendererButtonAttributes} /> <span class="mb-[-1px] pr-1">Like</span>
           </CommentRendererButton>
         {:else}
           {@const { icon, label, colors } = reactionRender[currentReaction]}
           <CommentRendererButton customColors={colors} as="summary" aria-describedby="reaction-bar-{data.post.id}">
             <svelte:component this={icon} animatable={false} {...rendererButtonAttributes} />
-            <span class="mb-[-1px] text-black dark:text-white">{label}</span>
+            <span class="mb-[-1px] pr-1 text-black dark:text-white">{label}</span>
           </CommentRendererButton>
         {/if}
         <ReactionBar
           id="reaction-bar-{data.post.id}"
-          class="animate-fly absolute top-0 translate-y-[calc(-100%-4px)]"
-          style="--fly-translate:0.25rem"
+          class="animate-fly absolute bottom-full -translate-y-1"
+          style="--fly-translate-y:1rem"
           forId={data.post.id}
           forType="post"
           updateReaction={(reaction) => {
@@ -86,29 +92,20 @@
       </details>
       <CommentRendererButton as="a" href="#comments">
         <CommentIcon {...rendererButtonAttributes} />
-        <span class="mb-[-1px]">Comment</span>
+        <span class="mb-[-1px] pr-1">Comment</span>
       </CommentRendererButton>
       <CommentRendererButton as="div">
         <Share {...rendererButtonAttributes} />
-        <span class="mb-[-1px]">Share</span>
+        <span class="mb-[-1px] pr-1">Share</span>
       </CommentRendererButton>
     </div>
   </div>
   <section id="comments" class="flex h-full flex-col gap-3">
     <h2 class="sr-only">Comments</h2>
     <CommentForm parentId={null} updateReplies={(newComment) => comments.unshift(newComment)} />
-    {#snippet renderer(comment: Comment)}
+    {#snippet renderer(comment: Ref<ClientComment>)}
       <div class="pb-3">
-        <CommentRenderer
-          {comment}
-          updateReaction={(comment, reaction) => {
-            comment.user_reaction = reaction;
-          }}
-          updateReplies={(comment, reply) => {
-            if (!comment.children) comment.children = [];
-            comment.children.unshift(reply);
-          }}
-        />
+        <CommentRenderer bind:comment={comment.ref} />
       </div>
     {/snippet}
     <VirtualScroller items={comments} {renderer} />

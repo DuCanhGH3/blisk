@@ -12,19 +12,12 @@
 
   interface PostRendererProps {
     /**
-     * The post to be rendered. Must be a state for the component to work
-     * properly.
+     * The post to be rendered. Must be a state for the component to work properly.
      */
     post: Post;
-    /**
-     * Called whenever the user's reaction to the post is updated. Used for
-     * updating the reaction state.
-     * @param reaction
-     */
-    updateReaction(reaction: ReactionType | null): void;
   }
 
-  const { post, updateReaction: updateReactionState }: PostRendererProps = $props();
+  const { post = $bindable() }: PostRendererProps = $props();
 
   let previousReaction: ReactionType | null = null;
 
@@ -32,7 +25,7 @@
 
   const updateReaction = (reaction: ReactionType | null) => {
     previousReaction = post.user_reaction;
-    updateReactionState(reaction);
+    post.user_reaction = reaction;
   };
 </script>
 
@@ -73,8 +66,8 @@
       {/if}
       <ReactionBar
         id="reaction-bar-{post.id}"
-        class="animate-fly absolute top-0 translate-y-[calc(-100%-4px)]"
-        style="--fly-translate:0.25rem"
+        class="animate-fly absolute bottom-full -translate-y-1"
+        style="--fly-translate-y:1rem"
         forId={post.id}
         forType="post"
         updateReaction={(reaction) => {

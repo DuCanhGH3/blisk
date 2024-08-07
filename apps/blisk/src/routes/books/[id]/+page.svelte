@@ -2,7 +2,7 @@
   import PostRenderer from "$components/PostRenderer.svelte";
   import VirtualScroller from "$components/VirtualScroller.svelte";
   import { clsx } from "$lib/clsx";
-  import type { Post } from "$lib/types";
+  import type { Post, Ref } from "$lib/types";
   import LinkButton from "./LinkButton.svelte";
 
   const { data } = $props();
@@ -71,14 +71,9 @@
     <section id="reviews" class="flex basis-2/3 flex-col gap-6">
       <h2 class="text-3xl">Reviews</h2>
       {#if data.book.reviews.length > 0}
-        {#snippet renderer(post: Post)}
+        {#snippet renderer(post: Ref<Post>)}
           <div class="pb-6">
-            <PostRenderer
-              {post}
-              updateReaction={(reaction) => {
-                post.user_reaction = reaction;
-              }}
-            />
+            <PostRenderer post={post.ref} />
           </div>
         {/snippet}
         <VirtualScroller items={reviews} {renderer} />

@@ -6,40 +6,41 @@
   import ThumbUp from "$components/icons/ThumbUp.svelte";
   import ReactionBar from "$components/ReactionBar.svelte";
   import { clsx } from "$lib/clsx";
-  import type { Comment, ReactionType } from "$lib/types";
+  import type { ClientComment, ReactionType } from "$lib/types";
   import CommentForm from "./CommentForm.svelte";
   import { rendererButtonAttributes, reactionRender } from "./renderer-constants";
   import MarkdownRenderer from "./MarkdownRenderer.svelte";
+  import ThreeDots from "./icons/ThreeDots.svelte";
+  import Menu from "./Menu.svelte";
+  import MenuItem from "./MenuItem.svelte";
+  import Pencil from "./icons/Pencil.svelte";
+  import CommentEditor from "./CommentEditor.svelte";
 
   interface CommentProps {
     /**
-     * The comment to be rendered. Must be a state for the component to work
-     * properly.
+     * The comment to be rendered. Must be a state for the component to work properly.
      */
-    comment: Comment;
-    /**
-     * Called whenever the user's reaction to a comment is updated. Used for
-     * updating said comment's `user_reaction` state.
-     * @param reaction
-     */
-    updateReaction(comment: Comment, reaction: ReactionType | null): void;
-    /**
-     * Called whenever a reply is added to a comment. Used for updating said comment's
-     * `replies` state.
-     * @param reaction
-     */
-    updateReplies(comment: Comment, newReply: Comment): void;
+    comment: ClientComment;
   }
 
-  const { comment, updateReaction: updateReactionState, updateReplies }: CommentProps = $props();
+  const { comment = $bindable() }: CommentProps = $props();
 
   let previousReaction: ReactionType | null = null;
 
   let reactionBar = $state<HTMLDetailsElement | null>(null);
 
+  const toggleEditingMode = () => {
+    comment.isEditing = !comment.isEditing;
+  };
+
   const updateReaction = (reaction: ReactionType | null) => {
     previousReaction = comment.user_reaction;
-    updateReactionState(comment, reaction);
+    comment.user_reaction = reaction;
+  };
+
+  const updateReplies = (reply: ClientComment) => {
+    if (!comment.children) comment.children = [];
+    comment.children.unshift(reply);
   };
 </script>
 
@@ -53,45 +54,65 @@
         <span class="text-comment text-xs">Just now</span>
       </span>
     </div>
-    <MarkdownRenderer source={comment.content} startingHeading={4} />
-    <div class="-m-1 mt-0 flex w-fit flex-row flex-wrap gap-2">
-      <details bind:this={reactionBar} class="relative">
-        {#if !comment.user_reaction}
-          <CommentRendererButton as="summary" aria-describedby="reaction-bar-{comment.id}">
-            <ThumbUp {...rendererButtonAttributes} /> Like
+    {#if !comment.isEditing}
+      <MarkdownRenderer source={comment.content} startingHeading={4} />
+      <div class="-m-1 mt-0 flex w-fit flex-row flex-wrap gap-2">
+        <details bind:this={reactionBar} class="relative">
+          {#if !comment.user_reaction}
+            <CommentRendererButton as="summary" aria-describedby="reaction-bar-{comment.id}">
+              <ThumbUp {...rendererButtonAttributes} /> <span class="pr-1">Like</span>
+            </CommentRendererButton>
+          {:else}
+            {@const { icon, label, colors } = reactionRender[comment.user_reaction]}
+            <CommentRendererButton customColors={colors} as="summary" aria-describedby="reaction-bar-{comment.id}">
+              <svelte:component this={icon} animatable={false} {...rendererButtonAttributes} />
+              <span class="pr-1 text-black dark:text-white">{label}</span>
+            </CommentRendererButton>
+          {/if}
+          <ReactionBar
+            id="reaction-bar-{comment.id}"
+            class="animate-fly absolute bottom-full -translate-y-1"
+            style="--fly-translate-y:1rem"
+            forId={comment.id}
+            forType="comment"
+            updateReaction={(reaction) => {
+              updateReaction(reaction);
+              if (reactionBar) {
+                reactionBar.open = false;
+              }
+            }}
+            revertReaction={() => {
+              updateReaction(previousReaction);
+              previousReaction = null;
+            }}
+          />
+        </details>
+        <CommentRendererButton as="label" id="comment-toggle-label-{comment.id}" for="comment-toggle-{comment.id}">
+          <CommentIcon {...rendererButtonAttributes} /> <span class="pr-1">Comment</span>
+        </CommentRendererButton>
+        <CommentRendererButton as="div">
+          <Share {...rendererButtonAttributes} /> <span class="pr-1">Share</span>
+        </CommentRendererButton>
+        <details class="relative">
+          <CommentRendererButton as="summary" aria-describedby="menu-bar-{comment.id}">
+            <ThreeDots {...rendererButtonAttributes} /> <span class="sr-only">More</span>
           </CommentRendererButton>
-        {:else}
-          {@const { icon, label, colors } = reactionRender[comment.user_reaction]}
-          <CommentRendererButton customColors={colors} as="summary" aria-describedby="reaction-bar-{comment.id}">
-            <svelte:component this={icon} animatable={false} {...rendererButtonAttributes} />
-            <span class="text-black dark:text-white">{label}</span>
-          </CommentRendererButton>
-        {/if}
-        <ReactionBar
-          id="reaction-bar-{comment.id}"
-          class="animate-fly absolute top-0 translate-y-[calc(-100%-4px)]"
-          style="--fly-translate:0.25rem"
-          forId={comment.id}
-          forType="comment"
-          updateReaction={(reaction) => {
-            updateReaction(reaction);
-            if (reactionBar) {
-              reactionBar.open = false;
-            }
-          }}
-          revertReaction={() => {
-            updateReaction(previousReaction);
-            previousReaction = null;
-          }}
-        />
-      </details>
-      <CommentRendererButton as="label" id="comment-toggle-label-{comment.id}" for="comment-toggle-{comment.id}">
-        <CommentIcon {...rendererButtonAttributes} /> Comment
-      </CommentRendererButton>
-      <CommentRendererButton as="div">
-        <Share {...rendererButtonAttributes} /> Share
-      </CommentRendererButton>
-    </div>
+          <Menu
+            id="menu-bar-{comment.id}"
+            class="animate-fly dark:bg-neutral-915 bottom-full z-10 w-32 -translate-y-1 bg-white"
+            style="--fly-translate-y:1rem"
+          >
+            <div>
+              <MenuItem as="button" onclick={toggleEditingMode}>
+                <Pencil width={20} height={20} class="mr-2 h-auto w-5" aria-hidden="true" tabindex={-1} /> Edit
+              </MenuItem>
+            </div>
+          </Menu>
+        </details>
+      </div>
+    {:else}
+      <CommentEditor {comment} {toggleEditingMode} />
+    {/if}
   </div>
   <div
     class={clsx(
@@ -101,18 +122,13 @@
   >
     <input class="peer sr-only" type="checkbox" checked={false} id="comment-toggle-{comment.id}" />
     <div class="hidden pt-3 peer-checked:block">
-      <CommentForm
-        parentId={comment.id}
-        updateReplies={(reply) => {
-          updateReplies(comment, reply);
-        }}
-      />
+      <CommentForm parentId={comment.id} {updateReplies} />
     </div>
     {#if comment.children && comment.children.length > 0}
       <ul class="flex flex-col gap-3 pt-3">
         {#each comment.children as reply (reply.id)}
           <li>
-            <svelte:self comment={reply} updateReaction={updateReactionState} {updateReplies} />
+            <svelte:self comment={reply} />
           </li>
         {/each}
       </ul>

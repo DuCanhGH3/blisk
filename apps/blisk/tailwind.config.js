@@ -16,7 +16,7 @@ export default {
         fly: {
           from: {
             opacity: "0",
-            transform: "var(--fly-translate-y, translateY(-1rem))",
+            transform: "translateY(var(--fly-translate-y, -1rem))",
           },
         },
         "thumbs-up": {

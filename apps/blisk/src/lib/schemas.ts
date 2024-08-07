@@ -23,6 +23,11 @@ export const postIdSchema = z
   .int("Post ID must be an integer!")
   .safe("Post ID must be within safe range!");
 
+export const commentIdSchema = z
+  .number({ coerce: true, message: "Comment ID is not a number!" })
+  .int("Comment ID must be an integer!")
+  .safe("Comment ID must be within safe range!");
+
 export const commentSchema = z.object({
   post_id: postIdSchema,
   parent_id: z
@@ -47,4 +52,9 @@ export const reactionSchema = z.object({
   for_type: reactionForSchema,
   post_id: postIdSchema,
   reaction_type: reactionTypeSchema,
+});
+
+export const editCommentSchema = z.object({
+  id: commentIdSchema,
+  content: z.string().min(1, "Your comment must not be empty!"),
 });

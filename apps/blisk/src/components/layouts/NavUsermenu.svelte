@@ -3,6 +3,8 @@
   import { page } from "$app/stores";
   import LogOut from "$components/icons/LogOut.svelte";
   import UserCircle from "$components/icons/UserCircle.svelte";
+  import Menu from "$components/Menu.svelte";
+  import MenuItem from "$components/MenuItem.svelte";
   import { clsx } from "$lib/clsx";
   import type { User } from "$lib/types";
 
@@ -13,11 +15,6 @@
   }
 
   const { user, leftSided = false }: NavUsermenuProps = $props();
-
-  const NAV_USERMENU_CLASS = clsx(
-    "group flex w-full items-center rounded-md p-2 text-sm transition-colors duration-100",
-    "hover:bg-gray-200 text-black hover:dark:bg-neutral-800 dark:text-white"
-  );
 
   let navUsermenu = $state<HTMLDetailsElement | null>(null);
 
@@ -34,20 +31,13 @@
     <summary class="nav-button flex-shrink-0" id="navbar-usermenu-button">
       <img alt="Your avatar" width={24} height={24} class="h-6 w-6 rounded-full text-transparent" src="/no-avatar.webp" />
     </summary>
-    <div
-      class={clsx(
-        "absolute mt-2 w-52 origin-top-right rounded-[10px] shadow-lg transition ease-in-out [&>*]:p-1",
-        "border-[0.25px] border-border-light bg-white dark:border-gray-700 dark:bg-black",
-        "divide-y divide-neutral-300 ring-1 ring-black/5 focus:outline-none dark:divide-gray-700",
-        leftSided ? "right-0 md:left-0" : "right-0"
-      )}
-      aria-labelledby="navbar-usermenu-button"
+    <Menu
+      class={clsx("w-52 origin-top-right bg-white dark:bg-black", leftSided ? "right-0 md:left-0" : "right-0")}
       id="navbar-usermenu"
-      role="menu"
-      tabindex={0}
+      aria-labelledby="navbar-usermenu-button"
     >
       <div>
-        <div class="flex flex-row items-center gap-2 p-2" id="navbar-usermenu-items" role="menuitem" tabindex="-1">
+        <div class="flex flex-row items-center gap-2 p-2" id="navbar-usermenu-items" role="menuitem" tabindex={-1}>
           <!-- <img alt="Your avatar" width={40} height={40} class="h-10 w-10 rounded-full text-transparent" src={user.avatar} /> -->
           <div>
             <div class="text-base font-bold">
@@ -57,17 +47,17 @@
         </div>
       </div>
       <div>
-        <a href="/users/{user.name}" class={NAV_USERMENU_CLASS}>
-          <UserCircle width={24} height={24} class="mr-2 h-5 w-5" />
+        <MenuItem as="a" href="/users/{user.name}">
+          <UserCircle width={20} height={20} class="mr-2 h-auto w-5" aria-hidden="true" tabindex={-1} />
           Your profile
-        </a>
+        </MenuItem>
         <form method="POST" action="/login?/logout" use:enhance>
-          <button class={NAV_USERMENU_CLASS}>
-            <LogOut width={24} height={24} class="mr-2 h-5 w-5" />
+          <MenuItem as="button">
+            <LogOut width={20} height={20} class="mr-2 h-auto w-5" aria-hidden="true" tabindex={-1} />
             Sign out
-          </button>
+          </MenuItem>
         </form>
       </div>
-    </div>
+    </Menu>
   </details>
 {/if}
