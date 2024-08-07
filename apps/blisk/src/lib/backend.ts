@@ -10,11 +10,15 @@ export interface BackendInit extends RequestInit {
   cookies: Cookies;
   fetch: typeof globalThis.fetch;
   setHeaders: SetHeaders;
+  noSuccessContent?: boolean;
 }
 
 export type BackendResult<T> = { ok: true; data: T } | { ok: false; status: number; error: string };
 
-export const fetchBackend = async <T>(url: `/${string}`, { authz, cookies, fetch, setHeaders, ...init }: BackendInit): Promise<BackendResult<T>> => {
+export const fetchBackend = async <T>(
+  url: `/${string}`,
+  { authz, cookies, fetch, setHeaders, noSuccessContent, ...init }: BackendInit
+): Promise<BackendResult<T>> => {
   const headers = new Headers({
     Accept: "application/json",
     "Content-Type": "application/json",
@@ -63,6 +67,9 @@ export const fetchBackend = async <T>(url: `/${string}`, { authz, cookies, fetch
     }
     return { ok: false, status: res.status, error: validatedJson.data.error };
   }
+  if (noSuccessContent) {
+    return { ok: true, data: undefined as unknown as T };
+  }
   return { ok: true, data: await res.json() };
 };
 
@@ -109,6 +116,7 @@ export const editComment = async (formData: FormData, fetch: typeof globalThis.f
     cookies,
     fetch,
     setHeaders,
+    noSuccessContent: true,
     method: "PATCH",
     body: JSON.stringify(data.data),
     signal: AbortSignal.timeout(10000),

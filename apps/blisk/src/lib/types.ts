@@ -34,6 +34,9 @@ export interface Comment {
 export interface ClientComment extends Comment {
   isEditing: boolean;
   editText: string;
+  isProcessingEdit?: boolean | undefined;
+  oldContent?: string | undefined;
+  error?: FormError<"content"> | undefined;
 }
 
 export interface BookAuthor {
@@ -63,3 +66,5 @@ export type SetHeaders = (headers: Record<string, string>) => void;
 export type HeadingLevel = 1 | 2 | 3 | 4 | 5 | 6;
 
 export type Ref<T> = { ref: T };
+
+export type FormError<Fields extends string> = { error?: string | undefined; validationError: Record<Fields, string> };

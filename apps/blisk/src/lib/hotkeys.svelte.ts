@@ -77,6 +77,7 @@ export const getHotkeyMatcher = (hotkey: string): CheckHotkeyMatch => {
 
 export interface HotkeyItemOptions {
   preventDefault?: boolean;
+  tagsToIgnore?: string[];
 }
 
 const shouldFireEvent = (event: KeyboardEvent, tagsToIgnore: string[], triggerOnContentEditable = false) => {
@@ -94,9 +95,9 @@ const shouldFireEvent = (event: KeyboardEvent, tagsToIgnore: string[], triggerOn
 export const hotkeys = (hotkeys: HotkeyItem[], tagsToIgnore: string[] = ["INPUT", "TEXTAREA", "SELECT"], triggerOnContentEditable = false) => {
   $effect(() => {
     const keydownListener = (event: KeyboardEvent) => {
-      hotkeys.forEach(([hotkey, handler, options = { preventDefault: true }]) => {
-        if (getHotkeyMatcher(hotkey)(event) && shouldFireEvent(event, tagsToIgnore, triggerOnContentEditable)) {
-          if (options.preventDefault) {
+      hotkeys.forEach(([hotkey, handler, { preventDefault = true, tagsToIgnore: ignore = tagsToIgnore } = {}]) => {
+        if (getHotkeyMatcher(hotkey)(event) && shouldFireEvent(event, ignore, triggerOnContentEditable)) {
+          if (preventDefault) {
             event.preventDefault();
           }
 

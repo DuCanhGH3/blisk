@@ -23,7 +23,7 @@
     comment: ClientComment;
   }
 
-  const { comment = $bindable() }: CommentProps = $props();
+  let { comment = $bindable() }: CommentProps = $props();
 
   let previousReaction: ReactionType | null = null;
 
@@ -111,7 +111,7 @@
         </details>
       </div>
     {:else}
-      <CommentEditor {comment} {toggleEditingMode} />
+      <CommentEditor bind:comment={comment} />
     {/if}
   </div>
   <div

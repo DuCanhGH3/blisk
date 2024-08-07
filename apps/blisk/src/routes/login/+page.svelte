@@ -25,7 +25,7 @@
         };
       }}
     >
-      <h1>Login</h1>
+      <h1 class="h2">Login</h1>
       <Input
         id="login-username-input"
         label="Username"

@@ -20,7 +20,7 @@
         };
       }}
     >
-      <h1>Register</h1>
+      <h1 class="h2">Register</h1>
       <Input
         id="register-username-input"
         label="Username"
