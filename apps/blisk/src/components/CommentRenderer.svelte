@@ -15,6 +15,8 @@
   import MenuItem from "./MenuItem.svelte";
   import Pencil from "./icons/Pencil.svelte";
   import CommentEditor from "./CommentEditor.svelte";
+  import Trash from "./icons/Trash.svelte";
+  import { dialog } from "$lib/stores/dialog.svelte";
 
   interface CommentProps {
     /**
@@ -41,6 +43,25 @@
   const updateReplies = (reply: Comment) => {
     if (!comment.children) comment.children = [];
     comment.children.unshift(reply);
+  };
+
+  const openDeleteModal = () => {
+    dialog.state = {
+      type: "action",
+      title: "Are you sure you want to delete this?",
+      description: "There's no going back :)",
+      closeVariant: "error",
+      closeText: "Delete",
+      onClose() {
+        console.log("delete");
+        dialog.state = null;
+      },
+      cancelText: "Cancel",
+      onCancel() {
+        console.log("cancel");
+        dialog.state = null;
+      },
+    };
   };
 </script>
 
@@ -106,12 +127,15 @@
               <MenuItem as="button" onclick={toggleEditingMode}>
                 <Pencil width={20} height={20} class="mr-2 h-auto w-5" aria-hidden="true" tabindex={-1} /> Edit
               </MenuItem>
+              <MenuItem as="button" customColors="text-error-light dark:text-error-dark" onclick={openDeleteModal}>
+                <Trash width={20} height={20} class="mr-2 h-auto w-5" aria-hidden="true" tabindex={-1} /> Delete
+              </MenuItem>
             </div>
           </Menu>
         </details>
       </div>
     {:else}
-      <CommentEditor bind:comment={comment} />
+      <CommentEditor bind:comment />
     {/if}
   </div>
   <div

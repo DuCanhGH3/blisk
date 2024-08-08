@@ -77,6 +77,15 @@
   details > summary::-webkit-details-marker {
     @apply hidden;
   }
+  dialog {
+    @apply absolute hidden scale-95 opacity-0 transition-all duration-200 ease-out;
+  }
+  dialog[open] {
+    @apply relative flex scale-100 opacity-100;
+  }
+  dialog[open]::backdrop {
+    @apply bg-black/80;
+  }
 
   #root-container {
     @apply relative m-0 flex h-fit min-h-screen w-full flex-col p-0;

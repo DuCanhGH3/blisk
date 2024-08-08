@@ -147,6 +147,14 @@ export default {
         error: {
           light: "#a51a12",
           dark: "#f87171",
+          hover: {
+            light: "#8e1610",
+            dark: "#f98b8b",
+          },
+          disabled: {
+            light: "#73120d",
+            dark: "#f99a9a",
+          }
         },
         accent: {
           light: "#1e40af",

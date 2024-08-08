@@ -1,5 +1,8 @@
 <script lang="ts">
   // This component is stateless to work with the virtual scroller.
+  // Note(ducanhgh/2024-08-07 23:41): When we unmount the component
+  // via `comment.is_editing = false`, our focus returns to the
+  // beginning of the page. This is not a desired behaviour.
   import X from "$components/icons/X.svelte";
   import CommentIcon from "$components/icons/Comment.svelte";
   import type { Comment } from "$lib/types";

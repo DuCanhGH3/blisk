@@ -12,6 +12,7 @@
   import { isColorScheme } from "$lib/isColorScheme";
   import { colorScheme } from "$lib/stores/colorScheme";
   import { PUBLIC_CANONICAL_URL } from "$env/static/public";
+  import Dialog from "$components/layouts/Dialog.svelte";
 
   const { data, children } = $props();
   const isDark = $derived($colorScheme === "dark");
@@ -66,6 +67,7 @@
 
 <a class="absolute -top-full z-[100] text-black underline focus:top-0 dark:text-white" href="#main-content">Skip to main content</a>
 <GlobalSvgDefs />
+<Dialog />
 <div class="flex flex-1 flex-col md:flex-row">
   <VerticalNavbar user={data.user} />
   <main id="main-content">
