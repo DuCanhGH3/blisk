@@ -13,8 +13,10 @@
   $effect(() => {
     if (dialog.state !== null) {
       self?.showModal();
+      document.body.style.overflow = "hidden";
     } else {
       self?.close();
+      document.body.style.overflow = "";
     }
   });
 </script>
