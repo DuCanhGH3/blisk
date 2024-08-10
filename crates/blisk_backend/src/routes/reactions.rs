@@ -9,6 +9,7 @@ use axum::{
     response::{IntoResponse, Response},
 };
 use tracing::instrument;
+use validator::Validate;
 
 #[derive(Clone, Debug, PartialEq, PartialOrd, sqlx::Type, serde::Deserialize, serde::Serialize)]
 #[sqlx(type_name = "preact", rename_all = "snake_case")]
@@ -29,9 +30,10 @@ pub enum PostReactionFor {
     Comment,
 }
 
-#[derive(serde::Deserialize)]
+#[derive(serde::Deserialize, Validate)]
 pub struct CreatePayload {
     for_type: PostReactionFor,
+    #[validate(range(min = 0))]
     post_id: i64,
     reaction_type: PostReaction,
 }
@@ -77,9 +79,10 @@ pub async fn create(
     ))
 }
 
-#[derive(serde::Deserialize)]
+#[derive(serde::Deserialize, Validate)]
 pub struct DeletePayload {
     for_type: PostReactionFor,
+    #[validate(range(min = 0))]
     post_id: i64,
 }
 

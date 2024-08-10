@@ -26,6 +26,7 @@ use jsonwebtoken::{decode, encode, DecodingKey, EncodingKey, Header, Validation}
 use rand::{distributions::Alphanumeric, Rng};
 use redis::Commands;
 use tracing::instrument;
+use validator::Validate;
 
 #[derive(Clone, Debug, PartialEq, PartialOrd, sqlx::Type, serde::Deserialize, serde::Serialize)]
 #[sqlx(type_name = "urole", rename_all = "lowercase")]
@@ -337,10 +338,13 @@ pub async fn confirm(
     ))
 }
 
-#[derive(serde::Deserialize)]
+#[derive(serde::Deserialize, Validate)]
 pub struct RegisterPayload {
+    #[validate(length(min = 1))]
     email: String,
+    #[validate(length(min = 1))]
     password: String,
+    #[validate(length(min = 1))]
     username: String,
 }
 
@@ -404,9 +408,11 @@ pub async fn register(
 pub struct LoginQuery {
     client_id: String,
 }
-#[derive(serde::Deserialize)]
+#[derive(serde::Deserialize, Validate)]
 pub struct LoginPayload {
+    #[validate(length(min = 1))]
     username: String,
+    #[validate(length(min = 1))]
     password: String,
 }
 #[derive(serde::Serialize)]

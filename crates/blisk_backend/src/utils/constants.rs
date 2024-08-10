@@ -7,3 +7,6 @@ pub static TEMPLATES: LazyLock<minijinja::Environment<'static>> = LazyLock::new(
 });
 
 pub const UPLOADS_DIRECTORY: &str = "uploads";
+
+pub static SLUG_REGEX: LazyLock<regex::Regex> =
+    LazyLock::new(|| regex::Regex::new("^[a-z0-9](-?[a-z0-9])*$").unwrap());

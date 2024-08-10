@@ -81,6 +81,15 @@
         actions={[[trackActive, observer]]}
       />
       <Input
+        name="slug"
+        label="Slug (where to access the book)"
+        id="create-book-slug"
+        required
+        errorTextId="create-book-slug-error"
+        errorText={form?.validationError?.slug}
+        actions={[[trackActive, observer]]}
+      />
+      <Input
         type="number"
         name="pages"
         id="create-book-pages"

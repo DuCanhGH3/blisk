@@ -16,6 +16,7 @@ use axum::{
     response::{IntoResponse, Response},
 };
 use tracing::instrument;
+use validator::Validate;
 
 #[derive(serde::Serialize, serde::Deserialize, sqlx::FromRow)]
 pub struct Comment {
@@ -28,10 +29,13 @@ pub struct Comment {
     pub children: Option<sqlx::types::Json<Vec<Comment>>>,
 }
 
-#[derive(serde::Deserialize)]
+#[derive(serde::Deserialize, Validate)]
 pub struct CreatePayload {
+    #[validate(range(min = 0))]
     post_id: i64,
+    #[validate(range(min = 0))]
     parent_id: Option<i64>,
+    #[validate(length(min = 1))]
     content: String,
 }
 #[derive(serde::Serialize)]
@@ -121,9 +125,11 @@ pub async fn read(
     Ok(response(StatusCode::OK, None, AppJson(comments)))
 }
 
-#[derive(serde::Deserialize)]
+#[derive(serde::Deserialize, Validate)]
 pub struct UpdatePayload {
+    #[validate(range(min = 0))]
     id: i64,
+    #[validate(length(min = 1))]
     content: String,
 }
 
@@ -149,8 +155,9 @@ pub async fn update(
     Ok(StatusCode::NO_CONTENT)
 }
 
-#[derive(serde::Deserialize)]
+#[derive(serde::Deserialize, Validate)]
 pub struct DeletePayload {
+    #[validate(range(min = 0))]
     id: i64,
 }
 

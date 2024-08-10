@@ -17,6 +17,7 @@ use axum::{
     response::{IntoResponse, Response},
 };
 use tracing::instrument;
+use validator::Validate;
 
 #[derive(Clone, Debug, PartialEq, PartialOrd, sqlx::Type, serde::Deserialize, serde::Serialize)]
 #[sqlx(type_name = "breact", rename_all = "snake_case")]
@@ -37,10 +38,13 @@ pub struct Post {
     pub comments: Option<sqlx::types::Json<Vec<Comment>>>,
 }
 
-#[derive(serde::Deserialize)]
+#[derive(serde::Deserialize, Validate)]
 pub struct CreatePayload {
+    #[validate(range(min = 0))]
     book_id: i64,
+    #[validate(length(min = 1))]
     title: String,
+    #[validate(length(min = 1))]
     content: String,
     reaction: Reaction,
 }
@@ -128,10 +132,13 @@ pub async fn read(
     Ok(response(StatusCode::OK, None, AppJson(post)))
 }
 
-#[derive(serde::Deserialize)]
+#[derive(serde::Deserialize, Validate)]
 pub struct UpdatePayload {
+    #[validate(range(min = 0))]
     id: i64,
+    #[validate(length(min = 1))]
     title: Option<String>,
+    #[validate(length(min = 1))]
     content: Option<String>,
     reaction: Option<Reaction>,
 }
@@ -176,8 +183,9 @@ pub async fn update(
     Ok(StatusCode::NO_CONTENT)
 }
 
-#[derive(serde::Deserialize)]
+#[derive(serde::Deserialize, Validate)]
 pub struct DeletePayload {
+    #[validate(range(min = 0))]
     id: i64,
 }
 

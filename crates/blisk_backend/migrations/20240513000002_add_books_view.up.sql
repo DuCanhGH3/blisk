@@ -3,7 +3,11 @@ CREATE OR REPLACE VIEW book_view AS (
   SELECT
     b.id,
     b.title,
+    b.name,
+    b.pages,
     b.summary,
+    bl.name AS lang,
+    bl.code AS lang_code,
     (
       SELECT COALESCE(JSONB_AGG(bc) FILTER (WHERE bc.id IS NOT NULL), '[]'::JSONB)
       FROM (
@@ -25,5 +29,6 @@ CREATE OR REPLACE VIEW book_view AS (
       ) ba
     ) AS authors
   FROM books b
-  GROUP BY b.id
+  JOIN book_languages bl ON b.language = bl.code
+  GROUP BY b.id, bl.name, bl.code
 );

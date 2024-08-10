@@ -10,7 +10,7 @@ export const actions: Actions = {
 };
 
 export const load: PageServerLoad = async ({ cookies, params, setHeaders }) => {
-  const res = await fetchBackend<Book>(`/books?book_id=${params.id}`, {
+  const res = await fetchBackend<Book>(`/books/${params.id}`, {
     authz: "optional",
     cookies,
     fetch,

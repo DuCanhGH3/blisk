@@ -56,6 +56,7 @@ impl Application {
                 "/books",
                 post(routes::books::create).get(routes::books::read),
             )
+            .route("/books/:slug", get(routes::books::read_slug))
             .route(
                 "/posts",
                 post(routes::posts::create)

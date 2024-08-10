@@ -1,6 +1,7 @@
 -- Add up migration script here
 CREATE TABLE IF NOT EXISTS book_languages (
-    "name" TEXT NOT NULL PRIMARY KEY
+  "code" TEXT NOT NULL PRIMARY KEY,
+  "name" TEXT NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS book_categories (
@@ -17,9 +18,10 @@ CREATE TABLE IF NOT EXISTS books (
   "id" BIGSERIAL NOT NULL PRIMARY KEY,
   "title" TEXT NOT NULL,
   "name" TEXT NOT NULL UNIQUE,
+  "pages" INT NOT NULL,
   "language" TEXT NOT NULL,
   "summary" TEXT NOT NULL,
-  FOREIGN KEY ("name") REFERENCES book_languages ("name") ON DELETE CASCADE
+  FOREIGN KEY ("language") REFERENCES book_languages ("code") ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS book_to_category (
@@ -37,3 +39,5 @@ CREATE TABLE IF NOT EXISTS book_to_author (
   FOREIGN KEY ("author_id") REFERENCES book_authors ("id") ON DELETE CASCADE,
   PRIMARY KEY ("book_id", "author_id")
 );
+
+CREATE INDEX IF NOT EXISTS fkey_books_book_languages ON books ("language");

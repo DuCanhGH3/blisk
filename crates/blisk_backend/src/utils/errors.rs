@@ -4,6 +4,7 @@ use axum::{
     response::{IntoResponse, Response},
 };
 use axum_typed_multipart::TypedMultipartError;
+use validator::ValidationErrors;
 
 use super::{response::ErrorResponse, structs::AppJson};
 
@@ -43,8 +44,12 @@ pub enum PostsError {
 }
 #[derive(Debug, thiserror::Error)]
 pub enum BooksError {
+    #[error("duplicate slug {0}")]
+    SlugAlreadyExists(String),
+    #[error("language {0} does not exist")]
+    LanguageInvalid(String),
     #[error("book {0} cannot be found")]
-    BookNotFound(i64),
+    BookNotFound(String),
     #[error("this error is not expected")]
     Unexpected,
 }
@@ -58,6 +63,8 @@ pub enum UploadsError {
 
 #[derive(Debug, thiserror::Error)]
 pub enum AppError {
+    #[error("a validator error was met: {0}")]
+    ValidationErrors(#[from] ValidationErrors),
     #[error("error as an token was already used")]
     TokenUsed,
     #[error("error while authenticating an user: {0}")]
@@ -106,6 +113,7 @@ impl IntoResponse for AppError {
     fn into_response(self) -> Response {
         tracing::error!(error = %self, "an application error was thrown");
         let (status, error) = match self {
+            AppError::ValidationErrors(_) => (StatusCode::BAD_REQUEST, format!("{self}").replace('\n', ", ")),
             AppError::TokenUsed => (
                 StatusCode::UNPROCESSABLE_ENTITY,
                 "Token has either expired or been used.".to_owned(),
@@ -168,9 +176,17 @@ impl IntoResponse for AppError {
             }
             AppError::BooksError(error) => {
                 match error {
+                    BooksError::SlugAlreadyExists(slug) => (
+                        StatusCode::CONFLICT,
+                        format!("Slug {slug} already exists!")
+                    ),
+                    BooksError::LanguageInvalid(lang) => (
+                        StatusCode::CONFLICT,
+                        format!("Language {lang} is not valid.")
+                    ),
                     BooksError::BookNotFound(_) => (
                         StatusCode::NOT_FOUND,
-                        format!("Book not found")
+                        format!("Book not found.")
                     ),
                     BooksError::Unexpected => (
                         StatusCode::INTERNAL_SERVER_ERROR,

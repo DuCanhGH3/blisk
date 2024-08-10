@@ -6,11 +6,10 @@ use axum::{
     response::{IntoResponse, Response},
 };
 use axum_typed_multipart::{BaseMultipart, TryFromMultipart};
+use validator::Validate;
 
 use super::errors::AppError;
 
-#[derive(FromRequest)]
-#[from_request(via(axum::Json), rejection(AppError))]
 pub struct AppJson<T>(pub T);
 
 impl<T> IntoResponse for AppJson<T>
@@ -19,6 +18,21 @@ where
 {
     fn into_response(self) -> Response {
         axum::Json(self.0).into_response()
+    }
+}
+
+#[async_trait]
+impl<T, S> FromRequest<S> for AppJson<T>
+where
+    T: serde::de::DeserializeOwned + Validate,
+    S: Send + Sync,
+{
+    type Rejection = AppError;
+
+    async fn from_request(req: Request, state: &S) -> Result<Self, Self::Rejection> {
+        let base = axum::Json::<T>::from_request(req, state).await?;
+        base.0.validate()?;
+        Ok(Self(base.0))
     }
 }
 
