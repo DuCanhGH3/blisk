@@ -1,5 +1,6 @@
 <script lang="ts">
   import { enhance } from "$app/forms";
+  import Button from "$components/Button.svelte";
   import FilePicker from "$components/FilePicker.svelte";
   import Input from "$components/Input.svelte";
   import Textarea from "$components/Textarea.svelte";
@@ -88,7 +89,7 @@
           {/if}
         </ol>
       {/if}
-      <button class="button" type="submit" disabled={isLoading}>Post</button>
+      <Button as="button" type="submit" disabled={isLoading}>Post</Button>
       {#if form?.error}
         <p class="text-error-light dark:text-error-dark">{form.error}</p>
       {/if}

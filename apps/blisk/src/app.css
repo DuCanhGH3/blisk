@@ -308,14 +308,6 @@
   .nav-button.active {
     @apply bg-neutral-250 dark:bg-neutral-800;
   }
-  .button {
-    @apply transition-colors-opacity min-w-max rounded-md px-5 py-2.5 text-center text-sm font-medium duration-100 focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-gray-800;
-    @apply border-border-light dark:border-border-dark border shadow-md;
-    @apply bg-accent-light dark:bg-accent-dark [&:not(:disabled)]:hover:bg-accent-light/80 dark:[&:not(:disabled)]:hover:bg-accent-dark/80 text-white disabled:bg-gray-100 disabled:text-neutral-700 dark:text-black dark:disabled:bg-neutral-900 dark:disabled:text-neutral-400;
-  }
-  .button.light {
-    @apply text-accent-light dark:text-accent-dark dark:bg-neutral-915 [&:not(:disabled)]:hover:bg-neutral-150 bg-white dark:[&:not(:disabled)]:hover:bg-neutral-800;
-  }
   .datepicker + .label,
   .input:placeholder-shown:focus + .label,
   .input:not(:placeholder-shown) + .label,

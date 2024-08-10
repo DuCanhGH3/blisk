@@ -1,7 +1,9 @@
 import { z } from "zod";
-import type { Actions } from "./$types";
-import { fail } from "@sveltejs/kit";
+import type { Actions, PageServerLoad } from "./$types";
+import { error, fail } from "@sveltejs/kit";
 import { fetchBackend } from "$lib/backend";
+import type { BookCategory } from "$lib/types";
+import { bookCategoryIdSchema } from "$lib/schemas";
 
 const createSchema = z.object({
   title: z.string().min(1, "Title must not be empty!"),
@@ -16,6 +18,7 @@ const createSchema = z.object({
     ),
   pages: z.number({ coerce: true, message: "Number of pages must be a number!" }).safe().int("Number of pages must be an integer!"),
   summary: z.string().min(1, "Synopsis must not be empty!"),
+  categories: z.array(bookCategoryIdSchema),
 });
 
 export const actions: Actions = {
@@ -26,6 +29,7 @@ export const actions: Actions = {
       slug: formData.get("slug"),
       pages: formData.get("pages"),
       summary: formData.get("summary"),
+      categories: formData.getAll("categories"),
     });
     if (!data.success) {
       return fail(400, { validationError: data.error.flatten().fieldErrors });
@@ -39,7 +43,6 @@ export const actions: Actions = {
       body: JSON.stringify({
         ...data.data,
         language: "en-US",
-        categories: [1, 2, 3],
       }),
     });
     if (!backendResponse.ok) {
@@ -47,4 +50,17 @@ export const actions: Actions = {
     }
     // redirect(307, `${base}/posts/${backendResponse.data.id}`);
   },
+};
+
+export const load: PageServerLoad = async ({ cookies, fetch, setHeaders }) => {
+  const res = await fetchBackend<BookCategory[]>(`/books/categories`, {
+    authz: false,
+    cookies,
+    fetch,
+    setHeaders,
+  });
+  if (!res.ok) {
+    error(res.status, res.error);
+  }
+  return { categories: res.data };
 };

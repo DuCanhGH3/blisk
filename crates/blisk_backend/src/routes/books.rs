@@ -171,3 +171,17 @@ pub async fn read_slug(
     transaction.commit().await?;
     Ok(response(StatusCode::OK, None, AppJson(book)))
 }
+
+pub async fn read_categories(
+    State(AppState { pool, .. }): State<AppState>,
+) -> Result<Response, AppError> {
+    let mut transaction = pool.begin().await?;
+    let categories = sqlx::query_as!(
+        BookCategory,
+        r#"SELECT id AS "id!: _", name AS "name!: _" FROM book_categories"#
+    )
+    .fetch_all(&mut *transaction)
+    .await?;
+    transaction.commit().await?;
+    Ok(response(StatusCode::OK, None, AppJson(categories)))
+}

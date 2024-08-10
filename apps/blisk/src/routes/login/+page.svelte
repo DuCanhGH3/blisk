@@ -1,6 +1,7 @@
 <script>
   import { enhance } from "$app/forms";
   import { goto } from "$app/navigation";
+  import Button from "$components/Button.svelte";
   import Input from "$components/Input.svelte";
 
   const { form } = $props();
@@ -42,7 +43,7 @@
         errorText={form?.validationError?.password}
         errorTextId="login-password-error-text"
       />
-      <button class="button filled" disabled={isLoading} type="submit">Login</button>
+      <Button as="button" type="submit" disabled={isLoading}>Login</Button>
       <a class="link" href="/register">New? Register a new account!</a>
       {#if form?.error}
         <p class="text-error-light dark:text-error-dark">{form.error}</p>

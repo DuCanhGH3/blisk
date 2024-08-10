@@ -4,8 +4,10 @@
   import Input from "$components/Input.svelte";
   import NavLink from "$components/layouts/NavLink.svelte";
   import Textarea from "$components/Textarea.svelte";
+  import Button from "$components/Button.svelte";
+  import Select from "$components/Select.svelte";
 
-  const { form } = $props();
+  const { data, form } = $props();
 
   let isLoading = $state(false);
   let observer = $state<IntersectionObserver | null>(null);
@@ -47,8 +49,10 @@
 
   const links = [
     ["#create-book-title", "Book title"],
+    ["#create-book-slug", "Slug"],
     ["#create-book-pages", "Number of pages"],
     ["#create-book-content", "Book synopsis"],
+    ["#create-book-category", "Categories"],
   ] as const;
 </script>
 
@@ -108,9 +112,10 @@
         errorText={form?.validationError?.summary}
         actions={[[trackActive, observer]]}
       />
+      <Select id="create-book-category" label="Categories" options={data.categories} />
       <div class="flex w-full flex-row-reverse items-center gap-4">
-        <button class="button !px-20 !py-3" type="submit" disabled={isLoading}>Create</button>
-        <a class="button light !px-20 !py-3" href="/books">Cancel</a>
+        <Button as="button" class="!px-20 !py-3" type="submit" disabled={isLoading}>Create</Button>
+        <Button as="a" class="!px-20 !py-3" variant="light" href="/books">Cancel</Button>
         {#if form?.error}
           <p class="text-error-light dark:text-error-dark">{form.error}</p>
         {/if}

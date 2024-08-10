@@ -5,6 +5,7 @@
   import { page } from "$app/stores";
   import CommentIcon from "./icons/Comment.svelte";
   import Textarea from "./Textarea.svelte";
+  import Button from "./Button.svelte";
 
   interface CommentFormProps {
     parentId: number | null;
@@ -61,8 +62,8 @@
     errorText={$page.form?.validationError?.content}
     errorTextId="{idPrefix}-content-error-text"
   />
-  <button class="button absolute bottom-1 right-1 !rounded-full !p-2" disabled={isParentOptimistic || isProcessing}>
+  <Button as="button" class="absolute bottom-1 right-1 !rounded-full !p-2" disabled={isParentOptimistic || isProcessing}>
     <CommentIcon width={20} height={20} class="h-auto w-5" aria-hidden="true" tabindex={-1} />
     <span class="sr-only">{isParentComment ? "Comment" : "Reply"}</span>
-  </button>
+  </Button>
 </form>

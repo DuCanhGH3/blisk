@@ -3,6 +3,7 @@
   import { enhance } from "$app/forms";
   import NavLink from "$components/layouts/NavLink.svelte";
   import DatePicker from "$components/DatePicker.svelte";
+  import Button from "$components/Button.svelte";
 
   const { data, form } = $props();
 
@@ -94,8 +95,8 @@
         actions={[[trackActive, observer]]}
       />
       <div class="flex w-full flex-row-reverse items-center gap-4">
-        <button class="button !px-20 !py-3" type="submit" disabled={isLoading}>Start reading</button>
-        <a class="button light !px-20 !py-3" href="/books">Cancel</a>
+        <Button as="button" class="!px-20 !py-3" type="submit" disabled={isLoading}>Start reading</Button>
+        <Button as="a" variant="light" class="!px-20 !py-3" href="/books">Cancel</Button>
         {#if !!form?.error}
           {#if typeof form.error === "string"}
             <p class="text-error-light dark:text-error-dark">{form.error}</p>

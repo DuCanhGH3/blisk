@@ -9,6 +9,7 @@
   import { OPTIMISTIC_ID } from "$lib/constants";
   import Textarea from "./Textarea.svelte";
   import { hotkeys } from "$lib/hotkeys.svelte";
+  import Button from "./Button.svelte";
 
   interface CommentEditorProps {
     comment: Comment;
@@ -126,13 +127,20 @@
     </p>
   {/if}
   <div class="absolute bottom-2 right-2 flex flex-row gap-2">
-    <button type="button" class="button light !rounded-full !p-2" onclick={() => (comment.is_editing = false)} disabled={comment.is_processing_edit}>
+    <Button
+      as="button"
+      variant="light"
+      class="!rounded-full !p-2"
+      type="button"
+      onclick={() => (comment.is_editing = false)}
+      disabled={comment.is_processing_edit}
+    >
       <X width={20} height={20} class="h-auto w-5" aria-hidden="true" tabindex={-1} />
       <span class="sr-only">Cancel</span>
-    </button>
-    <button type="submit" class="button !rounded-full !p-2" disabled={isCommentOptimistic || comment.is_processing_edit}>
+    </Button>
+    <Button as="button" class="!rounded-full !p-2" type="submit" disabled={isCommentOptimistic || comment.is_processing_edit}>
       <CommentIcon width={20} height={20} class="h-auto w-5" aria-hidden="true" tabindex={-1} />
       <span class="sr-only">Edit</span>
-    </button>
+    </Button>
   </div>
 </form>

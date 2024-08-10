@@ -28,6 +28,11 @@ export const commentIdSchema = z
   .int("Comment ID must be an integer!")
   .safe("Comment ID must be within safe range!");
 
+export const bookCategoryIdSchema = z
+  .number({ coerce: true, message: "Category ID must be a number!" })
+  .int("Category ID must be an integer!")
+  .safe("Category ID must be within safe range!");
+
 export const commentSchema = z.object({
   post_id: postIdSchema,
   parent_id: z
