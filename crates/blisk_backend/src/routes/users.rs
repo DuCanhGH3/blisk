@@ -10,6 +10,7 @@ use axum::{
 };
 
 use super::auth::OptionalUserClaims;
+use super::comments::Comment;
 use super::posts::Reaction;
 use super::reactions::PostReaction;
 
@@ -33,6 +34,7 @@ struct ReadResponsePost {
 struct ReadResponse {
     name: String,
     posts: sqlx::types::Json<Vec<ReadResponsePost>>,
+    comments: sqlx::types::Json<Vec<Comment>>,
 }
 
 pub async fn read(
@@ -46,20 +48,41 @@ pub async fn read(
         ReadResponse,
         r#"SELECT
             u.name,
-            COALESCE(JSONB_AGG(p), '[]'::JSONB) AS "posts!: sqlx::types::Json<Vec<ReadResponsePost>>"
+            COALESCE((
+                SELECT JSONB_AGG(p) FILTER (WHERE p.id IS NOT NULL)
+                FROM (
+                    SELECT
+                        id,
+                        title,
+                        content,
+                        reaction,
+                        user_reaction
+                    FROM fetch_posts(request_uid => $2)
+                    ORDER BY id DESC
+                    LIMIT 5
+                    OFFSET 0
+                ) p
+            ), '[]'::JSONB) AS "posts!: sqlx::types::Json<Vec<ReadResponsePost>>",
+            COALESCE((
+                SELECT JSONB_AGG(c) FILTER (WHERE c.id IS NOT NULL)
+                FROM (
+                    SELECT
+                        c.id,
+                        c.content,
+                        c.author_name,
+                        c.user_reaction,
+                        c.children
+                    FROM fetch_comments(
+                        request_uid => $2,
+                        replies_depth => 0
+                    ) c
+                    WHERE c.author_id = u.id
+                    ORDER BY c.id DESC
+                    LIMIT 20
+                    OFFSET 0
+                ) c
+            ), '[]'::JSONB) AS "comments!: sqlx::types::Json<Vec<Comment>>"
         FROM users u
-        LEFT JOIN LATERAL (
-            SELECT
-                id,
-                title,
-                content,
-                reaction,
-                user_reaction
-            FROM fetch_posts(request_uid => $2)
-            ORDER BY id DESC
-            LIMIT 5
-            OFFSET 0
-        ) p ON TRUE
         WHERE u.name = $1
         GROUP BY u.id"#,
         &username,

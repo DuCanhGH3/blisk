@@ -103,9 +103,9 @@ pub async fn read(
             children AS "children?: sqlx::types::Json<Vec<Comment>>"
         FROM fetch_comments(
             request_uid => $1,
-            request_pid => $2,
             replies_depth => $3
         ) c
+        WHERE c.post_id = $2
         ORDER BY c.id DESC
         LIMIT $4
         OFFSET $5"#,

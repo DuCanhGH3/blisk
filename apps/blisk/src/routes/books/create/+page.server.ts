@@ -5,6 +5,7 @@ import { fetchBackend } from "$lib/backend";
 
 const postSchema = z.object({
   title: z.string().min(1, "Title must not be empty!"),
+  pages: z.number({ coerce: true, message: "Number of pages must be a number!" }).safe().int("Number of pages must be an integer!"),
   summary: z.string().min(1, "Summary must not be empty!"),
 });
 

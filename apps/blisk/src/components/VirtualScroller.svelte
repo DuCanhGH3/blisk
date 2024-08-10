@@ -15,7 +15,7 @@
     renderer: Snippet<[Ref<T>]>;
   }
 
-  const { items, renderer }: VirtualScrollerProps = $props();
+  const { items = $bindable(), renderer }: VirtualScrollerProps = $props();
 
   class HeightTree {
     private n = $state(0);

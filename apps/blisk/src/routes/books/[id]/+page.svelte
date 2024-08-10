@@ -9,7 +9,7 @@
 
   const reviews = $derived.by(() => {
     const state = $state(data.book.reviews);
-    return state;
+    return { state };
   });
 </script>
 
@@ -79,7 +79,7 @@
             <PostRenderer bind:post={post.ref} />
           </div>
         {/snippet}
-        <VirtualScroller items={reviews} {renderer} />
+        <VirtualScroller bind:items={reviews.state} {renderer} />
       {:else}
         <p class="text-lg font-semibold leading-3 tracking-tight">There's no review yet!</p>
       {/if}

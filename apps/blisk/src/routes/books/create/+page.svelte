@@ -46,8 +46,9 @@
   };
 
   const links = [
-    ["#create-book-title", "Title"],
-    ["#create-book-content", "Content"],
+    ["#create-book-title", "Book title"],
+    ["#create-book-pages", "Number of pages"],
+    ["#create-book-content", "Book synopsis"],
   ] as const;
 </script>
 
@@ -72,16 +73,25 @@
     >
       <Input
         name="title"
-        label="Title"
+        label="Book title"
         id="create-book-title"
         required
         errorTextId="create-book-title-error"
         errorText={form?.validationError?.title}
         actions={[[trackActive, observer]]}
       />
+      <Input
+        type="number"
+        name="pages"
+        id="create-book-pages"
+        label="Number of pages"
+        errorTextId="create-post-pages-error"
+        errorText={form?.validationError?.pages}
+        required
+      />
       <Textarea
         name="summary"
-        label="Synopsis"
+        label="Book synopsis"
         id="create-book-content"
         rows={5}
         required

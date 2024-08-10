@@ -101,6 +101,6 @@
         <CommentRenderer bind:comment={comment.ref} currentUser={data.user?.name} />
       </div>
     {/snippet}
-    <VirtualScroller items={post.comments} {renderer} />
+    <VirtualScroller bind:items={post.comments} {renderer} />
   </section>
 </article>

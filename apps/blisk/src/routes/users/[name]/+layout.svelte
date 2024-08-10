@@ -78,6 +78,7 @@
         <Link href={`${basePath}/dislikes`}>Dislikes</Link>
       </div>
       <div>
+        <!-- TODO(ducanhgh): Currently, any optimistic update gets removed as the user navigates through the pages of the layout. -->
         {@render children()}
       </div>
     </article>

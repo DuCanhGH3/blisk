@@ -1,11 +1,12 @@
 import { fetchBackend } from "$lib/backend";
 import { error } from "@sveltejs/kit";
 import type { LayoutServerLoad } from "./$types";
-import type { Post } from "$lib/types";
+import type { Comment, Post } from "$lib/types";
 
 interface LoadData {
   name: string;
   posts: Post[];
+  comments: Comment[];
 }
 
 export const load: LayoutServerLoad = async ({ cookies, fetch, params, setHeaders }) => {

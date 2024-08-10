@@ -8,7 +8,7 @@ CREATE TYPE PREACT AS ENUM (
     'angry'
 );
 
-CREATE TABLE post_reactions (
+CREATE TABLE IF NOT EXISTS post_reactions (
     "type" PREACT NOT NULL,
     "user_id" BIGINT NOT NULL,
     "post_id" BIGINT NOT NULL,
@@ -17,7 +17,7 @@ CREATE TABLE post_reactions (
     PRIMARY KEY (user_id, post_id)
 );
 
-CREATE TABLE comment_reactions (
+CREATE TABLE IF NOT EXISTS comment_reactions (
     "type" PREACT NOT NULL,
     "user_id" BIGINT NOT NULL,
     "comment_id" BIGINT NOT NULL,

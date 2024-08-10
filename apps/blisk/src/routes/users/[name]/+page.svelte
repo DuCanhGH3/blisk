@@ -5,12 +5,15 @@
 
   const { data } = $props();
 
-  const posts = $state(
-    data.data.posts.map((post) => ({
-      ...post,
-      author_name: data.data.name,
-    }))
-  );
+  let posts = $derived.by(() => {
+    const state = $state(
+      data.data.posts.map((post) => ({
+        ...post,
+        author_name: data.data.name,
+      }))
+    );
+    return { state };
+  });
 </script>
 
 {#snippet renderer(post: Ref<Post>)}
@@ -18,4 +21,4 @@
     <PostRenderer bind:post={post.ref} />
   </div>
 {/snippet}
-<VirtualScroller items={posts} {renderer} />
+<VirtualScroller bind:items={posts.state} {renderer} />

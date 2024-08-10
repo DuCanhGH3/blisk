@@ -106,9 +106,9 @@ pub async fn read(
         LEFT JOIN LATERAL (
             SELECT * FROM fetch_comments(
                 request_uid => $2,
-                request_pid => p.id,
                 replies_depth => 4
             ) c
+            WHERE c.post_id = p.id
             ORDER BY c.id DESC
             LIMIT 20
             OFFSET 0
