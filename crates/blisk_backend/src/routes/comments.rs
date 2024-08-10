@@ -15,7 +15,6 @@ use axum::{
     http::StatusCode,
     response::{IntoResponse, Response},
 };
-use sqlx::Postgres;
 use tracing::instrument;
 
 #[derive(serde::Serialize, serde::Deserialize, sqlx::FromRow)]
@@ -27,49 +26,6 @@ pub struct Comment {
     pub user_reaction: Option<PostReaction>,
     #[sqlx(default)]
     pub children: Option<sqlx::types::Json<Vec<Comment>>>,
-}
-
-pub async fn read_base<'c>(
-    transaction: &mut sqlx::Transaction<'c, Postgres>,
-    OptionalUserClaims(claims): &OptionalUserClaims,
-    post_id: i64,
-    limit: i64,
-    offset: i64,
-) -> Result<Vec<Comment>, AppError> {
-    let uid = claims.as_ref().map(|claims| claims.sub);
-
-    let comments = sqlx::query_as!(
-        Comment,
-        r#"SELECT
-            c.id,
-            c.content,
-            u.name AS "author_name: _",
-            ucr.type AS "user_reaction: _",
-            fetch_replies(
-                request_uid => $4,
-                request_pid => $1,
-                parent_id => c.id,
-                parent_path => c.path,
-                current_level => 4
-            ) AS "children: sqlx::types::Json<Vec<Comment>>"
-        FROM comments c
-        JOIN users u
-        ON c.author_id = u.id
-        LEFT JOIN comment_reactions ucr
-        ON ucr.comment_id = c.id AND ucr.user_id = $4
-        WHERE c.post_id = $1 AND c.path = 'Top'
-        ORDER BY c.id DESC
-        LIMIT $2
-        OFFSET $3"#,
-        &post_id,
-        &limit,
-        &offset,
-        &uid as &_,
-    )
-    .fetch_all(&mut **transaction)
-    .await?;
-
-    Ok(comments)
 }
 
 #[derive(serde::Deserialize)]
@@ -132,13 +88,37 @@ pub struct ReadQuery {
 #[instrument(name = "Reading a comment", skip(pool, claims))]
 pub async fn read(
     State(AppState { pool, .. }): State<AppState>,
-    claims: OptionalUserClaims,
+    OptionalUserClaims(claims): OptionalUserClaims,
     Query(ReadQuery { post_id, offset }): Query<ReadQuery>,
 ) -> Result<Response, AppError> {
     let mut transaction = pool.begin().await?;
-    let comments_list = read_base(&mut transaction, &claims, post_id, 20, offset).await?;
+    let uid = claims.as_ref().map(|claims| claims.sub);
+    let comments = sqlx::query_as!(
+        Comment,
+        r#"SELECT
+            c.id AS "id!: _",
+            c.content AS "content!: _",
+            c.author_name AS "author_name!: _",
+            c.user_reaction AS "user_reaction!: _",
+            children AS "children?: sqlx::types::Json<Vec<Comment>>"
+        FROM fetch_comments(
+            request_uid => $1,
+            request_pid => $2,
+            replies_depth => $3
+        ) c
+        ORDER BY c.id DESC
+        LIMIT $4
+        OFFSET $5"#,
+        &uid as &_,
+        &post_id,
+        4,
+        20,
+        &offset,
+    )
+    .fetch_all(&mut *transaction)
+    .await?;
     transaction.commit().await?;
-    Ok(response(StatusCode::OK, None, AppJson(comments_list)))
+    Ok(response(StatusCode::OK, None, AppJson(comments)))
 }
 
 #[derive(serde::Deserialize)]

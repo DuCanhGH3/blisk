@@ -1,6 +1,6 @@
 use super::{
     auth::{OptionalUserClaims, UserClaims},
-    comments::{self, Comment},
+    comments::Comment,
     reactions::PostReaction,
 };
 use crate::{
@@ -34,6 +34,7 @@ pub struct Post {
     pub author_name: String,
     pub reaction: Reaction,
     pub user_reaction: Option<PostReaction>,
+    pub comments: Option<sqlx::types::Json<Vec<Comment>>>,
 }
 
 #[derive(serde::Deserialize)]
@@ -82,11 +83,6 @@ pub async fn create(
 pub struct ReadQuery {
     post_id: i64,
 }
-#[derive(serde::Serialize)]
-pub struct ReadResponse {
-    post: Post,
-    comments: Vec<Comment>,
-}
 
 #[instrument(name = "Reading a post", skip(pool, claims))]
 pub async fn read(
@@ -99,17 +95,26 @@ pub async fn read(
     let post = sqlx::query_as!(
         Post,
         r#"SELECT
-            p.id,
-            p.title,
-            p.content,
-            u.name as author_name,
-            p.reaction AS "reaction: _",
-            ucr.type AS "user_reaction: _"
-        FROM posts p
-        JOIN users u ON p.author_id = u.id
-        LEFT JOIN post_reactions ucr
-        ON ucr.post_id = $1 AND ucr.user_id = $2
-        WHERE p.id = $1"#,
+            p.id AS "id!: _",
+            p.title AS "title!: _",
+            p.content AS "content!: _", 
+            p.author_name AS "author_name!: _",
+            p.reaction AS "reaction!: _",
+            p.user_reaction AS "user_reaction!: _",
+            COALESCE(JSONB_AGG(c) FILTER (WHERE c.id IS NOT NULL), '[]'::JSONB) AS "comments!: sqlx::types::Json<Vec<Comment>>"
+        FROM fetch_posts(request_uid => $2) p
+        LEFT JOIN LATERAL (
+            SELECT * FROM fetch_comments(
+                request_uid => $2,
+                request_pid => p.id,
+                replies_depth => 4
+            ) c
+            ORDER BY c.id DESC
+            LIMIT 20
+            OFFSET 0
+        ) c ON TRUE
+        WHERE p.id = $1
+        GROUP BY p.id, p.title, p.content, p.author_name, p.reaction, p.user_reaction"#,
         &post_id,
         &uid as &_,
     )
@@ -119,13 +124,8 @@ pub async fn read(
         sqlx::Error::RowNotFound => PostsError::PostNotFound(post_id),
         _ => PostsError::Unexpected,
     })?;
-    let comments = comments::read_base(&mut transaction, &claims, post_id, 20, 0).await?;
     transaction.commit().await?;
-    Ok(response(
-        StatusCode::OK,
-        None,
-        AppJson(ReadResponse { post, comments }),
-    ))
+    Ok(response(StatusCode::OK, None, AppJson(post)))
 }
 
 #[derive(serde::Deserialize)]

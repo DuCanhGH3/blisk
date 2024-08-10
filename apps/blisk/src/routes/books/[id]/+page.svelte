@@ -7,7 +7,10 @@
 
   const { data } = $props();
 
-  const reviews = $state(data.book.reviews);
+  const reviews = $derived.by(() => {
+    const state = $state(data.book.reviews);
+    return state;
+  });
 </script>
 
 <div class="mx-auto flex h-full w-full flex-col gap-8 p-4 md:p-10">
@@ -73,7 +76,7 @@
       {#if data.book.reviews.length > 0}
         {#snippet renderer(post: Ref<Post>)}
           <div class="pb-6">
-            <PostRenderer post={post.ref} />
+            <PostRenderer bind:post={post.ref} />
           </div>
         {/snippet}
         <VirtualScroller items={reviews} {renderer} />

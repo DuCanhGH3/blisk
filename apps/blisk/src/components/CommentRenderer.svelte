@@ -24,9 +24,13 @@
      * The comment to be rendered. Must be a state for the component to work properly.
      */
     comment: Comment;
+    /**
+     * The current user's name. Used for checking whether the comment belongs to them.
+     */
+    currentUser: string | undefined;
   }
 
-  let { comment = $bindable() }: CommentProps = $props();
+  let { comment = $bindable(), currentUser }: CommentProps = $props();
 
   let previousReaction: ReactionType | null = null;
 
@@ -126,25 +130,27 @@
         <CommentRendererButton as="div">
           <Share {...rendererButtonAttributes} /> <span class="pr-1">Share</span>
         </CommentRendererButton>
-        <details bind:this={menu} class="relative">
-          <CommentRendererButton as="summary" aria-describedby="menu-bar-{comment.id}">
-            <ThreeDots {...rendererButtonAttributes} /> <span class="sr-only">More</span>
-          </CommentRendererButton>
-          <Menu
-            id="menu-bar-{comment.id}"
-            class="animate-fly dark:bg-neutral-915 bottom-full z-10 w-32 -translate-y-1 bg-white"
-            style="--fly-translate-y:1rem"
-          >
-            <div>
-              <MenuItem as="button" onclick={toggleEditingMode}>
-                <Pencil width={20} height={20} class="mr-2 h-auto w-5" aria-hidden="true" tabindex={-1} /> Edit
-              </MenuItem>
-              <MenuItem as="button" customColors="text-error-light dark:text-error-dark" onclick={openDeleteModal}>
-                <Trash width={20} height={20} class="mr-2 h-auto w-5" aria-hidden="true" tabindex={-1} /> Delete
-              </MenuItem>
-            </div>
-          </Menu>
-        </details>
+        {#if currentUser === comment.author_name}
+          <details bind:this={menu} class="relative">
+            <CommentRendererButton as="summary" aria-describedby="menu-bar-{comment.id}">
+              <ThreeDots {...rendererButtonAttributes} /> <span class="sr-only">More</span>
+            </CommentRendererButton>
+            <Menu
+              id="menu-bar-{comment.id}"
+              class="animate-fly dark:bg-neutral-915 bottom-full z-10 w-32 -translate-y-1 bg-white"
+              style="--fly-translate-y:1rem"
+            >
+              <div>
+                <MenuItem as="button" onclick={toggleEditingMode}>
+                  <Pencil width={20} height={20} class="mr-2 h-auto w-5" aria-hidden="true" tabindex={-1} /> Edit
+                </MenuItem>
+                <MenuItem as="button" customColors="text-error-light dark:text-error-dark" onclick={openDeleteModal}>
+                  <Trash width={20} height={20} class="mr-2 h-auto w-5" aria-hidden="true" tabindex={-1} /> Delete
+                </MenuItem>
+              </div>
+            </Menu>
+          </details>
+        {/if}
       </div>
     {:else}
       <CommentEditor bind:comment />
@@ -164,7 +170,7 @@
       <ul class="flex flex-col gap-3 pt-3">
         {#each comment.children as reply (reply.id)}
           <li>
-            <svelte:self comment={reply} />
+            <svelte:self comment={reply} {currentUser} />
           </li>
         {/each}
       </ul>

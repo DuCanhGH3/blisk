@@ -27,7 +27,7 @@ struct ReadResponsePost {
     title: String,
     content: String,
     reaction: Reaction,
-    user_reaction: Option<PostReaction>, // comments: Vec<ReadResponseComment>,
+    user_reaction: Option<PostReaction>,
 }
 #[derive(serde::Serialize, sqlx::FromRow)]
 struct ReadResponse {

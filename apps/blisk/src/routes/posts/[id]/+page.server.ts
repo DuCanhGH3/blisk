@@ -1,6 +1,6 @@
 import { error, fail } from "@sveltejs/kit";
 import { createReaction, editComment, fetchBackend } from "$lib/backend";
-import type { Comment, Post } from "$lib/types";
+import type { Post, RequireFields } from "$lib/types";
 import type { Actions, PageServerLoad } from "./$types";
 import { commentSchema } from "$lib/schemas";
 
@@ -43,7 +43,7 @@ export const actions: Actions = {
 };
 
 export const load: PageServerLoad = async ({ cookies, fetch, params, setHeaders }) => {
-  const res = await fetchBackend<{ post: Post; comments: Comment[] }>(`/posts?post_id=${params.id}`, {
+  const res = await fetchBackend<RequireFields<Post, "comments">>(`/posts?post_id=${params.id}`, {
     authz: "optional",
     cookies,
     fetch,
@@ -53,8 +53,5 @@ export const load: PageServerLoad = async ({ cookies, fetch, params, setHeaders 
   if (!res.ok) {
     error(res.status, { message: res.error });
   }
-  return {
-    post: res.data.post,
-    comments: res.data.comments,
-  };
+  return { post: res.data };
 };

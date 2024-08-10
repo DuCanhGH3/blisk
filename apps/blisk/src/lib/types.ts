@@ -1,6 +1,8 @@
 import type { COLOR_SCHEMES, VALID_REACTION_FOR, VALID_REACTIONS } from "./constants";
 
-export type RequireFields<T, K extends keyof T> = Omit<T, K> & Required<Pick<T, K>>;
+export type RequireFields<T, K extends keyof T> = Omit<T, K> & {
+  [P in keyof Pick<T, K>]-?: NonNullable<T[P]>;
+};
 
 export type ColorScheme = (typeof COLOR_SCHEMES)[number];
 
@@ -19,6 +21,7 @@ export interface Post {
   author_name: string;
   reaction: BookReaction;
   user_reaction: ReactionType | null;
+  comments: Comment[] | null;
 }
 
 export interface Comment {
