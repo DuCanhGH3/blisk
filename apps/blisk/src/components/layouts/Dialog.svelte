@@ -4,24 +4,14 @@
   import { dialog } from "$lib/stores/dialog.svelte";
   import type { HTMLDialogAttributes } from "svelte/elements";
 
-  interface DialogProps extends HTMLDialogAttributes {
-    self?: HTMLDialogElement | null;
-  }
-
-  let { self = $bindable(), class: className, ...props }: DialogProps = $props();
-
-  $effect(() => {
-    if (dialog.state !== null) {
-      self?.showModal();
-      document.body.style.overflow = "hidden";
-    } else {
-      self?.close();
-      document.body.style.overflow = "";
-    }
-  });
+  let { class: className, ...props }: HTMLDialogAttributes = $props();
 </script>
 
-<dialog bind:this={self} class={clsx("box md flex w-[90dvw] max-w-[500px] flex-col gap-8 !p-8 text-black dark:text-white", className)} {...props}>
+<dialog
+  bind:this={dialog.element}
+  class={clsx("box md flex w-[90dvw] max-w-[500px] flex-col gap-8 !p-8 text-black dark:text-white", className)}
+  {...props}
+>
   {#if dialog.state}
     <div>
       <h1 class="h4 mb-4">{dialog.state.title}</h1>

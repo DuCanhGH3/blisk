@@ -2,7 +2,7 @@
   import type { ReactionProps } from "../types";
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const { animatable = true, ...props }: ReactionProps = $props();
+  const { animatable = true, children, ...props }: ReactionProps = $props();
 </script>
 
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="none" {...props}>
@@ -36,4 +36,7 @@
     fill="url(#sad-teardrop-gra)"
     d="M13.5 13.606c-.328 0-.594-.296-.594-.66 0-.366.141-.613.255-.852.236-.498.283-.566.34-.566.055 0 .102.068.338.566.114.24.255.486.255.851s-.266.661-.594.661"
   />
+  {#if children}
+    {@render children()}
+  {/if}
 </svg>

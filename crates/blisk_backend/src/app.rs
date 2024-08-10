@@ -70,7 +70,10 @@ impl Application {
                     .patch(routes::comments::update)
                     .delete(routes::comments::delete),
             )
-            .route("/reactions", post(routes::reactions::create))
+            .route(
+                "/reactions",
+                post(routes::reactions::create).delete(routes::reactions::delete),
+            )
             .route("/users", get(routes::users::read))
             .route("/auth/authenticate", post(routes::auth::authenticate))
             .route("/auth/confirm", post(routes::auth::confirm))

@@ -69,6 +69,7 @@
           id="reaction-bar-{data.post.id}"
           class="animate-fly absolute bottom-full -translate-y-1"
           style="--fly-translate-y:1rem"
+          {currentReaction}
           forId={data.post.id}
           forType="post"
           updateReaction={(reaction) => {

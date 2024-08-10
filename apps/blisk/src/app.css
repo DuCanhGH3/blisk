@@ -28,10 +28,6 @@
   button {
     @apply cursor-pointer;
   }
-  html,
-  body {
-    @apply m-0 flex h-full w-full p-0;
-  }
   html {
     @apply scroll-smooth;
   }
@@ -337,7 +333,7 @@
     @apply text-[#a51a12] dark:text-red-400;
   }
   .react-button {
-    @apply relative flex size-9 max-w-24 items-center justify-center transition-all duration-200;
+    @apply relative size-9 max-w-24 transition-all duration-200;
     flex: calc(0.5 + var(--lerp, 0) * 1.5);
   }
   :is(.react-button:hover, .react-button:active, .react-button:focus-visible) {

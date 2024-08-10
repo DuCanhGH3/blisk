@@ -17,6 +17,7 @@
   import CommentEditor from "./CommentEditor.svelte";
   import Trash from "./icons/Trash.svelte";
   import { dialog } from "$lib/stores/dialog.svelte";
+  import { hotkeys } from "$lib/hotkeys.svelte";
 
   interface CommentProps {
     /**
@@ -30,6 +31,16 @@
   let previousReaction: ReactionType | null = null;
 
   let reactionBar = $state<HTMLDetailsElement | null>(null);
+  let menu = $state<HTMLDetailsElement | null>(null);
+
+  hotkeys([
+    [
+      "Escape",
+      () => {
+        if (menu) menu.open = false;
+      },
+    ],
+  ]);
 
   const toggleEditingMode = () => {
     comment.is_editing = !comment.is_editing;
@@ -81,19 +92,20 @@
         <details bind:this={reactionBar} class="relative">
           {#if !comment.user_reaction}
             <CommentRendererButton as="summary" aria-describedby="reaction-bar-{comment.id}">
-              <ThumbUp {...rendererButtonAttributes} /> <span class="pr-1">Like</span>
+              <ThumbUp {...rendererButtonAttributes} /> <span class="select-none pr-1">Like</span>
             </CommentRendererButton>
           {:else}
             {@const { icon, label, colors } = reactionRender[comment.user_reaction]}
             <CommentRendererButton customColors={colors} as="summary" aria-describedby="reaction-bar-{comment.id}">
               <svelte:component this={icon} animatable={false} {...rendererButtonAttributes} />
-              <span class="pr-1 text-black dark:text-white">{label}</span>
+              <span class="select-none pr-1 text-black dark:text-white">{label}</span>
             </CommentRendererButton>
           {/if}
           <ReactionBar
             id="reaction-bar-{comment.id}"
             class="animate-fly absolute bottom-full -translate-y-1"
             style="--fly-translate-y:1rem"
+            currentReaction={comment.user_reaction}
             forId={comment.id}
             forType="comment"
             updateReaction={(reaction) => {
@@ -114,7 +126,7 @@
         <CommentRendererButton as="div">
           <Share {...rendererButtonAttributes} /> <span class="pr-1">Share</span>
         </CommentRendererButton>
-        <details class="relative">
+        <details bind:this={menu} class="relative">
           <CommentRendererButton as="summary" aria-describedby="menu-bar-{comment.id}">
             <ThreeDots {...rendererButtonAttributes} /> <span class="sr-only">More</span>
           </CommentRendererButton>

@@ -55,19 +55,20 @@
     <details bind:this={reactionBar} class="relative flex-grow">
       {#if !post.user_reaction}
         <PostRendererButton as="summary" aria-describedby="reaction-bar-{post.id}">
-          <ThumbUp {...rendererButtonAttributes} /> <span class="mb-[-1px]">Like</span>
+          <ThumbUp {...rendererButtonAttributes} /> <span class="mb-[-1px] select-none">Like</span>
         </PostRendererButton>
       {:else}
         {@const { icon, label, colors } = reactionRender[post.user_reaction]}
         <PostRendererButton customColors={colors} as="summary" aria-describedby="reaction-bar-{post.id}">
           <svelte:component this={icon} animatable={false} {...rendererButtonAttributes} />
-          <span class="mb-[-1px] text-black dark:text-white">{label}</span>
+          <span class="mb-[-1px] text-black dark:text-white select-none">{label}</span>
         </PostRendererButton>
       {/if}
       <ReactionBar
         id="reaction-bar-{post.id}"
         class="animate-fly absolute bottom-full -translate-y-1"
         style="--fly-translate-y:1rem"
+        currentReaction={post.user_reaction}
         forId={post.id}
         forType="post"
         updateReaction={(reaction) => {

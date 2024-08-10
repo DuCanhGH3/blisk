@@ -1,6 +1,4 @@
-import type { z } from "zod";
-import type { COLOR_SCHEMES } from "./constants";
-import type { reactionForSchema, reactionTypeSchema } from "./schemas";
+import type { COLOR_SCHEMES, VALID_REACTION_FOR, VALID_REACTIONS } from "./constants";
 
 export type RequireFields<T, K extends keyof T> = Omit<T, K> & Required<Pick<T, K>>;
 
@@ -56,9 +54,9 @@ export interface Book {
   reviews: Post[];
 }
 
-export type ReactionFor = z.infer<typeof reactionForSchema>;
+export type ReactionFor = (typeof VALID_REACTION_FOR)[number];
 
-export type ReactionType = z.infer<typeof reactionTypeSchema>;
+export type ReactionType = (typeof VALID_REACTIONS)[number];
 
 export type SetHeaders = (headers: Record<string, string>) => void;
 

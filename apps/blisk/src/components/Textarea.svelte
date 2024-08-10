@@ -18,15 +18,14 @@
 
   let {
     self: thisRef = $bindable(),
+    value = $bindable(),
+    id,
+    class: className,
     actions,
     label,
-    id,
     errorTextId,
     errorText,
     errorRenderer,
-    value = $bindable(),
-    class: className,
-    oninput,
     ...rest
   }: TextareaProps = $props();
 

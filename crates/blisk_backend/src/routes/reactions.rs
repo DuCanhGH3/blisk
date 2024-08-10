@@ -3,7 +3,11 @@ use crate::{
     app::AppState,
     utils::{errors::AppError, response::response, structs::AppJson},
 };
-use axum::{extract::State, http::StatusCode, response::Response};
+use axum::{
+    extract::State,
+    http::StatusCode,
+    response::{IntoResponse, Response},
+};
 use tracing::instrument;
 
 #[derive(Clone, Debug, PartialEq, PartialOrd, sqlx::Type, serde::Deserialize, serde::Serialize)]
@@ -20,14 +24,14 @@ pub enum PostReaction {
 
 #[derive(Debug, serde::Deserialize)]
 #[serde(rename_all = "snake_case")]
-pub enum CreateForType {
+pub enum PostReactionFor {
     Post,
     Comment,
 }
 
 #[derive(serde::Deserialize)]
 pub struct CreatePayload {
-    for_type: CreateForType,
+    for_type: PostReactionFor,
     post_id: i64,
     reaction_type: PostReaction,
 }
@@ -51,13 +55,13 @@ pub async fn create(
 ) -> Result<Response, AppError> {
     let mut transaction = pool.begin().await?;
     let insert_query = match for_type {
-        CreateForType::Comment => sqlx::query!(
+        PostReactionFor::Comment => sqlx::query!(
             "SELECT create_comment_reaction (rtype => $1, usid => $2, cid => $3)",
             &reaction_type as _,
             &claims.sub,
             &post_id
         ),
-        CreateForType::Post => sqlx::query!(
+        PostReactionFor::Post => sqlx::query!(
             "SELECT create_post_reaction (rtype => $1, usid => $2, pid => $3)",
             &reaction_type as _,
             &claims.sub,
@@ -71,4 +75,34 @@ pub async fn create(
         None,
         AppJson(CreateResponse { reaction_type }),
     ))
+}
+
+#[derive(serde::Deserialize)]
+pub struct DeletePayload {
+    for_type: PostReactionFor,
+    post_id: i64,
+}
+
+#[instrument(name = "Removing a reaction", skip(pool, claims), fields(uid = %claims.sub))]
+pub async fn delete(
+    State(AppState { pool, .. }): State<AppState>,
+    claims: UserClaims,
+    AppJson(DeletePayload { for_type, post_id }): AppJson<DeletePayload>,
+) -> Result<impl IntoResponse, AppError> {
+    let mut transaction = pool.begin().await?;
+    let delete_query = match for_type {
+        PostReactionFor::Comment => sqlx::query!(
+            "DELETE FROM comment_reactions WHERE user_id = $1 AND comment_id = $2",
+            &claims.sub,
+            &post_id
+        ),
+        PostReactionFor::Post => sqlx::query!(
+            "DELETE FROM post_reactions WHERE user_id = $1 AND post_id = $2",
+            &claims.sub,
+            &post_id
+        ),
+    };
+    delete_query.execute(&mut *transaction).await?;
+    transaction.commit().await?;
+    Ok(StatusCode::NO_CONTENT)
 }

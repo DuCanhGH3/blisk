@@ -2,7 +2,7 @@
   import { clsx } from "$lib/clsx";
   import type { ReactionProps } from "../types";
 
-  const { animatable = true, ...props }: ReactionProps = $props();
+  const { animatable = true, children, ...props }: ReactionProps = $props();
 </script>
 
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="none" {...props}>
@@ -28,4 +28,7 @@
     fill="url(#face-eyebrow)"
     d="M11.068 1.696c.052-.005.104-.007.157-.007.487 0 .99.204 1.372.562a.368.368 0 0 1-.087.594.344.344 0 0 1-.387-.06c-.275-.26-.656-.4-.992-.37a.8.8 0 0 0-.59.332.346.346 0 0 1-.49.068.368.368 0 0 1-.068-.507 1.49 1.49 0 0 1 1.085-.612Zm-7.665.555c.371-.353.86-.553 1.372-.562a1.49 1.49 0 0 1 1.242.619.369.369 0 0 1-.066.507.347.347 0 0 1-.492-.068.8.8 0 0 0-.59-.331c-.335-.031-.717.11-.992.369a.344.344 0 0 1-.496-.024.368.368 0 0 1 .022-.51Z"
   />
+  {#if children}
+    {@render children()}
+  {/if}
 </svg>

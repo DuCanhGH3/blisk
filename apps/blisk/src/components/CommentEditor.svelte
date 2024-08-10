@@ -1,8 +1,7 @@
 <script lang="ts">
   // This component is stateless to work with the virtual scroller.
-  // Note(ducanhgh/2024-08-07 23:41): When we unmount the component
-  // via `comment.is_editing = false`, our focus returns to the
-  // beginning of the page. This is not a desired behaviour.
+  // TODO(ducanhgh): When we unmount the component via `comment.is_editing = false`,
+  // our focus returns to the beginning of the page. This is not a desired behaviour.
   import X from "$components/icons/X.svelte";
   import CommentIcon from "$components/icons/Comment.svelte";
   import type { Comment } from "$lib/types";
@@ -20,10 +19,6 @@
   let textarea = $state<HTMLTextAreaElement | null>(null);
   let value = $state(comment.edit_text ?? comment.content);
   const isCommentOptimistic = $derived(comment.id === OPTIMISTIC_ID);
-
-  $effect(() => {
-    comment.edit_text = value;
-  });
 
   // Escape: remove focus from textarea
   // Enter: request submit if keyboard not focused on textarea
@@ -99,11 +94,12 @@
     bind:value
     id="{comment.id}-edit-content-input"
     class="peer"
-    label="Content"
     name="content"
+    label="Content"
     rows={5}
-    errorText={comment.error?.validationError?.content}
+    oninput={(el) => (comment.edit_text = el.currentTarget.value)}
     errorTextId="{comment.id}-edit-content-error-text"
+    errorText={comment.error?.validationError?.content}
   >
     {#snippet errorRenderer({ errorTextId, errorText })}
       <div id={errorTextId} class="absolute bottom-2 right-[6.25rem] flex h-[2.375rem] flex-col justify-center gap-2">
@@ -117,6 +113,18 @@
       </div>
     {/snippet}
   </Textarea>
+  <!--
+    .error and .validationError don't appear together, so we can reuse `right-[6.25rem]`.
+    This seems cursed though. Is there a better way?
+  -->
+  {#if comment.error?.error}
+    <p
+      id="{comment.id}-edit-error-text"
+      class="text-error-light dark:text-error-dark absolute bottom-2 right-[6.25rem] flex h-[2.375rem] flex-col justify-center gap-2"
+    >
+      {comment.error.error}
+    </p>
+  {/if}
   <div class="absolute bottom-2 right-2 flex flex-row gap-2">
     <button type="button" class="button light !rounded-full !p-2" onclick={() => (comment.is_editing = false)} disabled={comment.is_processing_edit}>
       <X width={20} height={20} class="h-auto w-5" aria-hidden="true" tabindex={-1} />

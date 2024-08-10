@@ -75,8 +75,8 @@ export const fetchBackend = async <T>(
 
 export const createReaction = async (formData: FormData, fetch: typeof globalThis.fetch, cookies: Cookies, setHeaders: SetHeaders) => {
   const data = await reactionSchema.spa({
-    post_id: formData.get("forId"),
     for_type: formData.get("forType"),
+    post_id: formData.get("forId"),
     reaction_type: formData.get("reactionType"),
   });
 
@@ -84,21 +84,41 @@ export const createReaction = async (formData: FormData, fetch: typeof globalThi
     return fail(400, { validationError: data.error.flatten().fieldErrors });
   }
 
-  const res = await fetchBackend<{ reaction_type: ReactionType }>("/reactions", {
-    authz: true,
-    cookies,
-    fetch,
-    setHeaders,
-    method: "POST",
-    body: JSON.stringify(data.data),
-    signal: AbortSignal.timeout(10000),
-  });
+  if (data.data.reaction_type === "cancel") {
+    const res = await fetchBackend("/reactions", {
+      authz: true,
+      cookies,
+      fetch,
+      setHeaders,
+      noSuccessContent: true,
+      method: "DELETE",
+      body: JSON.stringify({
+        for_type: data.data.for_type,
+        post_id: data.data.post_id,
+      }),
+      signal: AbortSignal.timeout(10000),
+    });
 
-  if (!res.ok) {
-    return fail(res.status, { error: res.error });
+    if (!res.ok) {
+      return fail(res.status, { error: res.error });
+    }
+  } else {
+    const res = await fetchBackend<{ reaction_type: ReactionType }>("/reactions", {
+      authz: true,
+      cookies,
+      fetch,
+      setHeaders,
+      method: "POST",
+      body: JSON.stringify(data.data),
+      signal: AbortSignal.timeout(10000),
+    });
+
+    if (!res.ok) {
+      return fail(res.status, { error: res.error });
+    }
+
+    return { reactionType: res.data.reaction_type };
   }
-
-  return { reactionType: res.data.reaction_type };
 };
 
 export const editComment = async (formData: FormData, fetch: typeof globalThis.fetch, cookies: Cookies, setHeaders: SetHeaders) => {

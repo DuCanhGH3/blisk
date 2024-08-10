@@ -51,7 +51,7 @@ export const reactionForSchema = literalUnion(
 export const reactionSchema = z.object({
   for_type: reactionForSchema,
   post_id: postIdSchema,
-  reaction_type: reactionTypeSchema,
+  reaction_type: reactionTypeSchema.or(z.literal("cancel")),
 });
 
 export const editCommentSchema = z.object({
