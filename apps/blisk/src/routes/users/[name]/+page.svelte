@@ -6,12 +6,7 @@
   const { data } = $props();
 
   let posts = $derived.by(() => {
-    const state = $state(
-      data.data.posts.map((post) => ({
-        ...post,
-        author_name: data.data.name,
-      }))
-    );
+    const state = $state(data.posts);
     return { state };
   });
 </script>

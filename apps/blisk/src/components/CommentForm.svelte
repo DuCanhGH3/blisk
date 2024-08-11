@@ -10,9 +10,10 @@
   interface CommentFormProps {
     parentId: number | null;
     updateReplies(newReply: Comment): void;
+    revertReplies(): void;
   }
 
-  const { parentId, updateReplies }: CommentFormProps = $props();
+  const { parentId, updateReplies, revertReplies }: CommentFormProps = $props();
   const isParentComment = $derived(parentId === null);
   const isParentOptimistic = $derived(parentId === OPTIMISTIC_ID);
   const idPrefix = $derived(parentId !== null ? `reply-${parentId}` : "comment");
@@ -46,6 +47,7 @@
         comment.id = result.data.id;
         await update({ reset: true, invalidateAll: false });
       } else {
+        revertReplies();
         await update();
       }
       isProcessing = false;

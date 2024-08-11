@@ -12,6 +12,7 @@
   import ThumbUpFilled from "$components/icons/ThumbUpFilled.svelte";
   import VirtualScroller from "$components/VirtualScroller.svelte";
   import { rendererButtonAttributes } from "$components/renderer-constants.js";
+  import { OPTIMISTIC_ID } from "$lib/constants.js";
 
   const { data } = $props();
 
@@ -95,7 +96,11 @@
   </div>
   <section id="comments" class="flex h-full flex-col gap-3">
     <h2 class="sr-only">Comments</h2>
-    <CommentForm parentId={null} updateReplies={(newComment) => post.comments.unshift(newComment)} />
+    <CommentForm
+      parentId={null}
+      updateReplies={(newComment) => post.comments.unshift(newComment)}
+      revertReplies={() => (post.comments = post.comments.filter((comment) => comment.id !== OPTIMISTIC_ID))}
+    />
     {#snippet renderer(comment: Ref<Comment>)}
       <div class="pb-3">
         <CommentRenderer bind:comment={comment.ref} currentUser={data.user?.name} />

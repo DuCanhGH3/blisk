@@ -6,7 +6,7 @@
   const { data } = $props();
 
   const comments = $derived.by(() => {
-    const state = $state(data.data.comments);
+    const state = $state(data.comments);
     return { state };
   });
 </script>

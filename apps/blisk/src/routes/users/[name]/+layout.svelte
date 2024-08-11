@@ -3,7 +3,7 @@
   import { page } from "$app/stores";
   import Link from "./Link.svelte";
 
-  const { data, children } = $props();
+  const { children } = $props();
 
   const days = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 
@@ -26,13 +26,13 @@
       />
       <h1>
         <span class="sr-only">The home of</span>
-        {data.data.name}
+        {$page.params.name}
       </h1>
     </div>
   </div>
   <div class="flex w-full flex-col gap-8 md:gap-14 lg:flex-row-reverse">
     <div class="flex h-fit flex-[2_2_0] flex-col gap-4 lg:sticky lg:top-14">
-      <h2>About {data.data.name}</h2>
+      <h2>About {$page.params.name}</h2>
       <div class="box md">here comes a quote</div>
       <div class="box md">
         69 books read this year
@@ -78,7 +78,6 @@
         <Link href={`${basePath}/dislikes`}>Dislikes</Link>
       </div>
       <div>
-        <!-- TODO(ducanhgh): Currently, any optimistic update gets removed as the user navigates through the pages of the layout. -->
         {@render children()}
       </div>
     </article>

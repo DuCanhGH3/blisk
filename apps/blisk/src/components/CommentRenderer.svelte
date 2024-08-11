@@ -18,6 +18,7 @@
   import Trash from "./icons/Trash.svelte";
   import { dialog } from "$lib/stores/dialog.svelte";
   import { hotkeys } from "$lib/hotkeys.svelte";
+  import { OPTIMISTIC_ID } from "$lib/constants";
 
   interface CommentProps {
     /**
@@ -46,18 +47,9 @@
     ],
   ]);
 
-  const toggleEditingMode = () => {
-    comment.is_editing = !comment.is_editing;
-  };
-
   const updateReaction = (reaction: ReactionType | null) => {
     previousReaction = comment.user_reaction;
     comment.user_reaction = reaction;
-  };
-
-  const updateReplies = (reply: Comment) => {
-    if (!comment.children) comment.children = [];
-    comment.children.unshift(reply);
   };
 
   const openDeleteModal = () => {
@@ -141,7 +133,12 @@
               style="--fly-translate-y:1rem"
             >
               <div>
-                <MenuItem as="button" onclick={toggleEditingMode}>
+                <MenuItem
+                  as="button"
+                  onclick={() => {
+                    comment.is_editing = !comment.is_editing;
+                  }}
+                >
                   <Pencil width={20} height={20} class="mr-2 h-auto w-5" aria-hidden="true" tabindex={-1} /> Edit
                 </MenuItem>
                 <MenuItem as="button" customColors="text-error-light dark:text-error-dark" onclick={openDeleteModal}>
@@ -164,7 +161,17 @@
   >
     <input class="peer sr-only" type="checkbox" checked={false} id="comment-toggle-{comment.id}" />
     <div class="hidden pt-3 peer-checked:block">
-      <CommentForm parentId={comment.id} {updateReplies} />
+      <CommentForm
+        parentId={comment.id}
+        updateReplies={(reply: Comment) => {
+          if (!comment.children) comment.children = [];
+          comment.children.unshift(reply);
+        }}
+        revertReplies={() => {
+          if (!comment.children) return;
+          comment.children = comment.children.filter((reply) => reply.id !== OPTIMISTIC_ID);
+        }}
+      />
     </div>
     {#if comment.children && comment.children.length > 0}
       <ul class="flex flex-col gap-3 pt-3">

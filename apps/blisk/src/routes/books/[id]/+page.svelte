@@ -19,8 +19,8 @@
     <div class="flex flex-1 flex-col gap-2 break-all">
       <h1 class="pt-4 text-5xl lg:text-8xl">{data.book.title}</h1>
       <h2 class="sr-only">About this book</h2>
-      <p class="text-comment text-3xl font-semibold leading-10 tracking-tight" aria-label="This book was written by Frank Herbert in 1965">
-        {data.book.authors.map((author) => author.name).join(", ")} • 1965
+      <p class="text-comment text-3xl font-semibold leading-10 tracking-tight">
+        <span class="sr-only">Written by</span> {data.book.authors.map((author) => author.name).join(", ")} • 1965
       </p>
       <p class="max-h-72 overflow-y-auto lg:max-h-full">
         {data.book.summary}
