@@ -71,3 +71,7 @@ export type Ref<T> = { ref: T };
 export type FormError<Fields extends string> = { error?: string | undefined; validationError: Record<Fields, string> };
 
 export type ButtonType = "normal" | "light" | "error";
+
+export type MouseEventEvent<T extends EventTarget> = MouseEvent & {
+  currentTarget: EventTarget & T;
+};
