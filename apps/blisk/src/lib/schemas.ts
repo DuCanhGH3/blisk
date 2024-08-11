@@ -1,3 +1,8 @@
+// Here are the frontend's validator schemas. They are used to 
+// recheck whether the data is valid before a request is sent
+// to the backend. The error messages here are more friendly
+// than those of the backend. In the future, we can also use
+// them to check whether the backend's response is valid.
 import { z } from "zod";
 import { VALID_REACTION_FOR, VALID_REACTIONS } from "./constants";
 

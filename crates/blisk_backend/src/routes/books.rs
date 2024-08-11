@@ -95,6 +95,7 @@ struct BookCategory {
 #[derive(serde::Serialize, sqlx::FromRow)]
 struct Book {
     title: String,
+    name: String,
     summary: String,
     authors: sqlx::types::Json<Vec<BookAuthor>>,
     categories: sqlx::types::Json<Vec<BookCategory>>,
@@ -111,6 +112,7 @@ pub async fn read(
         Book,
         r#"SELECT 
             b.title AS "title!: String",
+            b.name AS "name!: String",
             b.summary AS "summary!: String",
             b.authors AS "authors!: sqlx::types::Json<Vec<BookAuthor>>",
             b.categories AS "categories!: sqlx::types::Json<Vec<BookCategory>>",
@@ -124,7 +126,7 @@ pub async fn read(
             LIMIT 5
             OFFSET 0
         ) rv ON TRUE
-        GROUP BY b.id, b.title, b.summary, b.authors, b.categories"#,
+        GROUP BY b.title, b.name, b.summary, b.authors, b.categories"#,
         &uid as &_
     )
     .fetch_all(&mut *transaction)
@@ -144,6 +146,7 @@ pub async fn read_slug(
         Book,
         r#"SELECT
             b.title AS "title!: String",
+            b.name AS "name!: String",
             b.summary AS "summary!: String",
             b.authors AS "authors!: sqlx::types::Json<Vec<BookAuthor>>",
             b.categories AS "categories!: sqlx::types::Json<Vec<BookCategory>>",
@@ -158,7 +161,7 @@ pub async fn read_slug(
             OFFSET 0
         ) rv ON TRUE
         WHERE b.name = $1
-        GROUP BY b.id, b.title, b.summary, b.authors, b.categories"#,
+        GROUP BY b.title, b.name, b.summary, b.authors, b.categories"#,
         &slug,
         &uid as &_
     )

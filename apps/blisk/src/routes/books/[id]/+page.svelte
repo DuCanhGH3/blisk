@@ -15,7 +15,7 @@
 
 <div class="mx-auto flex h-full w-full flex-col gap-8 p-4 md:p-10">
   <div class="flex w-full flex-col gap-4 lg:h-72 lg:flex-row lg:gap-8">
-    <img src="/test-cover.jpg" width="192" height="288" alt="" class="h-auto w-48" />
+    <img src="/test-cover.jpg" width="192" height="288" alt="" class="h-auto w-48" style="view-transition-name:book-{data.book.name}" />
     <div class="flex flex-1 flex-col gap-2 break-all">
       <h1 class="pt-4 text-5xl lg:text-8xl">{data.book.title}</h1>
       <h2 class="sr-only">About this book</h2>

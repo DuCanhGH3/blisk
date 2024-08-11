@@ -31,9 +31,9 @@
 <div class="bg-wood w-full bg-[#d8a85f]">
   {#each Array.from({ length: 5 }) as _}
     <div
-      class="relative w-full border-[8px] border-t-0 border-x-[#856940] border-b-[#6b5330] border-t-transparent px-4 shadow-[inset_0_0_20px_5px_#000000]"
+      class="relative w-full border-[8px] border-t-0 border-x-[#856940] border-b-[#6b5330] border-t-transparent px-10 shadow-[inset_0_0_20px_5px_#000000]"
     >
-      <h2 class="py-4">science fiction</h2>
+      <h2 class="py-5">science fiction</h2>
       <div
         class="mx-[-4px] mb-[-4px] overflow-x-hidden"
         use:emblaCarousel={{ options: { align: "start", containScroll: false, dragFree: true, loop: true }, plugins: [] }}

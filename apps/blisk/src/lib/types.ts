@@ -51,6 +51,7 @@ export interface BookCategory {
 
 export interface Book {
   title: string;
+  name: string;
   summary: string;
   authors: BookAuthor[];
   categories: BookCategory[];

@@ -48,8 +48,8 @@ pub async fn read(
         ReadResponse,
         r#"SELECT
             u.name,
-            COALESCE((
-                SELECT JSONB_AGG(p) FILTER (WHERE p.id IS NOT NULL)
+            (
+                SELECT COALESCE(JSONB_AGG(p) FILTER (WHERE p.id IS NOT NULL), '[]'::JSONB)
                 FROM (
                     SELECT
                         id,
@@ -62,9 +62,9 @@ pub async fn read(
                     LIMIT 5
                     OFFSET 0
                 ) p
-            ), '[]'::JSONB) AS "posts!: sqlx::types::Json<Vec<ReadResponsePost>>",
-            COALESCE((
-                SELECT JSONB_AGG(c) FILTER (WHERE c.id IS NOT NULL)
+            ) AS "posts!: sqlx::types::Json<Vec<ReadResponsePost>>",
+            (
+                SELECT COALESCE(JSONB_AGG(c) FILTER (WHERE c.id IS NOT NULL), '[]'::JSONB)
                 FROM (
                     SELECT
                         c.id,
@@ -81,7 +81,7 @@ pub async fn read(
                     LIMIT 20
                     OFFSET 0
                 ) c
-            ), '[]'::JSONB) AS "comments!: sqlx::types::Json<Vec<Comment>>"
+            ) AS "comments!: sqlx::types::Json<Vec<Comment>>"
         FROM users u
         WHERE u.name = $1
         GROUP BY u.id"#,
