@@ -25,30 +25,46 @@
       this.n = typeof arrOrLength === "number" ? arrOrLength : arrOrLength.length;
       this.bit = Array.from({ length: this.n }, () => 0);
       if (Array.isArray(arrOrLength)) {
-        for (let i = 0; i < this.n; ++i) {
+        for (let i = this.n - 1; i >= 0; --i) {
           this.bit[i] += arrOrLength[i];
-          const r = i | (i + 1);
-          if (r < this.n) {
+          const r = (i & (i + 1)) - 1;
+          if (r >= 0) {
             this.bit[r] += this.bit[i];
           }
         }
       }
     }
 
+    /**
+     * Get sum of [l, r].
+     * @param l
+     * @param r
+     */
     rangeSum(l: number, r: number) {
-      return this.sum(r) - this.sum(l - 1);
+      return this.sum(l) - this.sum(r + 1);
     }
 
+    /**
+     * Get sum of [r, n].
+     * @param r
+     */
     sum(r: number) {
       let ret = 0;
-      for (; r >= 0; r = (r & (r + 1)) - 1) {
+      for (; r < this.n; r = r | (r + 1)) {
         ret += this.bit[r];
       }
       return ret;
     }
 
+    /**
+     * Add `arr[idx]` by `delta`. 
+     * @param idx
+     * @param delta
+     */
     add(idx: number, delta: number) {
-      for (; idx < this.n; idx = idx | (idx + 1)) {
+      this.n = Math.max(idx + 1, this.n);
+      for (; idx >= 0; idx = (idx & (idx + 1)) - 1) {
+        if (!this.bit[idx]) this.bit[idx] = 0;
         this.bit[idx] += delta;
       }
     }
@@ -62,13 +78,13 @@
   let height = $state<number[]>(null!);
   let heightTree = $state<HeightTree | null>(null);
 
-  const paddingTop = $derived(start > 0 && heightTree ? heightTree.sum(start - 1) : 0);
-  const paddingBottom = $derived(end < items.length - 1 && heightTree ? heightTree.rangeSum(end + 1, items.length - 1) : 0);
+  const paddingTop = $derived(start > 0 && heightTree ? heightTree.rangeSum(0, start - 1) : 0);
+  const paddingBottom = $derived(end < items.length - 1 && heightTree ? heightTree.sum(end + 1) : 0);
 
   /**
    * The bulk of the virtual scroller. Requires that all elements' heights have been calculated.
    * The way we do that is to initially render the whole thing, create a height map, then run this
-   * function. 
+   * function.
    */
   const recalculate = () => {
     if (!container || !heightTree) return;
@@ -85,7 +101,7 @@
 
       while (tl < tr) {
         const tm = tl + ((tr - tl) >> 1);
-        if (heightTree.sum(tm) < containerTop) {
+        if (heightTree.rangeSum(0, tm) < containerTop) {
           tl = tm + 1;
         } else {
           tr = tm;
@@ -115,10 +131,10 @@
     await tick();
     heightTree = null;
     height = Array.from({ length: items.length }, () => 0);
-    for (let i = start; i <= end; ++i) {
-      const row = rows[i - start];
+    for (let i = 0; i <= end - start + 1; ++i) {
+      const row = rows[i];
       if (row) {
-        height[i] = row.offsetHeight;
+        height[start + i] = row.offsetHeight;
       }
     }
     heightTree = new HeightTree(height);
@@ -143,6 +159,8 @@
   $effect(() => {
     refresh();
   });
+
+  $inspect(start, end, JSON.stringify(height), paddingTop, paddingBottom);
 </script>
 
 <svelte:window onscroll={handleLayout} onresize={handleLayout} />
