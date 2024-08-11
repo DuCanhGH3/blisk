@@ -13,9 +13,16 @@
      * allowing the component to assign its states to the data.
      */
     renderer: Snippet<[Ref<T>]>;
+    /**
+     * A function that should load more data. If not defined, the
+     * virtual scroller does not implement infinite loading.
+     */
+    loadMore?(): Promise<T[]> | T[];
   }
 
-  const { items = $bindable(), renderer }: VirtualScrollerProps = $props();
+  const { items: initialItems = $bindable(), renderer, loadMore }: VirtualScrollerProps = $props();
+
+  let items = $state([...initialItems]);
 
   class HeightTree {
     private n = $state(0);
@@ -51,13 +58,14 @@
     sum(r: number) {
       let ret = 0;
       for (; r < this.n; r = r | (r + 1)) {
+        if (!this.bit[r]) this.bit[r] = 0;
         ret += this.bit[r];
       }
       return ret;
     }
 
     /**
-     * Add `arr[idx]` by `delta`. 
+     * Increase `arr[idx]` by `delta`.
      * @param idx
      * @param delta
      */
@@ -73,13 +81,15 @@
   let container = $state<HTMLDivElement | null>(null);
   // During SSR, render the whole thing.
   let start = $state(0);
-  let end = $state(items.length - 1);
+  let end = $state(initialItems.length - 1);
   const rows = $state<(HTMLDivElement | null)[]>([]);
   let height = $state<number[]>(null!);
   let heightTree = $state<HeightTree | null>(null);
 
   const paddingTop = $derived(start > 0 && heightTree ? heightTree.rangeSum(0, start - 1) : 0);
   const paddingBottom = $derived(end < items.length - 1 && heightTree ? heightTree.sum(end + 1) : 0);
+
+  let isLoadingMore = false;
 
   /**
    * The bulk of the virtual scroller. Requires that all elements' heights have been calculated.
@@ -88,9 +98,10 @@
    */
   const recalculate = () => {
     if (!container || !heightTree) return;
+    const containerRect = container.getBoundingClientRect();
+    let containerTop = containerRect.y;
     let tl = 0;
     let tr = items.length - 1;
-    let containerTop = container.getBoundingClientRect().y;
     if (containerTop >= 0) {
       // Container's top is in view, start from the first item.
       start = 0;
@@ -126,11 +137,12 @@
   };
 
   const refresh = async () => {
+    items = [...initialItems];
     start = 0;
-    end = items.length - 1;
+    end = initialItems.length - 1;
     await tick();
     heightTree = null;
-    height = Array.from({ length: items.length }, () => 0);
+    height = Array.from({ length: initialItems.length }, () => 0);
     for (let i = 0; i <= end - start + 1; ++i) {
       const row = rows[i];
       if (row) {
@@ -141,16 +153,30 @@
     recalculate();
   };
 
-  const handleLayout = () => {
+  const handleLayout = async () => {
     if (!heightTree) return;
-    for (let i = 0; i <= end - start + 1; ++i) {
-      const row = rows[i];
+    for (let i = start; i <= end; ++i) {
+      const row = rows[i - start];
       if (row) {
         let offset = row.offsetHeight;
-        if (offset !== height[start + i]) {
-          heightTree.add(start + i, offset - height[start + i]);
-          height[start + i] = offset;
+        if (offset !== height[i]) {
+          if (!height[i]) height[i] = 0;
+          heightTree.add(i, offset - height[i]);
+          height[i] = offset;
         }
+      }
+    }
+    if (loadMore && !isLoadingMore) {
+      const remaining = document.documentElement.scrollHeight - (document.documentElement.scrollTop + window.innerHeight);
+      if (remaining < 100) {
+        isLoadingMore = true;
+        const data = await loadMore();
+        if (data.length > 0) {
+          items.push(...data);
+          end = items.length - 1;
+          await tick();
+        }
+        isLoadingMore = false;
       }
     }
     recalculate();
@@ -159,14 +185,12 @@
   $effect(() => {
     refresh();
   });
-
-  $inspect(start, end, JSON.stringify(height), paddingTop, paddingBottom);
 </script>
 
 <svelte:window onscroll={handleLayout} onresize={handleLayout} />
 
 <div bind:this={container} style="padding-top:{paddingTop}px;padding-bottom:{paddingBottom}px">
-  {#each range(start, end, (i) => items[i]) as item, i (item.id)}
+  {#each range(start, end, (idx) => items[idx]) as item, i (item.id)}
     <div bind:this={rows[i]}>
       {@render renderer({ ref: item })}
     </div>

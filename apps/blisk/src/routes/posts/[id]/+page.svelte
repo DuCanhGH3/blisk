@@ -27,6 +27,8 @@
     previousReaction = post.user_reaction;
     post.user_reaction = reaction;
   };
+
+  let loadTime = 0;
 </script>
 
 <article class="flex h-full w-full max-w-6xl flex-col gap-8 p-2 md:py-8">
@@ -101,11 +103,57 @@
       updateReplies={(newComment) => post.comments.unshift(newComment)}
       revertReplies={() => (post.comments = post.comments.filter((comment) => comment.id !== OPTIMISTIC_ID))}
     />
-    {#snippet renderer(comment: Ref<Comment>)}
-      <div class="pb-3">
-        <CommentRenderer bind:comment={comment.ref} currentUser={data.user?.name} />
-      </div>
-    {/snippet}
-    <VirtualScroller bind:items={post.comments} {renderer} />
+    <VirtualScroller
+      bind:items={post.comments}
+      loadMore={async () => {
+        await new Promise((resolve) => setTimeout(resolve, 3000));
+        loadTime++;
+        const random = Math.random() * Math.random();
+        const state = $state([
+          {
+            id: 62 * random,
+            content: `${loadTime} - 62`,
+            author_name: "admin",
+            user_reaction: null,
+            children: [
+              {
+                id: 32 * random,
+                content: "3213",
+                author_name: "admin",
+                user_reaction: null,
+                children: [{ id: 33 * random, content: "q2eqwe231312", author_name: "admin", user_reaction: null, children: null }],
+              },
+            ],
+          },
+          { id: 60 * random, content: `${loadTime} - 60`, author_name: "admin", user_reaction: "laugh", children: null },
+          { id: 58 * random, content: `${loadTime} - 58`, author_name: "admin", user_reaction: null, children: null },
+          { id: 56 * random, content: `${loadTime} - 56`, author_name: "admin", user_reaction: null, children: null },
+          { id: 54 * random, content: `${loadTime} - 54`, author_name: "admin", user_reaction: null, children: null },
+          { id: 52 * random, content: `${loadTime} - 52`, author_name: "admin", user_reaction: null, children: null },
+          { id: 50 * random, content: `${loadTime} - 50`, author_name: "admin", user_reaction: null, children: null },
+          { id: 48 * random, content: `${loadTime} - 48`, author_name: "admin", user_reaction: null, children: null },
+          { id: 46 * random, content: `${loadTime} - 46`, author_name: "admin", user_reaction: null, children: null },
+          { id: 44 * random, content: `${loadTime} - 44`, author_name: "admin", user_reaction: null, children: null },
+          { id: 42 * random, content: `${loadTime} - 42`, author_name: "admin", user_reaction: null, children: null },
+          { id: 40 * random, content: `${loadTime} - 40`, author_name: "admin", user_reaction: null, children: null },
+          { id: 38 * random, content: `${loadTime} - 38`, author_name: "admin", user_reaction: null, children: null },
+          { id: 36 * random, content: `${loadTime} - 36`, author_name: "admin", user_reaction: null, children: null },
+          { id: 34 * random, content: `${loadTime} - 34`, author_name: "admin", user_reaction: null, children: null },
+          { id: 32 * random, content: `${loadTime} - 32`, author_name: "admin", user_reaction: null, children: null },
+          { id: 30 * random, content: `${loadTime} - 30`, author_name: "admin", user_reaction: null, children: null },
+          { id: 28 * random, content: `${loadTime} - 28`, author_name: "admin", user_reaction: null, children: null },
+          { id: 26 * random, content: `${loadTime} - 26`, author_name: "admin", user_reaction: null, children: null },
+          { id: 24 * random, content: `${loadTime} - 24`, author_name: "admin", user_reaction: null, children: null },
+        ] satisfies Comment[]);
+
+        return state;
+      }}
+    >
+      {#snippet renderer(comment: Ref<Comment>)}
+        <div class="pb-3">
+          <CommentRenderer comment={comment.ref} currentUser={data.user?.name} />
+        </div>
+      {/snippet}
+    </VirtualScroller>
   </section>
 </article>
