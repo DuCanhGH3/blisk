@@ -116,8 +116,9 @@
   };
 
   const loadMoreData = async () => {
-    if (loadMore && !hasReachedEnd && !isLoadingMore) {
-      const remaining = document.documentElement.scrollHeight - (document.documentElement.scrollTop + window.innerHeight);
+    if (container && loadMore && !hasReachedEnd && !isLoadingMore) {
+      const containerRect = container.getBoundingClientRect();
+      const remaining = containerRect.height - (Math.abs(containerRect.y) + window.innerHeight);
       if (remaining < 100) {
         isLoadingMore = true;
         try {
