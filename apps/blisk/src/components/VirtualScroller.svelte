@@ -185,46 +185,56 @@
     end = tr;
   };
 
-  // `refresh` will **not** run when `items` updates. In the future, we may expose
-  // this function so that other components can recreate the tree themselves.
-  const refresh = async () => {
-    start = 0;
-    end = untrack(() => items.length - 1);
-    await tick();
-    // In the case the user is loaded at the bottom of the container, try loading more data.
-    await loadMoreData();
-    heightTree = null;
-    const heightTreeLength = end - start + 1;
-    height = Array.from({ length: heightTreeLength }, () => 0);
-    for (let i = 0; i < heightTreeLength; ++i) {
-      const row = rows[i];
-      if (row) {
-        height[start + i] = row.offsetHeight;
-      }
-    }
-    heightTree = new HeightTree(height);
-    recalculate();
-  };
-
   const handleLayout = async () => {
     if (!heightTree) return;
-    updateTree();
     await loadMoreData();
+    updateTree();
     recalculate();
   };
 
   $effect(() => {
+    // `refresh` will **not** run when `items` updates. In the future, we may expose
+    // this function so that other components can recreate the tree themselves.
+    const refresh = async () => {
+      start = 0;
+      end = untrack(() => items.length - 1);
+      await tick();
+      // In the case the user is loaded at the bottom of the container, try loading more data.
+      await loadMoreData();
+      heightTree = null;
+      const heightTreeLength = end - start + 1;
+      height = Array.from({ length: heightTreeLength }, () => 0);
+      for (let i = 0; i < heightTreeLength; ++i) {
+        const row = rows[i];
+        if (row) {
+          height[start + i] = row.offsetHeight;
+        }
+      }
+      heightTree = new HeightTree(height);
+      recalculate();
+    };
     refresh();
+  });
+
+  // This listens for external updates.
+  $effect(() => {
+    items;
+    untrack(() => {
+      updateTree();
+      recalculate();
+    });
   });
 </script>
 
 <svelte:window onscroll={handleLayout} onresize={handleLayout} />
 
 <div bind:this={container} style="padding-top:{paddingTop}px;padding-bottom:{paddingBottom}px">
-  {#each range(start, end, (idx) => items[idx]) as item, i (item.id)}
-    <div bind:this={rows[i]}>
-      {@render renderer({ ref: item })}
-    </div>
+  {#each range(start, end, (idx) => items[idx]) as item, i (item?.id)}
+    {#if item}
+      <div bind:this={rows[i]}>
+        {@render renderer({ ref: item })}
+      </div>
+    {/if}
   {/each}
 </div>
 {#if !!loadMore && !hasReachedEnd}

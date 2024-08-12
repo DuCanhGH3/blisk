@@ -43,7 +43,7 @@ pub struct CreateResponse {
     id: i64,
 }
 
-#[instrument(name = "Creating a comment", skip(pool, claims), fields(uid = %claims.sub))]
+#[instrument(name = "Creating a comment", skip(pool, claims, content), fields(uid = %claims.sub))]
 pub async fn create(
     State(AppState { pool, .. }): State<AppState>,
     claims: UserClaims,
@@ -161,11 +161,13 @@ pub struct DeletePayload {
     id: i64,
 }
 
+// TODO(ducanhgh): add a column named `isDeleted` and change this function so that
+// it no longer truly deletes the comment. This helps preserve the replies.
 #[instrument(name = "Deleting a comment", skip(pool, claims), fields(uid = %claims.sub))]
 pub async fn delete(
     State(AppState { pool, .. }): State<AppState>,
     claims: UserClaims,
-    AppJson(DeletePayload { id }): AppJson<DeletePayload>,
+    Query(DeletePayload { id }): Query<DeletePayload>,
 ) -> Result<impl IntoResponse, AppError> {
     let mut transaction = pool.begin().await?;
     let delete_result = sqlx::query!(

@@ -49,7 +49,7 @@
       <Button as="button" type="submit" disabled={isLoading}>Register</Button>
       <a class="link" href="/login">Already have an account?</a>
       {#if form?.error}
-        <p class="text-error-light dark:text-error-dark">{form.error}</p>
+        <p class="text-error-light dark:text-error-dark" role="alert">{form.error}</p>
       {/if}
     </form>
   </div>

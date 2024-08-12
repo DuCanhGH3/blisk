@@ -19,6 +19,7 @@
   import { dialog } from "$lib/stores/dialog.svelte";
   import { hotkeys } from "$lib/hotkeys.svelte";
   import { OPTIMISTIC_ID } from "$lib/constants";
+  import { fetchBackend } from "$lib/backend.client";
 
   interface CommentProps {
     /**
@@ -29,12 +30,18 @@
      * The current user's name. Used for checking whether the comment belongs to them.
      */
     currentUser: string | undefined;
+    /**
+     * The function used to optimistically remove the comment. This should return
+     * a function that will be used to revert the optimistic update.
+     * @param comment
+     */
+    removeComment(comment: Comment): () => void;
   }
 
-  let { comment = $bindable(), currentUser }: CommentProps = $props();
+  let { comment = $bindable(), currentUser, removeComment }: CommentProps = $props();
 
   let previousReaction: ReactionType | null = null;
-
+  let deleteCommentError = $state<string | null>(null);
   let reactionBar = $state<HTMLDetailsElement | null>(null);
   let menu = $state<HTMLDetailsElement | null>(null);
 
@@ -59,13 +66,21 @@
       description: "There's no going back :)",
       closeVariant: "error",
       closeText: "Delete",
-      onClose() {
-        console.log("delete");
+      async onClose() {
         dialog.state = null;
+        const revertOptimistic = removeComment(comment);
+        const res = await fetchBackend(`/comments?id=${comment.id}`, {
+          noSuccessContent: true,
+          method: "DELETE",
+          signal: AbortSignal.timeout(10000),
+        });
+        if (!res.ok) {
+          revertOptimistic();
+          deleteCommentError = res.error;
+        }
       },
       cancelText: "Cancel",
       onCancel() {
-        console.log("cancel");
         dialog.state = null;
       },
     };
@@ -84,7 +99,7 @@
     </div>
     {#if !comment.is_editing}
       <MarkdownRenderer source={comment.content} startingHeading={4} />
-      <div class="-m-1 mt-0 flex w-fit flex-row flex-wrap gap-2">
+      <div class="-m-1 mt-0 flex w-fit flex-row flex-wrap gap-2 items-center">
         <details bind:this={reactionBar} class="relative">
           {#if !comment.user_reaction}
             <CommentRendererButton as="summary" aria-describedby="reaction-bar-{comment.id}">
@@ -147,6 +162,9 @@
               </div>
             </Menu>
           </details>
+        {/if}
+        {#if deleteCommentError}
+          <p class="text-error-light dark:text-error-dark" role="alert">{deleteCommentError}</p>
         {/if}
       </div>
     {:else}

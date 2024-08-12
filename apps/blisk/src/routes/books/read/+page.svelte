@@ -99,13 +99,13 @@
         <Button as="a" variant="light" class="!px-20 !py-3" href="/books">Cancel</Button>
         {#if !!form?.error}
           {#if typeof form.error === "string"}
-            <p class="text-error-light dark:text-error-dark">{form.error}</p>
+            <p class="text-error-light dark:text-error-dark" role="alert">{form.error}</p>
           {:else}
-            <div class="flex flex-row gap-2">
+            <ul class="flex flex-row gap-2" role="alert">
               {#each form.error as error}
-                <p class="text-error-light dark:text-error-dark">{error}</p>
+                <li class="text-error-light dark:text-error-dark">{error}</li>
               {/each}
-            </div>
+            </ul>
           {/if}
         {/if}
       </div>

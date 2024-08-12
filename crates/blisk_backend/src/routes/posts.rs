@@ -143,7 +143,7 @@ pub struct UpdatePayload {
     reaction: Option<Reaction>,
 }
 
-#[instrument(name = "Updating a post", skip(pool, claims), fields(uid = %claims.sub))]
+#[instrument(name = "Updating a post", skip(pool, claims, title, content, reaction), fields(uid = %claims.sub))]
 pub async fn update(
     State(AppState { pool, .. }): State<AppState>,
     claims: UserClaims,

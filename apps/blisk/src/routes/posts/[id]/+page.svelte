@@ -118,7 +118,17 @@
         <div class="pb-3">
           <!-- eslint-disable-next-line svelte/no-unused-svelte-ignore -->
           <!-- svelte-ignore binding_property_non_reactive -->
-          <CommentRenderer bind:comment={comment.ref} currentUser={data.user?.name} />
+          <CommentRenderer
+            bind:comment={comment.ref}
+            currentUser={data.user?.name}
+            removeComment={(commentToFilter) => {
+              const oldComments = [...post.comments];
+              post.comments = post.comments.filter((comment) => comment.id !== commentToFilter.id);
+              return () => {
+                post.comments = oldComments;
+              };
+            }}
+          />
         </div>
       {/snippet}
     </VirtualScroller>

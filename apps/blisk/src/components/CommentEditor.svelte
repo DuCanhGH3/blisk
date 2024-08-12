@@ -122,6 +122,7 @@
     <p
       id="{comment.id}-edit-error-text"
       class="text-error-light dark:text-error-dark absolute bottom-2 right-[6.25rem] flex h-[2.375rem] flex-col justify-center gap-2"
+      role="alert"
     >
       {comment.error.error}
     </p>
