@@ -109,6 +109,9 @@
         await new Promise((resolve) => setTimeout(resolve, 3000));
         loadTime++;
         const random = Math.random() * Math.random();
+        if (loadTime === 6) {
+          return [];
+        }
         const state = $state([
           {
             id: 62 * random,

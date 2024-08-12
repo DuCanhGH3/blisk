@@ -13,6 +13,51 @@ export default {
         sans: "'Geist', Arial, sans-serif",
       },
       keyframes: {
+        "progress-ring": {
+          "100%": { transform: "rotate(360deg)" },
+        },
+        "progress-ring-s": {
+          "0%": {
+            "stroke-dasharray": "1, 200",
+            "stroke-dashoffset": "0",
+          },
+          "66%": {
+            "stroke-dasharray": "89, 200",
+            "stroke-dashoffset": "-40px",
+          },
+          "100%": {
+            "stroke-dasharray": "89, 200",
+            "stroke-dashoffset": "-70px",
+          },
+        },
+        "progress-ring-m": {
+          "0%": {
+            "stroke-dasharray": "1, 200",
+            "stroke-dashoffset": "0",
+          },
+          "66%": {
+            "stroke-dasharray": "89, 200",
+            "stroke-dashoffset": "-35px",
+          },
+          "100%": {
+            "stroke-dasharray": "89, 200",
+            "stroke-dashoffset": "-100px",
+          },
+        },
+        "progress-ring-l": {
+          "0%": {
+            "stroke-dasharray": "1, 200",
+            "stroke-dashoffset": "0",
+          },
+          "66%": {
+            "stroke-dasharray": "89, 200",
+            "stroke-dashoffset": "-100px",
+          },
+          "100%": {
+            "stroke-dasharray": "89, 200",
+            "stroke-dashoffset": "-200px",
+          },
+        },
         fly: {
           from: {
             opacity: "0",
@@ -139,6 +184,10 @@ export default {
         love: "heart 1.5s ease-out 0.5s infinite",
         "haha-eyes": "laughing-eyes 2.5s ease-out 0s infinite",
         "haha-mouth": "laughing-mouth 2.5s ease-out 0s infinite",
+        ring: "progress-ring 0.9s linear infinite",
+        "ring-sm": "progress-ring-s 2.4s linear infinite",
+        "ring-md": "progress-ring-m 2.4s linear infinite",
+        "ring-lg": "progress-ring-l 2.4s linear infinite",
       },
       backgroundImage: {
         wood: "url('/wood-pattern.png')",
@@ -154,7 +203,7 @@ export default {
           disabled: {
             light: "#73120d",
             dark: "#f99a9a",
-          }
+          },
         },
         accent: {
           light: "#1e40af",

@@ -1,9 +1,10 @@
 <script lang="ts" generics="T extends { id: number | string }">
-  import type { Ref } from "$lib/types";
-  import { range } from "$lib/utils";
   // Note: since the virtual scroller destroys any component not in view,
   // states will not work properly.
   import { tick, type Snippet } from "svelte";
+  import type { Ref } from "$lib/types";
+  import { range } from "$lib/utils";
+  import ProgressRing from "./ProgressRing.svelte";
 
   interface VirtualScrollerProps {
     items: T[];
@@ -14,13 +15,17 @@
      */
     renderer: Snippet<[Ref<T>]>;
     /**
+     * Replaces the default loading spinner.
+     */
+    loading?: Snippet<[]>;
+    /**
      * A function that should load more data. If not defined, the
      * virtual scroller does not implement infinite loading.
      */
     loadMore?(): Promise<T[]> | T[];
   }
 
-  const { items: initialItems = $bindable(), renderer, loadMore }: VirtualScrollerProps = $props();
+  const { items: initialItems = $bindable(), renderer, loading, loadMore }: VirtualScrollerProps = $props();
 
   let items = $state([...initialItems]);
 
@@ -85,11 +90,46 @@
   const rows = $state<(HTMLDivElement | null)[]>([]);
   let height = $state<number[]>(null!);
   let heightTree = $state<HeightTree | null>(null);
+  let hasReachedEnd = $state(false);
+
+  let isLoadingMore = false;
 
   const paddingTop = $derived(start > 0 && heightTree ? heightTree.rangeSum(0, start - 1) : 0);
   const paddingBottom = $derived(end < items.length - 1 && heightTree ? heightTree.sum(end + 1) : 0);
 
-  let isLoadingMore = false;
+  const updateTree = () => {
+    if (!heightTree) return;
+    for (let i = start; i <= end; ++i) {
+      const row = rows[i - start];
+      if (row) {
+        let offset = row.offsetHeight;
+        if (offset !== height[i]) {
+          if (!height[i]) height[i] = 0;
+          heightTree.add(i, offset - height[i]);
+          height[i] = offset;
+        }
+      }
+    }
+  };
+
+  const loadMoreData = async () => {
+    if (loadMore && !hasReachedEnd && !isLoadingMore) {
+      const remaining = document.documentElement.scrollHeight - (document.documentElement.scrollTop + window.innerHeight);
+      if (remaining < 100) {
+        isLoadingMore = true;
+        const data = await loadMore();
+        if (data.length > 0) {
+          items.push(...data);
+          end = items.length - 1;
+          await tick();
+          updateTree();
+        } else {
+          hasReachedEnd = true;
+        }
+        isLoadingMore = false;
+      }
+    }
+  };
 
   /**
    * The bulk of the virtual scroller. Requires that all elements' heights have been calculated.
@@ -122,12 +162,10 @@
       start = tl;
       tr = items.length - 1;
     }
-    // When we render from the start, this will cause the algorithm to
-    // render an extra of `containerTop` pixels, but that's acceptable.
     const totalRenderingHeight = containerTop + window.innerHeight;
     while (tl < tr) {
       let tm = tl + ((tr - tl) >> 1);
-      if (heightTree.rangeSum(start, tm) <= totalRenderingHeight) {
+      if (heightTree.rangeSum(0, tm) <= totalRenderingHeight) {
         tl = tm + 1;
       } else {
         tr = tm;
@@ -141,9 +179,12 @@
     start = 0;
     end = initialItems.length - 1;
     await tick();
+    // In the case the user is loaded at the bottom of the container, try loading more data.
+    await loadMoreData();
     heightTree = null;
-    height = Array.from({ length: initialItems.length }, () => 0);
-    for (let i = 0; i <= end - start + 1; ++i) {
+    const heightTreeLength = end - start + 1;
+    height = Array.from({ length: heightTreeLength }, () => 0);
+    for (let i = 0; i < heightTreeLength; ++i) {
       const row = rows[i];
       if (row) {
         height[start + i] = row.offsetHeight;
@@ -155,30 +196,8 @@
 
   const handleLayout = async () => {
     if (!heightTree) return;
-    for (let i = start; i <= end; ++i) {
-      const row = rows[i - start];
-      if (row) {
-        let offset = row.offsetHeight;
-        if (offset !== height[i]) {
-          if (!height[i]) height[i] = 0;
-          heightTree.add(i, offset - height[i]);
-          height[i] = offset;
-        }
-      }
-    }
-    if (loadMore && !isLoadingMore) {
-      const remaining = document.documentElement.scrollHeight - (document.documentElement.scrollTop + window.innerHeight);
-      if (remaining < 100) {
-        isLoadingMore = true;
-        const data = await loadMore();
-        if (data.length > 0) {
-          items.push(...data);
-          end = items.length - 1;
-          await tick();
-        }
-        isLoadingMore = false;
-      }
-    }
+    updateTree();
+    await loadMoreData();
     recalculate();
   };
 
@@ -196,3 +215,13 @@
     </div>
   {/each}
 </div>
+{#if !!loadMore && !hasReachedEnd}
+  {#if loading}
+    {@render loading()}
+  {:else}
+    <div class="flex h-fit flex-row items-center gap-2">
+      <ProgressRing size="sm" aria-hidden="true" tabindex={-1} />
+      Loading...
+    </div>
+  {/if}
+{/if}
