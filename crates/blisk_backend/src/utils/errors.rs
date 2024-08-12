@@ -1,3 +1,5 @@
+use std::convert::Infallible;
+
 use axum::{
     extract::rejection::JsonRejection,
     http::StatusCode,
@@ -101,6 +103,8 @@ pub enum AppError {
     LettreSmtpError(#[from] lettre::transport::smtp::Error),
     #[error("error while hashing password: {0}")]
     Argon2HashError(argon2::password_hash::Error),
+    #[error("an infallible error occurred?: {0}")]
+    Infallible(#[from] Infallible),
 }
 
 impl From<argon2::password_hash::Error> for AppError {
@@ -244,6 +248,10 @@ impl IntoResponse for AppError {
                 StatusCode::INTERNAL_SERVER_ERROR,
                 "Internal Server Error".to_owned(),
             ),
+            AppError::Infallible(_) => (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                "Internal Server Error".to_owned(),                
+            )
         };
         (status, AppJson(ErrorResponse { error })).into_response()
     }

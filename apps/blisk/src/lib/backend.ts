@@ -15,6 +15,13 @@ export interface BackendInit extends RequestInit {
 
 export type BackendResult<T> = { ok: true; data: T } | { ok: false; status: number; error: string };
 
+/**
+ * Fetch data from the backend on the server. Useful for actions, `load`
+ * functions, and more.
+ * @param url 
+ * @param init 
+ * @returns 
+ */
 export const fetchBackend = async <T>(
   url: `/${string}`,
   { authz, cookies, fetch, setHeaders, noSuccessContent, ...init }: BackendInit
@@ -79,8 +86,6 @@ export const createReaction = async (formData: FormData, fetch: typeof globalThi
     post_id: formData.get("forId"),
     reaction_type: formData.get("reactionType"),
   });
-
-  console.log(formData.get("forId"));
 
   if (!data.success) {
     return fail(400, { validationError: data.error.flatten().fieldErrors });

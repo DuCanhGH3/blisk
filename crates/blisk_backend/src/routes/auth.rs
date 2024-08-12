@@ -21,6 +21,7 @@ use axum_extra::{
     headers::{authorization::Bearer, Authorization},
     typed_header::TypedHeaderRejectionReason,
     TypedHeader,
+    extract::cookie::CookieJar
 };
 use jsonwebtoken::{decode, encode, DecodingKey, EncodingKey, Header, Validation};
 use rand::{distributions::Alphanumeric, Rng};
@@ -102,22 +103,29 @@ where
     type Rejection = AppError;
     async fn from_request_parts(parts: &mut Parts, _state: &S) -> Result<Self, Self::Rejection> {
         // Extract the token from the authorization header
-        let TypedHeader(Authorization(bearer)) =
-            match parts.extract::<TypedHeader<Authorization<Bearer>>>().await {
-                Ok(header) => header,
-                Err(err) => match err.reason() {
-                    TypedHeaderRejectionReason::Missing => {
-                        return Ok(OptionalUserClaims(None));
-                    }
-                    &_ => {
-                        return Err(AuthError::Invalid)?;
-                    }
-                },
-            };
+        let header = match parts.extract::<TypedHeader<Authorization<Bearer>>>().await {
+            Ok(header) => Some(header),
+            Err(err) => match err.reason() {
+                TypedHeaderRejectionReason::Missing => None,
+                &_ => {
+                    return Err(AuthError::Invalid)?;
+                }
+            },
+        };
 
-        Ok(OptionalUserClaims(Some(UserClaims::decode(
-            bearer.token(),
-        )?)))
+        if let Some(TypedHeader(Authorization(bearer))) = header {
+            return Ok(OptionalUserClaims(Some(UserClaims::decode(
+                bearer.token(),
+            )?)));
+        }
+
+        let jar = parts.extract::<CookieJar>().await?;
+
+        if let Some(token) = jar.get("token") {
+            return Ok(OptionalUserClaims(Some(UserClaims::decode(token.value())?)));
+        }
+
+        Ok(OptionalUserClaims(None))
     }
 }
 

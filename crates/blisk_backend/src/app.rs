@@ -2,6 +2,7 @@ use std::str::FromStr;
 
 use crate::{routes, settings::SETTINGS, utils::constants::UPLOADS_DIRECTORY};
 use axum::{
+    http::{HeaderValue, Method},
     routing::{get, post},
     serve::Serve,
     Router,
@@ -10,6 +11,8 @@ use sqlx::{
     postgres::{PgConnectOptions, PgPoolOptions},
     Pool, Postgres,
 };
+use tower::ServiceBuilder;
+use tower_http::cors::CorsLayer;
 
 #[derive(Clone)]
 pub struct AppState {
@@ -50,6 +53,20 @@ impl Application {
         let app_state = AppState { pool, redis_client };
         let listener = tokio::net::TcpListener::bind(&address).await?;
         let port = listener.local_addr().unwrap().port();
+        let cors = CorsLayer::new()
+            .allow_methods(vec![
+                Method::GET,
+                Method::POST,
+                Method::PATCH,
+                Method::DELETE,
+            ])
+            .allow_origin(
+                SETTINGS
+                    .frontend
+                    .url
+                    .parse::<HeaderValue>()
+                    .expect("Failed to parse frontend URI."),
+            );
         let app = Router::new()
             .route("/health", get(routes::health::health_check))
             .route(
@@ -82,7 +99,8 @@ impl Application {
             .route("/auth/confirm", post(routes::auth::confirm))
             .route("/auth/login", post(routes::auth::login))
             .route("/auth/register", post(routes::auth::register))
-            .with_state(app_state);
+            .with_state(app_state)
+            .layer(ServiceBuilder::new().layer(cors));
         let server = axum::serve(listener, app);
 
         Ok(Self { port, server })

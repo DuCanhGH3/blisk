@@ -20,7 +20,8 @@
       <h1 class="pt-4 text-5xl lg:text-8xl">{data.book.title}</h1>
       <h2 class="sr-only">About this book</h2>
       <p class="text-comment text-3xl font-semibold leading-10 tracking-tight">
-        <span class="sr-only">Written by</span> {data.book.authors.map((author) => author.name).join(", ")} • 1965
+        <span class="sr-only">Written by</span>
+        {data.book.authors.map((author) => author.name).join(", ")} • 1965
       </p>
       <p class="max-h-72 overflow-y-auto lg:max-h-full">
         {data.book.summary}
@@ -74,12 +75,13 @@
     <section id="reviews" class="flex basis-2/3 flex-col gap-6">
       <h2 class="text-3xl">Reviews</h2>
       {#if data.book.reviews.length > 0}
-        {#snippet renderer(post: Ref<Post>)}
-          <div class="pb-6">
-            <PostRenderer bind:post={post.ref} />
-          </div>
-        {/snippet}
-        <VirtualScroller bind:items={reviews.state} {renderer} />
+        <VirtualScroller bind:items={reviews.state}>
+          {#snippet renderer(post: Ref<Post>)}
+            <div class="pb-6">
+              <PostRenderer bind:post={post.ref} />
+            </div>
+          {/snippet}
+        </VirtualScroller>
       {:else}
         <p class="text-lg font-semibold leading-3 tracking-tight">There's no review yet!</p>
       {/if}

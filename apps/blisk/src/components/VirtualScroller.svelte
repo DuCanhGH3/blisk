@@ -19,13 +19,17 @@
      */
     loading?: Snippet<[]>;
     /**
+     * Replaces the default error renderer.
+     */
+    error?: Snippet<[]>;
+    /**
      * A function that should load more data. If not defined, the
      * virtual scroller does not implement infinite loading.
      */
     loadMore?(): Promise<T[]> | T[];
   }
 
-  const { items = $bindable(), renderer, loading, loadMore }: VirtualScrollerProps = $props();
+  const { items = $bindable(), renderer, loading, error, loadMore }: VirtualScrollerProps = $props();
 
   class HeightTree {
     private n = $state(0);
@@ -89,6 +93,7 @@
   let height = $state<number[]>(null!);
   let heightTree = $state<HeightTree | null>(null);
   let hasReachedEnd = $state(false);
+  let errorMessage = $state<string | null>(null);
 
   let isLoadingMore = false;
 
@@ -115,14 +120,21 @@
       const remaining = document.documentElement.scrollHeight - (document.documentElement.scrollTop + window.innerHeight);
       if (remaining < 100) {
         isLoadingMore = true;
-        const data = await loadMore();
-        if (data.length > 0) {
-          items.push(...data);
-          end = items.length - 1;
-          await tick();
-          updateTree();
-        } else {
-          hasReachedEnd = true;
+        try {
+          errorMessage = null;
+          const data = await loadMore();
+          if (data.length > 0) {
+            items.push(...data);
+            end = items.length - 1;
+            await tick();
+            updateTree();
+          } else {
+            hasReachedEnd = true;
+          }
+        } catch (err) {
+          if (err instanceof Error) {
+            errorMessage = err.message;
+          }
         }
         isLoadingMore = false;
       }
@@ -215,7 +227,13 @@
   {/each}
 </div>
 {#if !!loadMore && !hasReachedEnd}
-  {#if loading}
+  {#if errorMessage}
+    {#if error}
+      {@render error()}
+    {:else}
+      <p class="text-error-light dark:text-error-dark">Failed to load more: {errorMessage}</p>
+    {/if}
+  {:else if loading}
     {@render loading()}
   {:else}
     <div class="flex h-fit flex-row items-center gap-2">

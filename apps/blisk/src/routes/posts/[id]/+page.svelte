@@ -13,6 +13,7 @@
   import VirtualScroller from "$components/VirtualScroller.svelte";
   import { rendererButtonAttributes } from "$components/renderer-constants.js";
   import { OPTIMISTIC_ID } from "$lib/constants.js";
+  import { fetchBackend } from "$lib/backend.client.js";
 
   const { data } = $props();
 
@@ -27,8 +28,6 @@
     previousReaction = post.user_reaction;
     post.user_reaction = reaction;
   };
-
-  let loadTime = 0;
 </script>
 
 <article class="flex h-full w-full max-w-6xl flex-col gap-8 p-2 md:py-8">
@@ -106,48 +105,13 @@
     <VirtualScroller
       bind:items={post.comments}
       loadMore={async () => {
-        await new Promise((resolve) => setTimeout(resolve, 3000));
-        loadTime++;
-        const random = Math.random() * Math.random();
-        if (loadTime >= 15) {
-          return [];
+        const data = await fetchBackend<Comment[]>(`/comments?post_id=${post.id}&offset=${post.comments.length}`, {
+          signal: AbortSignal.timeout(10000),
+        });
+        if (!data.ok) {
+          throw new Error(data.error);
         }
-        return [
-          {
-            id: 62 * random,
-            content: `${loadTime} - 62`,
-            author_name: "admin",
-            user_reaction: null,
-            children: [
-              {
-                id: 32 * random,
-                content: "3213",
-                author_name: "admin",
-                user_reaction: null,
-                children: [{ id: 33 * random, content: "q2eqwe231312", author_name: "admin", user_reaction: null, children: null }],
-              },
-            ],
-          },
-          { id: 60 * random, content: `${loadTime} - 60`, author_name: "admin", user_reaction: "laugh", children: null },
-          { id: 58 * random, content: `${loadTime} - 58`, author_name: "admin", user_reaction: null, children: null },
-          { id: 56 * random, content: `${loadTime} - 56`, author_name: "admin", user_reaction: null, children: null },
-          { id: 54 * random, content: `${loadTime} - 54`, author_name: "admin", user_reaction: null, children: null },
-          { id: 52 * random, content: `${loadTime} - 52`, author_name: "admin", user_reaction: null, children: null },
-          { id: 50 * random, content: `${loadTime} - 50`, author_name: "admin", user_reaction: null, children: null },
-          { id: 48 * random, content: `${loadTime} - 48`, author_name: "admin", user_reaction: null, children: null },
-          { id: 46 * random, content: `${loadTime} - 46`, author_name: "admin", user_reaction: null, children: null },
-          { id: 44 * random, content: `${loadTime} - 44`, author_name: "admin", user_reaction: null, children: null },
-          { id: 42 * random, content: `${loadTime} - 42`, author_name: "admin", user_reaction: null, children: null },
-          { id: 40 * random, content: `${loadTime} - 40`, author_name: "admin", user_reaction: null, children: null },
-          { id: 38 * random, content: `${loadTime} - 38`, author_name: "admin", user_reaction: null, children: null },
-          { id: 36 * random, content: `${loadTime} - 36`, author_name: "admin", user_reaction: null, children: null },
-          { id: 34 * random, content: `${loadTime} - 34`, author_name: "admin", user_reaction: null, children: null },
-          { id: 32 * random, content: `${loadTime} - 32`, author_name: "admin", user_reaction: null, children: null },
-          { id: 30 * random, content: `${loadTime} - 30`, author_name: "admin", user_reaction: null, children: null },
-          { id: 28 * random, content: `${loadTime} - 28`, author_name: "admin", user_reaction: null, children: null },
-          { id: 26 * random, content: `${loadTime} - 26`, author_name: "admin", user_reaction: null, children: null },
-          { id: 24 * random, content: `${loadTime} - 24`, author_name: "admin", user_reaction: null, children: null },
-        ] satisfies Comment[];
+        return data.data;
       }}
     >
       {#snippet renderer(comment: Ref<Comment>)}

@@ -19,7 +19,7 @@ const config = {
     csp: {
       directives: {
         "frame-src": ["self"],
-        "connect-src": ["self"],
+        "connect-src": ["self", "http://localhost:8080"],
         "font-src": ["self"],
         "img-src": ["self", "https://wsrv.nl"],
         "object-src": ["self"],
