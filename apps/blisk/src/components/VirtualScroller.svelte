@@ -1,7 +1,7 @@
 <script lang="ts" generics="T extends { id: number | string }">
   // Note: since the virtual scroller destroys any component not in view,
   // states will not work properly.
-  import { tick, type Snippet } from "svelte";
+  import { tick, untrack, type Snippet } from "svelte";
   import type { Ref } from "$lib/types";
   import { range } from "$lib/utils";
   import ProgressRing from "./ProgressRing.svelte";
@@ -25,9 +25,7 @@
     loadMore?(): Promise<T[]> | T[];
   }
 
-  const { items: initialItems = $bindable(), renderer, loading, loadMore }: VirtualScrollerProps = $props();
-
-  let items = $state([...initialItems]);
+  const { items = $bindable(), renderer, loading, loadMore }: VirtualScrollerProps = $props();
 
   class HeightTree {
     private n = $state(0);
@@ -86,7 +84,7 @@
   let container = $state<HTMLDivElement | null>(null);
   // During SSR, render the whole thing.
   let start = $state(0);
-  let end = $state(initialItems.length - 1);
+  let end = $state(items.length - 1);
   const rows = $state<(HTMLDivElement | null)[]>([]);
   let height = $state<number[]>(null!);
   let heightTree = $state<HeightTree | null>(null);
@@ -174,10 +172,11 @@
     end = tr;
   };
 
+  // `refresh` will **not** run when `items` updates. In the future, we may expose
+  // this function so that other components can recreate the tree themselves.
   const refresh = async () => {
-    items = [...initialItems];
     start = 0;
-    end = initialItems.length - 1;
+    end = untrack(() => items.length - 1);
     await tick();
     // In the case the user is loaded at the bottom of the container, try loading more data.
     await loadMoreData();

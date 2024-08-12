@@ -80,6 +80,8 @@ export const createReaction = async (formData: FormData, fetch: typeof globalThi
     reaction_type: formData.get("reactionType"),
   });
 
+  console.log(formData.get("forId"));
+
   if (!data.success) {
     return fail(400, { validationError: data.error.flatten().fieldErrors });
   }

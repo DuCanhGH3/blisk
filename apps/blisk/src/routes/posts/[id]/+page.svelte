@@ -109,10 +109,10 @@
         await new Promise((resolve) => setTimeout(resolve, 3000));
         loadTime++;
         const random = Math.random() * Math.random();
-        if (loadTime === 6) {
+        if (loadTime >= 15) {
           return [];
         }
-        const state = $state([
+        return [
           {
             id: 62 * random,
             content: `${loadTime} - 62`,
@@ -147,14 +147,14 @@
           { id: 28 * random, content: `${loadTime} - 28`, author_name: "admin", user_reaction: null, children: null },
           { id: 26 * random, content: `${loadTime} - 26`, author_name: "admin", user_reaction: null, children: null },
           { id: 24 * random, content: `${loadTime} - 24`, author_name: "admin", user_reaction: null, children: null },
-        ] satisfies Comment[]);
-
-        return state;
+        ] satisfies Comment[];
       }}
     >
       {#snippet renderer(comment: Ref<Comment>)}
         <div class="pb-3">
-          <CommentRenderer comment={comment.ref} currentUser={data.user?.name} />
+          <!-- eslint-disable-next-line svelte/no-unused-svelte-ignore -->
+          <!-- svelte-ignore binding_property_non_reactive -->
+          <CommentRenderer bind:comment={comment.ref} currentUser={data.user?.name} />
         </div>
       {/snippet}
     </VirtualScroller>
