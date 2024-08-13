@@ -2,7 +2,8 @@ use std::str::FromStr;
 
 use crate::{routes, settings::SETTINGS, utils::constants::UPLOADS_DIRECTORY};
 use axum::{
-    http::{HeaderValue, Method},
+    extract::DefaultBodyLimit,
+    http::{HeaderName, HeaderValue, Method},
     routing::{get, post},
     serve::Serve,
     Router,
@@ -12,7 +13,7 @@ use sqlx::{
     Pool, Postgres,
 };
 use tower::ServiceBuilder;
-use tower_http::cors::CorsLayer;
+use tower_http::{cors::CorsLayer, services::ServeDir, set_header::SetResponseHeaderLayer};
 
 #[derive(Clone)]
 pub struct AppState {
@@ -67,6 +68,10 @@ impl Application {
                     .parse::<HeaderValue>()
                     .expect("Failed to parse frontend URI."),
             );
+        let robots = SetResponseHeaderLayer::overriding(
+            HeaderName::from_static("x-robots-tag"),
+            HeaderValue::from_static("noindex"),
+        );
         let app = Router::new()
             .route("/health", get(routes::health::health_check))
             .route(
@@ -99,8 +104,13 @@ impl Application {
             .route("/auth/confirm", post(routes::auth::confirm))
             .route("/auth/login", post(routes::auth::login))
             .route("/auth/register", post(routes::auth::register))
+            .route(
+                "/assets/upload",
+                post(routes::files::upload).layer(DefaultBodyLimit::max(10_000_000)),
+            )
+            .nest_service("/assets", ServeDir::new(UPLOADS_DIRECTORY))
             .with_state(app_state)
-            .layer(ServiceBuilder::new().layer(cors));
+            .layer(ServiceBuilder::new().layer(cors).layer(robots));
         let server = axum::serve(listener, app);
 
         Ok(Self { port, server })

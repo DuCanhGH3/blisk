@@ -61,6 +61,8 @@ pub enum UploadsError {
     InvalidName(String),
     #[error("received an IO error: {0}")]
     IoError(#[from] std::io::Error),
+    #[error("this error is not expected")]
+    Unexpected,
 }
 
 #[derive(Debug, thiserror::Error)]
@@ -205,6 +207,10 @@ impl IntoResponse for AppError {
                         format!("{file} is not a valid filename!")
                     ),
                     UploadsError::IoError(_) => (
+                        StatusCode::INTERNAL_SERVER_ERROR,
+                        "Internal Server Error".to_owned()
+                    ),
+                    UploadsError::Unexpected => (
                         StatusCode::INTERNAL_SERVER_ERROR,
                         "Internal Server Error".to_owned()
                     )

@@ -18,7 +18,7 @@ pub async fn upload_file<'c>(
     user_id: i64,
     parent_id: Option<i64>,
     bytes: Bytes,
-) -> Result<(), AppError> {
+) -> Result<i64, AppError> {
     let file_name = validate_file_name(file_name)?;
     let ext = Path::new(&file_name)
         .extension()
@@ -26,6 +26,7 @@ pub async fn upload_file<'c>(
         .ok_or(UploadsError::InvalidName(file_name.clone()))?;
     let uid = validate_file_name(user_id)?;
 
+    // TODO: add `extension` column
     let fid = {
         if let Some(pid) = parent_id {
             sqlx::query_scalar!(
@@ -51,14 +52,17 @@ pub async fn upload_file<'c>(
         .join(format!("{}.{}", fid, ext));
 
     async {
+        let dir = path.parent().ok_or(UploadsError::Unexpected)?;
+
+        tokio::fs::create_dir_all(dir).await?;
+
         let mut file = tokio::io::BufWriter::new(tokio::fs::File::create(path).await?);
 
         tokio::io::copy(&mut bytes.as_ref(), &mut file).await?;
 
         Ok::<_, UploadsError>(())
     }
-    .await
-    .map_err(|err| AppError::from(err))?;
+    .await?;
 
-    Ok(())
+    Ok(fid)
 }
