@@ -14,6 +14,7 @@
   import { rendererButtonAttributes } from "$components/renderer-constants.js";
   import { OPTIMISTIC_ID } from "$lib/constants.js";
   import { fetchBackend } from "$lib/backend.client.js";
+  import TooltipHover from "$components/TooltipHover.svelte";
 
   const { data } = $props();
 
@@ -39,7 +40,9 @@
         <div class="text-comment flex flex-row flex-wrap items-center gap-1 text-base">
           <a href="/users/{post.author_name}" class="link sm -mt-[1px]">{post.author_name}</a>
           <span>•</span>
-          <div>Just now</div>
+          <TooltipHover tooltipId="post-{post.id}-timestamp-tooltip" text="Just now">
+            Just now
+          </TooltipHover>
         </div>
         <div class="flex flex-row flex-wrap gap-1 text-lg">
           {#if post.reaction === "like"}

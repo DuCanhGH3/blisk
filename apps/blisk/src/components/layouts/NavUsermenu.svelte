@@ -32,8 +32,8 @@
       <img alt="Your avatar" width={24} height={24} class="h-6 w-6 rounded-full text-transparent" src="/no-avatar.webp" />
     </summary>
     <Menu
-      class={clsx("w-52 origin-top-right bg-white dark:bg-black", leftSided ? "right-0 md:left-0" : "right-0")}
       id="navbar-usermenu"
+      class={clsx("w-52 origin-top-right bg-white dark:bg-black", leftSided ? "right-0 md:left-0" : "right-0")}
       aria-labelledby="navbar-usermenu-button"
     >
       <div>

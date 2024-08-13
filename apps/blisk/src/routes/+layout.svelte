@@ -13,6 +13,8 @@
   import { colorScheme } from "$lib/stores/colorScheme";
   import { PUBLIC_CANONICAL_URL } from "$env/static/public";
   import Dialog from "$components/layouts/Dialog.svelte";
+  import { mount, unmount } from "svelte";
+  import Tooltip from "$components/layouts/Tooltip.svelte";
 
   const { data, children } = $props();
   const isDark = $derived($colorScheme === "dark");
@@ -30,6 +32,14 @@
       }
     };
     registerSerwist();
+  });
+
+  $effect(() => {
+    const tooltipElement = mount(Tooltip, {
+      target: document.getElementById("root-container")!,
+    });
+
+    return () => unmount(tooltipElement);
   });
 
   $effect(() => {

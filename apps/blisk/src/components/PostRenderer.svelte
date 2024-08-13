@@ -9,6 +9,7 @@
   import PostRendererButton from "./PostRendererButton.svelte";
   import ReactionBar from "./ReactionBar.svelte";
   import { rendererButtonAttributes, reactionRender } from "./renderer-constants";
+  import TooltipHover from "./TooltipHover.svelte";
 
   interface PostRendererProps {
     /**
@@ -37,7 +38,7 @@
       <div class="text-comment flex flex-row flex-wrap items-center gap-1 text-sm">
         <a href="/users/{post.author_name}" class="link sm">{post.author_name}</a>
         <span>•</span>
-        <div>Just now</div>
+        <TooltipHover tooltipId="post-{post.id}-timestamp-tooltip" text="Just now">Just now</TooltipHover>
       </div>
       <div class="flex flex-row flex-wrap items-center gap-1 text-base">
         {#if post.reaction === "like"}
@@ -54,18 +55,18 @@
   <div class="order-1 -m-1 flex flex-row flex-wrap gap-3">
     <details bind:this={reactionBar} class="relative flex-grow">
       {#if !post.user_reaction}
-        <PostRendererButton as="summary" aria-describedby="reaction-bar-{post.id}">
+        <PostRendererButton as="summary" aria-describedby="post-{post.id}-reaction-bar">
           <ThumbUp {...rendererButtonAttributes} /> <span class="mb-[-1px] select-none">Like</span>
         </PostRendererButton>
       {:else}
         {@const { icon, label, colors } = reactionRender[post.user_reaction]}
-        <PostRendererButton customColors={colors} as="summary" aria-describedby="reaction-bar-{post.id}">
+        <PostRendererButton customColors={colors} as="summary" aria-describedby="post-{post.id}-reaction-bar">
           <svelte:component this={icon} animatable={false} {...rendererButtonAttributes} />
-          <span class="mb-[-1px] text-black dark:text-white select-none">{label}</span>
+          <span class="mb-[-1px] select-none text-black dark:text-white">{label}</span>
         </PostRendererButton>
       {/if}
       <ReactionBar
-        id="reaction-bar-{post.id}"
+        id="post-{post.id}-reaction-bar"
         class="animate-fly absolute bottom-full -translate-y-1"
         style="--fly-translate-y:1rem"
         currentReaction={post.user_reaction}

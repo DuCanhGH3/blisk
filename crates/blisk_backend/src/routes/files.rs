@@ -12,8 +12,7 @@ use crate::{
 use axum::{body::Bytes, extract::State, http::StatusCode, response::Response};
 use axum_typed_multipart::{FieldData, TryFromMultipart};
 use futures::future::TryJoinAll;
-use std::sync::Arc;
-use tokio::{sync::Mutex, try_join};
+use tokio::try_join;
 use tracing::instrument;
 
 #[derive(TryFromMultipart)]
@@ -34,12 +33,10 @@ pub async fn upload(
     claims: UserClaims,
     AppMultipart(UploadPayload { files }): AppMultipart<UploadPayload>,
 ) -> Result<Response, AppError> {
-    let pool = Arc::new(Mutex::new(pool));
     let mut tasks = Vec::with_capacity(files.len());
     for file in files {
         let pool = pool.clone();
         tasks.push(flatten(tokio::spawn(async move {
-            let pool = pool.lock().await;
             let mut transaction = pool.begin().await?;
             let file_name = file
                 .metadata

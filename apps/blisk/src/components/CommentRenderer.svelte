@@ -20,6 +20,7 @@
   import { hotkeys } from "$lib/hotkeys.svelte";
   import { OPTIMISTIC_ID } from "$lib/constants";
   import { fetchBackend } from "$lib/backend.client";
+  import TooltipHover from "./TooltipHover.svelte";
 
   interface CommentProps {
     /**
@@ -94,26 +95,26 @@
       <img src="/no-avatar.webp" class="border-border-light dark:border-border-dark size-10 select-none rounded-full border shadow-lg" alt="" />
       <span class="flex flex-col gap-1">
         <a href="/users/{comment.author_name}" class="link sm text-sm">{comment.author_name}</a>
-        <span class="text-comment text-xs">Just now</span>
+        <TooltipHover class="text-comment text-xs" tooltipId="comment-{comment.id}-timestamp-tooltip" text="Just now">Just now</TooltipHover>
       </span>
     </div>
     {#if !comment.is_editing}
       <MarkdownRenderer source={comment.content} startingHeading={4} />
-      <div class="-m-1 mt-0 flex w-fit flex-row flex-wrap gap-2 items-center">
+      <div class="-m-1 mt-0 flex w-fit flex-row flex-wrap items-center gap-2">
         <details bind:this={reactionBar} class="relative">
           {#if !comment.user_reaction}
-            <CommentRendererButton as="summary" aria-describedby="reaction-bar-{comment.id}">
+            <CommentRendererButton as="summary" aria-describedby="comment-{comment.id}-reaction-bar">
               <ThumbUp {...rendererButtonAttributes} /> <span class="select-none pr-1">Like</span>
             </CommentRendererButton>
           {:else}
             {@const { icon, label, colors } = reactionRender[comment.user_reaction]}
-            <CommentRendererButton customColors={colors} as="summary" aria-describedby="reaction-bar-{comment.id}">
+            <CommentRendererButton customColors={colors} as="summary" aria-describedby="comment-{comment.id}-reaction-bar">
               <svelte:component this={icon} animatable={false} {...rendererButtonAttributes} />
               <span class="select-none pr-1 text-black dark:text-white">{label}</span>
             </CommentRendererButton>
           {/if}
           <ReactionBar
-            id="reaction-bar-{comment.id}"
+            id="comment-{comment.id}-reaction-bar"
             class="animate-fly absolute bottom-full -translate-y-1"
             style="--fly-translate-y:1rem"
             currentReaction={comment.user_reaction}
@@ -139,11 +140,11 @@
         </CommentRendererButton>
         {#if currentUser === comment.author_name}
           <details bind:this={menu} class="relative">
-            <CommentRendererButton as="summary" aria-describedby="menu-bar-{comment.id}">
+            <CommentRendererButton as="summary" aria-describedby="comment-{comment.id}-menu-bar">
               <ThreeDots {...rendererButtonAttributes} /> <span class="sr-only">More</span>
             </CommentRendererButton>
             <Menu
-              id="menu-bar-{comment.id}"
+              id="comment-{comment.id}-menu-bar"
               class="animate-fly dark:bg-neutral-915 bottom-full z-10 w-32 -translate-y-1 bg-white"
               style="--fly-translate-y:1rem"
             >
