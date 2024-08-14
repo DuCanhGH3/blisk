@@ -1,12 +1,7 @@
 use super::{auth::OptionalUserClaims, posts::Post};
 use crate::{
     app::AppState,
-    utils::{
-        constants::SLUG_REGEX,
-        errors::{AppError, BooksError},
-        response::response,
-        structs::AppJson,
-    },
+    utils::{constants::SLUG_REGEX, errors::AppError, response::response, structs::AppJson},
 };
 use axum::{
     extract::{Path, State},
@@ -14,6 +9,18 @@ use axum::{
     response::Response,
 };
 use validator::Validate;
+
+#[derive(Debug, thiserror::Error)]
+pub enum BooksError {
+    #[error("duplicate slug {0}")]
+    SlugAlreadyExists(String),
+    #[error("language {0} does not exist")]
+    LanguageInvalid(String),
+    #[error("book {0} cannot be found")]
+    BookNotFound(String),
+    #[error("this error is not expected")]
+    Unexpected,
+}
 
 #[derive(serde::Deserialize, Validate)]
 pub struct CreatePayload {

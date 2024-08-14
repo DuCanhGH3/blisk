@@ -7,7 +7,7 @@
   import { clsx } from "$lib/clsx";
 
   const id = $derived(tooltip.state.id);
-  const text = $derived(tooltip.state.text);
+  const content = $derived(tooltip.state.content);
   const x = $derived(tooltip.state.x ?? 0);
   const y = $derived(tooltip.state.y ?? 0);
   const right = $derived(tooltip.state.right);
@@ -19,7 +19,7 @@
   let tooltipContainer = $state<HTMLDivElement | null>(null);
 
   $effect(() => {
-    if (text) {
+    if (content) {
       tick().then(() => {
         if (tooltipContainer) {
           width = tooltipContainer.getBoundingClientRect().width;
@@ -28,10 +28,10 @@
     }
   });
 
-  hotkeys([["Escape", () => text && closeTooltip()]]);
+  hotkeys([["Escape", () => content && closeTooltip()]]);
 </script>
 
-{#if text}
+{#if content}
   <div
     bind:this={tooltipContainer}
     {id}
@@ -40,7 +40,7 @@
     role="tooltip"
     class={clsx(
       "absolute z-50 inline-flex select-none flex-col overflow-auto rounded-md border",
-      "border-border-light bg-white text-left dark:border-border-dark dark:bg-neutral-915",
+      "border-border-light dark:border-border-dark dark:bg-neutral-915 bg-white text-left",
       "text-inherit shadow-[rgb(0_0_0/0.08)_0px_1px_4px] duration-100",
       "translate-x-[--offset] px-2 py-1.5 hover:select-auto"
     )}
@@ -51,6 +51,10 @@
     transition:fade={{ duration: 150, easing: quintOut }}
   >
     <span class="sr-only">Press Esc to dismiss this tooltip.</span>
-    {text}
+    {#if typeof content === "string"}
+      {content}
+    {:else}
+      {@render content()}
+    {/if}
   </div>
 {/if}

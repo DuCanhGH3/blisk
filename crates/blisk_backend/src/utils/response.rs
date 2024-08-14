@@ -2,6 +2,7 @@ use axum::{
     http::{HeaderMap, HeaderName, HeaderValue, StatusCode},
     response::{IntoResponse, Response},
 };
+use validator::ValidationErrors;
 
 use super::structs::AppJson;
 
@@ -12,6 +13,10 @@ pub struct SuccessResponse {
 #[derive(serde::Serialize)]
 pub struct ErrorResponse {
     pub error: String,
+}
+#[derive(serde::Serialize)]
+pub struct ValidationErrorResponse {
+    pub validation_error: ValidationErrors,
 }
 
 pub fn response<T>(

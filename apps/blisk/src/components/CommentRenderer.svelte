@@ -95,7 +95,7 @@
       <img src="/no-avatar.webp" class="border-border-light dark:border-border-dark size-10 select-none rounded-full border shadow-lg" alt="" />
       <span class="flex flex-col gap-1">
         <a href="/users/{comment.author_name}" class="link sm text-sm">{comment.author_name}</a>
-        <TooltipHover class="text-comment text-xs" tooltipId="comment-{comment.id}-timestamp-tooltip" text="Just now">Just now</TooltipHover>
+        <TooltipHover class="text-comment text-xs" tooltipId="comment-{comment.id}-timestamp-tooltip" content="Just now">Just now</TooltipHover>
       </span>
     </div>
     {#if !comment.is_editing}

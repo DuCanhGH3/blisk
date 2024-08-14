@@ -40,9 +40,7 @@
         <div class="text-comment flex flex-row flex-wrap items-center gap-1 text-base">
           <a href="/users/{post.author_name}" class="link sm -mt-[1px]">{post.author_name}</a>
           <span>•</span>
-          <TooltipHover tooltipId="post-{post.id}-timestamp-tooltip" text="Just now">
-            Just now
-          </TooltipHover>
+          <TooltipHover tooltipId="post-{post.id}-timestamp-tooltip" content="Just now">Just now</TooltipHover>
         </div>
         <div class="flex flex-row flex-wrap gap-1 text-lg">
           {#if post.reaction === "like"}

@@ -1,5 +1,13 @@
 use std::convert::Infallible;
 
+use super::{response::ErrorResponse, structs::AppJson, uploads::UploadsError};
+use crate::{
+    routes::{
+        auth::AuthError, books::BooksError, comments::CommentsError, posts::PostsError,
+        users::UserError,
+    },
+    utils::response::ValidationErrorResponse,
+};
 use axum::{
     extract::rejection::JsonRejection,
     http::StatusCode,
@@ -7,63 +15,6 @@ use axum::{
 };
 use axum_typed_multipart::TypedMultipartError;
 use validator::ValidationErrors;
-
-use super::{response::ErrorResponse, structs::AppJson};
-
-#[derive(Debug, thiserror::Error)]
-pub enum AuthError {
-    #[error("this user either doesn't exist or has already been verified")]
-    AlreadyVerified,
-    #[error("this user is not valid")]
-    Invalid,
-    #[error("this error is not expected")]
-    Unexpected,
-}
-#[derive(Debug, thiserror::Error)]
-pub enum UserError {
-    #[error("user {0} cannot be found")]
-    UserNotFound(String),
-    #[error("this error is not expected")]
-    Unexpected,
-}
-#[derive(Debug, thiserror::Error)]
-pub enum CommentsError {
-    #[error("comment {0} cannot be found")]
-    CommentNotFound(i64),
-    #[error("comment {0} was non-existent, or an unauthorized personnel tried to update it")]
-    UpdateUnauthorized(i64),
-    #[error("this error is not expected")]
-    Unexpected,
-}
-#[derive(Debug, thiserror::Error)]
-pub enum PostsError {
-    #[error("post {0} cannot be found")]
-    PostNotFound(i64),
-    #[error("post {0} was non-existent, or an unauthorized personnel tried to update it")]
-    UpdateUnauthorized(i64),
-    #[error("this error is not expected")]
-    Unexpected,
-}
-#[derive(Debug, thiserror::Error)]
-pub enum BooksError {
-    #[error("duplicate slug {0}")]
-    SlugAlreadyExists(String),
-    #[error("language {0} does not exist")]
-    LanguageInvalid(String),
-    #[error("book {0} cannot be found")]
-    BookNotFound(String),
-    #[error("this error is not expected")]
-    Unexpected,
-}
-#[derive(Debug, thiserror::Error)]
-pub enum UploadsError {
-    #[error("received an invalid filename: {0}")]
-    InvalidName(String),
-    #[error("received an IO error: {0}")]
-    IoError(#[from] std::io::Error),
-    #[error("this error is not expected")]
-    Unexpected,
-}
 
 #[derive(Debug, thiserror::Error)]
 pub enum AppError {
@@ -119,7 +70,9 @@ impl IntoResponse for AppError {
     fn into_response(self) -> Response {
         tracing::error!(error = %self, "an application error was thrown");
         let (status, error) = match self {
-            AppError::ValidationErrors(_) => (StatusCode::BAD_REQUEST, format!("{self}").replace('\n', ", ")),
+            AppError::ValidationErrors(error) => {
+                return (StatusCode::BAD_REQUEST, AppJson(ValidationErrorResponse { validation_error: error })).into_response();
+            },
             AppError::TokenUsed => (
                 StatusCode::UNPROCESSABLE_ENTITY,
                 "Token has either expired or been used.".to_owned(),

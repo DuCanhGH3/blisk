@@ -5,11 +5,7 @@ use super::{
 };
 use crate::{
     app::AppState,
-    utils::{
-        errors::{AppError, PostsError},
-        response::response,
-        structs::AppJson,
-    },
+    utils::{errors::AppError, response::response, structs::AppJson},
 };
 use axum::{
     extract::{Query, State},
@@ -18,6 +14,16 @@ use axum::{
 };
 use tracing::instrument;
 use validator::Validate;
+
+#[derive(Debug, thiserror::Error)]
+pub enum PostsError {
+    #[error("post {0} cannot be found")]
+    PostNotFound(i64),
+    #[error("post {0} was non-existent, or an unauthorized personnel tried to update it")]
+    UpdateUnauthorized(i64),
+    #[error("this error is not expected")]
+    Unexpected,
+}
 
 #[derive(Clone, Debug, PartialEq, PartialOrd, sqlx::Type, serde::Deserialize, serde::Serialize)]
 #[sqlx(type_name = "breact", rename_all = "snake_case")]

@@ -31,7 +31,7 @@ export const actions: Actions = {
       if (!data.success) {
         return fail(400, { validationError: data.error.flatten().fieldErrors });
       }
-      const res = await fetchBackend<{ token_type: string; expires_in: number; id_token: string }>("/auth/login?client_id=abc", {
+      const res = await fetchBackend<{ token_type: string; expires_in: number; id_token: string }>("/auth/login?client_id=abc&scope=openid", {
         authz: false,
         cookies,
         fetch,

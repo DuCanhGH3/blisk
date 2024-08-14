@@ -1,14 +1,15 @@
 <script lang="ts">
   // TODO: Allow customizing hover timeout to be compliant with Timing Adjustable.
   import { tooltip } from "$lib/stores/tooltip.svelte";
+  import type { Snippet } from "svelte";
   import type { HTMLAttributes, MouseEventHandler } from "svelte/elements";
 
   interface TooltipHoverProps extends Omit<HTMLAttributes<HTMLSpanElement>, "role" | "aria-describedby"> {
-    text: string;
+    content: Snippet<[]> | string;
     tooltipId: string;
   }
 
-  const { text, tooltipId, children, onmouseenter, onmouseleave, ...props }: TooltipHoverProps = $props();
+  const { content, tooltipId, children, onmouseenter, onmouseleave, ...props }: TooltipHoverProps = $props();
   let span = $state<HTMLSpanElement | null>(null);
   const isActive = $derived(tooltip.state.id === tooltipId);
 
@@ -34,7 +35,7 @@
 
       tooltip.state = {
         id: tooltipId,
-        text,
+        content,
         x,
         y,
         right,

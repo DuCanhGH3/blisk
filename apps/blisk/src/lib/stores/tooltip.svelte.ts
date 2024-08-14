@@ -1,6 +1,8 @@
+import type { Snippet } from "svelte";
+
 export interface TooltipState {
   id: string | undefined;
-  text: string | undefined;
+  content: Snippet<[]> | string | undefined;
   x: number | undefined;
   y: number | undefined;
   right: boolean;
@@ -12,7 +14,7 @@ export interface TooltipState {
 
 const tooltipDefault = {
   id: undefined,
-  text: undefined,
+  content: undefined,
   x: undefined,
   y: undefined,
   right: false,

@@ -1,8 +1,17 @@
-use super::errors::UploadsError;
 use crate::utils::{constants::UPLOADS_DIRECTORY, errors::AppError, validators::path_is_valid};
 use axum::body::Bytes;
 use sqlx::Postgres;
 use std::{ffi::OsStr, path::Path};
+
+#[derive(Debug, thiserror::Error)]
+pub enum UploadsError {
+    #[error("received an invalid filename: {0}")]
+    InvalidName(String),
+    #[error("received an IO error: {0}")]
+    IoError(#[from] std::io::Error),
+    #[error("this error is not expected")]
+    Unexpected,
+}
 
 fn validate_file_name<'a>(file_path: impl ToString) -> Result<String, UploadsError> {
     let file_path = file_path.to_string();

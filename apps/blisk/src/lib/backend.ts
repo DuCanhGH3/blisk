@@ -18,9 +18,9 @@ export type BackendResult<T> = { ok: true; data: T } | { ok: false; status: numb
 /**
  * Fetch data from the backend on the server. Useful for actions, `load`
  * functions, and more.
- * @param url 
- * @param init 
- * @returns 
+ * @param url
+ * @param init
+ * @returns
  */
 export const fetchBackend = async <T>(
   url: `/${string}`,
@@ -51,7 +51,7 @@ export const fetchBackend = async <T>(
       headers,
     });
   } catch (err) {
-    console.log(err);
+    console.error("An error was thrown while fetching:", err);
     if (err instanceof Error && err.name === "TimeoutError") {
       return { ok: false, status: 500, error: "Server is currently under heavy load. Sorry for the inconvenience." };
     }
@@ -65,8 +65,12 @@ export const fetchBackend = async <T>(
     try {
       json = await res.json();
     } catch (err) {
-      console.error(err);
+      console.error("An error occurred while parsing error response:", err);
       json = { error: "An unexpected error occurred." };
+    }
+    if (json && typeof json === "object" && "validation_error" in json) {
+      console.error("An unexpected validation error occurred:", json.validation_error);
+      return { ok: false, status: 500, error: "Internal Server Error" };
     }
     const validatedJson = await errorSchema.spa(json);
     if (!validatedJson.success) {

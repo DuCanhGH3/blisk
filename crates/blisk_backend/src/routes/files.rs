@@ -2,11 +2,11 @@ use super::auth::UserClaims;
 use crate::{
     app::AppState,
     utils::{
-        errors::{AppError, UploadsError},
+        errors::AppError,
         futures::flatten,
         response::response,
         structs::{AppJson, AppMultipart},
-        uploads::upload_file,
+        uploads::{upload_file, UploadsError},
     },
 };
 use axum::{body::Bytes, extract::State, http::StatusCode, response::Response};

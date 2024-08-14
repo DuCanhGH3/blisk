@@ -1,4 +1,4 @@
-// Here are the frontend's validator schemas. They are used to 
+// Here are the frontend's validator schemas. They are used to
 // recheck whether the data is valid before a request is sent
 // to the backend. The error messages here are more friendly
 // than those of the backend. In the future, we can also use

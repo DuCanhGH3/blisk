@@ -1,17 +1,25 @@
+use super::auth::OptionalUserClaims;
+use super::comments::Comment;
 use crate::routes::posts::Post;
 use crate::utils::errors::AppError;
 use crate::{
     app::AppState,
-    utils::{errors::UserError, response::response, structs::AppJson},
+    utils::{response::response, structs::AppJson},
 };
 use axum::extract::Query;
 use axum::{
-    extract::{State, Path},
+    extract::{Path, State},
     http::StatusCode,
     response::Response,
 };
-use super::auth::OptionalUserClaims;
-use super::comments::Comment;
+
+#[derive(Debug, thiserror::Error)]
+pub enum UserError {
+    #[error("user {0} cannot be found")]
+    UserNotFound(String),
+    #[error("this error is not expected")]
+    Unexpected,
+}
 
 #[derive(serde::Deserialize)]
 pub struct ReadPostsQuery {
