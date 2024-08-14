@@ -12,7 +12,6 @@
   <div class="container flex w-[90dvw] max-w-[500px] items-center gap-6 rounded-lg p-8 shadow-xl">
     <form
       method="POST"
-      action="?/login"
       class="flex w-full flex-col gap-3"
       use:enhance={() => {
         isLoading = true;

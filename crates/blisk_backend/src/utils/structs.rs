@@ -10,6 +10,23 @@ use validator::Validate;
 
 use super::errors::AppError;
 
+pub struct AppForm<T>(pub T);
+
+#[async_trait]
+impl<T, S> FromRequest<S> for AppForm<T>
+where
+    T: serde::de::DeserializeOwned + Validate,
+    S: Send + Sync,
+{
+    type Rejection = AppError;
+
+    async fn from_request(req: Request, state: &S) -> Result<Self, Self::Rejection> {
+        let base = axum::Form::<T>::from_request(req, state).await?;
+        base.0.validate()?;
+        Ok(Self(base.0))
+    }
+}
+
 pub struct AppJson<T>(pub T);
 
 impl<T> IntoResponse for AppJson<T>

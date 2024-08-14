@@ -1,3 +1,5 @@
+use std::str::FromStr;
+
 use crate::{
     app::AppState,
     settings::SETTINGS,
@@ -6,8 +8,9 @@ use crate::{
         constants::TEMPLATES,
         emails::send_email,
         errors::AppError,
+        oauth::{AuthError, AuthResponseType, AuthScope},
         response::{response, SuccessResponse},
-        structs::AppJson,
+        structs::{AppForm, AppJson},
     },
 };
 use axum::{
@@ -29,16 +32,6 @@ use redis::Commands;
 use tracing::instrument;
 use validator::Validate;
 
-#[derive(Debug, thiserror::Error)]
-pub enum AuthError {
-    #[error("this user either doesn't exist or has already been verified")]
-    AlreadyVerified,
-    #[error("this user is not valid")]
-    Invalid,
-    #[error("this error is not expected")]
-    Unexpected,
-}
-
 #[derive(Clone, Debug, PartialEq, PartialOrd, sqlx::Type, serde::Deserialize, serde::Serialize)]
 #[sqlx(type_name = "urole", rename_all = "lowercase")]
 pub enum UserRole {
@@ -55,31 +48,6 @@ pub struct User {
     pub is_verified: Option<bool>,
     pub role: Option<UserRole>,
     pub password: Option<String>,
-}
-
-#[derive(PartialEq, Eq, PartialOrd, Ord)]
-pub enum UserScopeValue {
-    OpenId,
-    Profile,
-    Email,
-}
-
-pub struct UserScope(pub Vec<UserScopeValue>);
-
-impl UserScope {
-    pub fn parse(scope: &str) -> Result<UserScope, AppError> {
-        let scope_values = scope
-            .split(' ')
-            .map(|scope_value| match scope_value {
-                "openid" => Ok(UserScopeValue::OpenId),
-                "profile" => Ok(UserScopeValue::Profile),
-                "email" => Ok(UserScopeValue::Email),
-                // TODO(ducanhgh): add error for invalid scope
-                &_ => Err(AuthError::Unexpected),
-            })
-            .collect::<Result<Vec<_>, _>>()?;
-        Ok(UserScope(scope_values))
-    }
 }
 
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
@@ -109,19 +77,20 @@ impl UserClaims {
             email_verified: None,
         }
     }
-    pub fn add_scope_values(&mut self, scope: &UserScope, name: &String, email: &String, is_verified: bool) {
-        for scope_value in &scope.0 {
-            match scope_value {
-                UserScopeValue::OpenId => {}
-                UserScopeValue::Profile => {
-                    self.name = Some(name.clone());
-                    self.picture = Some("".to_owned());
-                }
-                UserScopeValue::Email => {
-                    self.email = Some(email.clone());
-                    self.email_verified = Some(is_verified);
-                }
-            }
+    pub fn add_scope_values(
+        &mut self,
+        scope: &AuthScope,
+        name: &String,
+        email: &String,
+        is_verified: bool,
+    ) {
+        if scope.profile {
+            self.name = Some(name.clone());
+            self.picture = Some("".to_owned());
+        }
+        if scope.email {
+            self.email = Some(email.clone());
+            self.email_verified = Some(is_verified);
         }
     }
     pub fn encode(&self) -> Result<String, AppError> {
@@ -481,8 +450,20 @@ pub async fn register(
 
 #[derive(serde::Deserialize)]
 pub struct LoginQuery {
-    client_id: String,
+    response_type: String,
+    client_id: i64,
     scope: String,
+    redirect_uri: String,
+    state: Option<String>,
+    nonce: Option<String>,
+    // display: Option<String>,
+    prompt: Option<String>,
+    max_age: Option<i64>,
+    // ui_locales: Option<String>,
+    // claims_locales: Option<String>,
+    id_token_hint: Option<String>,
+    login_hint: Option<String>,
+    acr_values: Option<String>,
 }
 #[derive(serde::Deserialize, Validate)]
 pub struct LoginPayload {
@@ -498,18 +479,45 @@ pub struct LoginResponse {
     id_token: String,
 }
 
-#[axum::debug_handler]
-#[instrument(name = "Logging user in", skip(pool, client_id, password))]
-pub async fn login(
+#[instrument(name = "Authorizing client...", skip(pool, client_id, password))]
+pub async fn authorize(
     State(AppState { pool, .. }): State<AppState>,
-    Query(LoginQuery { client_id, scope }): Query<LoginQuery>,
-    AppJson(LoginPayload { username, password }): AppJson<LoginPayload>,
+    Query(LoginQuery {
+        response_type,
+        client_id,
+        scope,
+        redirect_uri,
+        state,
+        nonce,
+        prompt,
+        max_age,
+        id_token_hint,
+        login_hint,
+        acr_values,
+    }): Query<LoginQuery>,
+    AppForm(LoginPayload { username, password }): AppForm<LoginPayload>,
 ) -> Result<Response, AppError> {
-    let scope = UserScope::parse(scope.as_str())?;
-    if !scope.0.contains(&UserScopeValue::OpenId) {
-        return Err(AuthError::Unexpected)?;
-    }
     let mut transaction = pool.begin().await?;
+    let client = sqlx::query!(
+        r#"
+        SELECT
+            oa.secret,
+            COALESCE(ARRAY_AGG(oard.redirect_uri) FILTER (WHERE oard.id IS NOT NULL), '{}'::TEXT[]) AS "redirect_uris!"
+        FROM oauth_client oa
+        LEFT JOIN oauth_client_redirect oard
+        ON oa.id = oard.client_id
+        WHERE oa.id = $1
+        GROUP BY oa.id"#,
+        &client_id
+    )
+    .fetch_one(&mut *transaction)
+    .await?;
+    if client.redirect_uris.is_empty() {
+        // Return error
+    }
+    let response_type = AuthResponseType::from_str(&response_type)?;
+    let scope = AuthScope::from_str(&scope)?;
+    let is_openid_request = scope.openid;
     let user = sqlx::query!(
         "SELECT id, name, email, password, is_verified FROM users WHERE name = $1",
         &username
@@ -531,11 +539,13 @@ pub async fn login(
     let mut id_claims = UserClaims::new(
         SETTINGS.app.base.clone(),
         user_id,
-        client_id,
+        client_id.to_string(),
         (now + id_ttl).timestamp(),
         now.timestamp(),
     );
-    id_claims.add_scope_values(&scope, &user.name, &user.email, user.is_verified);
+    if is_openid_request {
+        id_claims.add_scope_values(&scope, &user.name, &user.email, user.is_verified);
+    }
     Ok(response(
         StatusCode::OK,
         Some(vec![(

@@ -1,15 +1,12 @@
 use std::convert::Infallible;
 
-use super::{response::ErrorResponse, structs::AppJson, uploads::UploadsError};
+use super::{oauth::AuthError, response::ErrorResponse, structs::AppJson, uploads::UploadsError};
 use crate::{
-    routes::{
-        auth::AuthError, books::BooksError, comments::CommentsError, posts::PostsError,
-        users::UserError,
-    },
+    routes::{books::BooksError, comments::CommentsError, posts::PostsError, users::UserError},
     utils::response::ValidationErrorResponse,
 };
 use axum::{
-    extract::rejection::JsonRejection,
+    extract::rejection::{FormRejection, JsonRejection},
     http::StatusCode,
     response::{IntoResponse, Response},
 };
@@ -36,6 +33,8 @@ pub enum AppError {
     UploadsError(#[from] UploadsError),
     #[error("error was not expected {0}")]
     Unexpected(&'static str),
+    #[error("error while procesing form: {0}")]
+    FormRejection(#[from] FormRejection),
     #[error("error while procesing json: {0}")]
     JsonRejection(#[from] JsonRejection),
     #[error("error while processing a multipart request: {0}")]
@@ -173,6 +172,7 @@ impl IntoResponse for AppError {
                 StatusCode::INTERNAL_SERVER_ERROR,
                 "Internal Server Error".to_owned(),
             ),
+            AppError::FormRejection(rejection) => (rejection.status(), rejection.body_text()),
             AppError::JsonRejection(rejection) => (rejection.status(), rejection.body_text()),
             AppError::MultipartError(error) => (error.get_status(), error.to_string()),
             AppError::SerdeError(_) => (

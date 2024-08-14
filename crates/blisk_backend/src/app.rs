@@ -102,7 +102,7 @@ impl Application {
             .route("/users/:user/comments", get(routes::users::read_comments))
             .route("/auth/authenticate", post(routes::auth::authenticate))
             .route("/auth/confirm", post(routes::auth::confirm))
-            .route("/auth/login", post(routes::auth::login))
+            .route("/auth/authorize", post(routes::auth::authorize))
             .route("/auth/register", post(routes::auth::register))
             .route(
                 "/assets/upload",

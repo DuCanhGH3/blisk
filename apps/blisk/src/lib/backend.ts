@@ -23,7 +23,7 @@ export type BackendResult<T> = { ok: true; data: T } | { ok: false; status: numb
  * @returns
  */
 export const fetchBackend = async <T>(
-  url: `/${string}`,
+  url: URL | `/${string}`,
   { authz, cookies, fetch, setHeaders, noSuccessContent, ...init }: BackendInit
 ): Promise<BackendResult<T>> => {
   const headers = new Headers({
@@ -46,7 +46,7 @@ export const fetchBackend = async <T>(
   }
   let res: Response;
   try {
-    res = await fetch(`${BACKEND_URL}${url}`, {
+    res = await fetch(url instanceof URL ? url : `${BACKEND_URL}${url}`, {
       ...init,
       headers,
     });
