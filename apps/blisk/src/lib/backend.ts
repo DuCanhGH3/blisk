@@ -5,8 +5,11 @@ import { editCommentSchema, errorSchema, reactionSchema } from "./schemas";
 
 export type Authz = boolean | "optional";
 
+export type RequestType = "json" | "multipart" | "url-encoded";
+
 export interface BackendInit extends RequestInit {
   authz: Authz;
+  type?: RequestType;
   cookies: Cookies;
   fetch: typeof globalThis.fetch;
   setHeaders: SetHeaders;
@@ -24,11 +27,12 @@ export type BackendResult<T> = { ok: true; data: T } | { ok: false; status: numb
  */
 export const fetchBackend = async <T>(
   url: URL | `/${string}`,
-  { authz, cookies, fetch, setHeaders, noSuccessContent, ...init }: BackendInit
+  { authz, type = "json", cookies, fetch, setHeaders, noSuccessContent, ...init }: BackendInit
 ): Promise<BackendResult<T>> => {
+  const requestType = type === "json" ? "application/json" : type === "url-encoded" ? "application/x-www-form-urlencoded" : null;
   const headers = new Headers({
     Accept: "application/json",
-    "Content-Type": "application/json",
+    ...(requestType ? { "Content-Type": requestType } : {}),
     ...init.headers,
   });
   if (authz) {

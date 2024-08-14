@@ -1,6 +1,5 @@
 <script>
   import { enhance } from "$app/forms";
-  import { goto } from "$app/navigation";
   import Button from "$components/Button.svelte";
   import Input from "$components/Input.svelte";
 
@@ -15,35 +14,39 @@
       class="flex w-full flex-col gap-3"
       use:enhance={() => {
         isLoading = true;
-        return async ({ result, update }) => {
+        return async ({ update }) => {
           isLoading = false;
-          if (result.type === "redirect") {
-            goto(result.location, { replaceState: true, invalidateAll: true });
-          } else {
-            await update();
-          }
+          await update();
         };
       }}
     >
-      <h1 class="h2">Login</h1>
+      <h1 class="h2">Register</h1>
       <Input
-        id="login-username-input"
+        id="register-username-input"
         label="Username"
         name="username"
         type="text"
         errorText={form?.validationError?.username}
-        errorTextId="login-username-error-text"
+        errorTextId="register-username-error-text"
       />
       <Input
-        id="login-password-input"
+        id="register-email-input"
+        label="Email"
+        name="email"
+        type="text"
+        errorText={form?.validationError?.email}
+        errorTextId="register-email-error-text"
+      />
+      <Input
+        id="register-password-input"
         label="Password"
         name="password"
         type="password"
         errorText={form?.validationError?.password}
-        errorTextId="login-password-error-text"
+        errorTextId="register-password-error-text"
       />
-      <Button as="button" type="submit" disabled={isLoading}>Login</Button>
-      <a class="link" href="/register">New? Register a new account!</a>
+      <Button as="button" type="submit" disabled={isLoading}>Register</Button>
+      <a class="link" href="/auth/login">Already have an account?</a>
       {#if form?.error}
         <p class="text-error-light dark:text-error-dark" role="alert">{form.error}</p>
       {/if}

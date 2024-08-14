@@ -1,3 +1,4 @@
+import { base } from "$app/paths";
 import { VALID_REACTIONS } from "./constants";
 
 /**
@@ -35,13 +36,13 @@ export interface ParseAcceptLanguageOptions {
 
 /**
  * Parse the `Accept-Language` header.
- * 
+ *
  * Source: https://github.com/donavon/intl-parse-accept-language/blob/be8c28ba716b0fb48414d70ed7ff863c0876ef55/src/index.ts
- * 
+ *
  * License: MIT
- * 
+ *
  * @param options
- * @returns 
+ * @returns
  */
 export const parseAcceptLanguage = ({
   acceptLanguage,
@@ -83,15 +84,15 @@ export const parseAcceptLanguage = ({
 
 /**
  * Create a range used for iterating.
- * 
+ *
  * Source: https://github.com/sodiray/radash/blob/069b26cdd7d62e6ac16a0ad3baa1c9abcca420bc/src/array.ts#L321-L334
- * 
+ *
  * License: MIT
- * 
- * @param startOrLength 
- * @param end 
- * @param mapper 
- * @param step 
+ *
+ * @param startOrLength
+ * @param end
+ * @param mapper
+ * @param step
  */
 export function* range<T = number>(startOrLength: number, end?: number, mapper: (i: number) => T = (i) => i as T, step: number = 1): Generator<T> {
   const start = end ? startOrLength : 0;
@@ -101,3 +102,10 @@ export function* range<T = number>(startOrLength: number, end?: number, mapper: 
     if (i + step > final) break;
   }
 }
+
+export const safeRedirect = (to: FormDataEntryValue | string | null | undefined) => {
+  if (!to || typeof to !== "string" || !to.startsWith("/") || to.startsWith("//")) {
+    to = `${base}/`;
+  }
+  return to;
+};

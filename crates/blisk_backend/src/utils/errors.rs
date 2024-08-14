@@ -1,8 +1,11 @@
 use std::convert::Infallible;
 
-use super::{oauth::AuthError, response::ErrorResponse, structs::AppJson, uploads::UploadsError};
+use super::{response::ErrorResponse, structs::AppJson, uploads::UploadsError};
 use crate::{
-    routes::{books::BooksError, comments::CommentsError, posts::PostsError, users::UserError},
+    routes::{
+        auth::AuthError, books::BooksError, comments::CommentsError, posts::PostsError,
+        users::UserError,
+    },
     utils::response::ValidationErrorResponse,
 };
 use axum::{

@@ -51,7 +51,7 @@
           <UserCircle width={20} height={20} class="mr-2 h-auto w-5" aria-hidden="true" tabindex={-1} />
           Your profile
         </MenuItem>
-        <form method="POST" action="/login?/logout" use:enhance>
+        <form method="POST" action="/auth/login?/logout&redirectTo={$page.url.pathname}" use:enhance>
           <MenuItem as="button">
             <LogOut width={20} height={20} class="mr-2 h-auto w-5" aria-hidden="true" tabindex={-1} />
             Sign out

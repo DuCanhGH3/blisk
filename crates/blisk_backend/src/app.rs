@@ -102,8 +102,8 @@ impl Application {
             .route("/users/:user/comments", get(routes::users::read_comments))
             .route("/auth/authenticate", post(routes::auth::authenticate))
             .route("/auth/confirm", post(routes::auth::confirm))
-            .route("/auth/authorize", post(routes::auth::authorize))
             .route("/auth/register", post(routes::auth::register))
+            .route("/auth/login", post(routes::auth::login))
             .route(
                 "/assets/upload",
                 post(routes::files::upload).layer(DefaultBodyLimit::max(10_000_000)),

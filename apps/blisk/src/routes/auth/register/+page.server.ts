@@ -1,10 +1,8 @@
 import { fail, redirect } from "@sveltejs/kit";
 import { z } from "zod";
-
 import { base } from "$app/paths";
-
-import type { Actions, PageServerLoad } from "./$types";
 import { fetchBackend } from "$lib/backend";
+import type { Actions, PageServerLoad } from "./$types";
 
 const registerSchema = z.object({
   username: z.string().min(1, "Please enter a valid username!"),
@@ -22,7 +20,7 @@ export const load: PageServerLoad = ({ locals }) => {
 };
 
 export const actions: Actions = {
-  async register({ cookies, fetch, request, setHeaders }) {
+  async default({ cookies, fetch, request, setHeaders }) {
     const formData = await request.formData();
     const data = await registerSchema.spa({
       username: formData.get("username"),
@@ -44,6 +42,6 @@ export const actions: Actions = {
     if (!res.ok) {
       return fail(res.status, { error: res.error });
     }
-    redirect(307, `${base}/login`);
+    redirect(307, `${base}/auth/login`);
   },
 };

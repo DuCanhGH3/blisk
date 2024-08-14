@@ -1,5 +1,6 @@
 <script>
   import { enhance } from "$app/forms";
+  import { goto } from "$app/navigation";
   import Button from "$components/Button.svelte";
   import Input from "$components/Input.svelte";
 
@@ -11,43 +12,39 @@
   <div class="container flex w-[90dvw] max-w-[500px] items-center gap-6 rounded-lg p-8 shadow-xl">
     <form
       method="POST"
-      action="?/register"
+      action="?/login"
       class="flex w-full flex-col gap-3"
       use:enhance={() => {
         isLoading = true;
-        return async ({ update }) => {
+        return async ({ result, update }) => {
           isLoading = false;
-          await update();
+          if (result.type === "redirect") {
+            goto(result.location, { replaceState: true, invalidateAll: true });
+          } else {
+            await update();
+          }
         };
       }}
     >
-      <h1 class="h2">Register</h1>
+      <h1 class="h2">Login</h1>
       <Input
-        id="register-username-input"
+        id="login-username-input"
         label="Username"
         name="username"
         type="text"
         errorText={form?.validationError?.username}
-        errorTextId="register-username-error-text"
+        errorTextId="login-username-error-text"
       />
       <Input
-        id="register-email-input"
-        label="Email"
-        name="email"
-        type="text"
-        errorText={form?.validationError?.email}
-        errorTextId="register-email-error-text"
-      />
-      <Input
-        id="register-password-input"
+        id="login-password-input"
         label="Password"
         name="password"
         type="password"
         errorText={form?.validationError?.password}
-        errorTextId="register-password-error-text"
+        errorTextId="login-password-error-text"
       />
-      <Button as="button" type="submit" disabled={isLoading}>Register</Button>
-      <a class="link" href="/login">Already have an account?</a>
+      <Button as="button" type="submit" disabled={isLoading}>Login</Button>
+      <a class="link" href="/auth/register">New? Register a new account!</a>
       {#if form?.error}
         <p class="text-error-light dark:text-error-dark" role="alert">{form.error}</p>
       {/if}

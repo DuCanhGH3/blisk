@@ -1,4 +1,4 @@
-import type { AUTHORIZATION_REQUEST_PARAMS, COLOR_SCHEMES, VALID_REACTION_FOR, VALID_REACTIONS } from "./constants";
+import type { COLOR_SCHEMES, VALID_REACTION_FOR, VALID_REACTIONS } from "./constants";
 
 export type RequireFields<T, K extends keyof T> = Omit<T, K> & {
   [P in keyof Pick<T, K>]-?: NonNullable<T[P]>;
@@ -75,5 +75,3 @@ export type ButtonType = "normal" | "light" | "error";
 export type MouseEventEvent<T extends EventTarget> = MouseEvent & {
   currentTarget: EventTarget & T;
 };
-
-export type AuthzRequestParams = (typeof AUTHORIZATION_REQUEST_PARAMS)[number];
