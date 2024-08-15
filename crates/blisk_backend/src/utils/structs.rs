@@ -2,7 +2,8 @@ use std::ops::{Deref, DerefMut};
 
 use axum::{
     async_trait,
-    extract::{FromRequest, Request},
+    extract::{FromRequest, FromRequestParts, Request},
+    http::request::Parts,
     response::{IntoResponse, Response},
 };
 use axum_typed_multipart::{BaseMultipart, TryFromMultipart};
@@ -22,6 +23,23 @@ where
 
     async fn from_request(req: Request, state: &S) -> Result<Self, Self::Rejection> {
         let base = axum::Form::<T>::from_request(req, state).await?;
+        base.0.validate()?;
+        Ok(Self(base.0))
+    }
+}
+
+pub struct AppQuery<T>(pub T);
+
+#[async_trait]
+impl<T, S> FromRequestParts<S> for AppQuery<T>
+where
+    T: serde::de::DeserializeOwned + Validate,
+    S: Send + Sync,
+{
+    type Rejection = AppError;
+
+    async fn from_request_parts(parts: &mut Parts, state: &S) -> Result<Self, Self::Rejection> {
+        let base = axum::extract::Query::<T>::from_request_parts(parts, state).await?;
         base.0.validate()?;
         Ok(Self(base.0))
     }

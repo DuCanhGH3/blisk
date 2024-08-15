@@ -86,9 +86,6 @@
   #root-container {
     @apply relative m-0 flex h-fit min-h-screen w-full flex-col p-0;
   }
-  #main-content {
-    @apply flex flex-1 px-4 py-4;
-  }
 
   #nav-mobile-menu[open] > summary {
     @apply [&>:nth-child(1)]:translate-y-[0.7rem] [&>:nth-child(1)]:rotate-45 [&>:nth-child(2)]:opacity-0 [&>:nth-child(3)]:-translate-y-[0.7rem] [&>:nth-child(3)]:-rotate-45;

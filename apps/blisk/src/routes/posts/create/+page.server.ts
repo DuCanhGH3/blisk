@@ -7,7 +7,7 @@ import { base } from "$app/paths";
 const postSchema = z.object({
   title: z.string().min(1, "Title must not be empty!"),
   content: z.string().min(1, "Content must not be empty!"),
-  book_id: z.number({ coerce: true, message: "Book ID must be a number!" }).safe().int("Book ID must be an integer!"),
+  book: z.string().min(1, "You must point to a book!"),
   images: z.array(z.instanceof(File, { message: "One of the images is not valid!" })),
 });
 
@@ -17,7 +17,7 @@ export const actions: Actions = {
     const data = await postSchema.spa({
       title: formData.get("title"),
       content: formData.get("content"),
-      book_id: formData.get("bookId"),
+      book: formData.get("book"),
       images: formData.getAll("images"),
     });
     if (!data.success) {

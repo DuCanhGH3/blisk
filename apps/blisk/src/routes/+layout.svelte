@@ -15,6 +15,7 @@
   import Dialog from "$components/layouts/Dialog.svelte";
   import { mount, unmount } from "svelte";
   import Tooltip from "$components/layouts/Tooltip.svelte";
+  import Input from "$components/Input.svelte";
 
   const { data, children } = $props();
   const isDark = $derived($colorScheme === "dark");
@@ -80,7 +81,14 @@
 <Dialog />
 <div class="flex flex-1 flex-col md:flex-row">
   <VerticalNavbar user={data.user} />
-  <main id="main-content">
-    {@render children()}
-  </main>
+  <div class="flex w-full flex-col xl:flex-row xl:justify-between">
+    <aside class="top-0 shrink-0 px-4 pt-4 xl:sticky xl:order-last xl:max-h-dvh xl:w-[25rem] print:hidden">
+      <form action="/books" class="w-full hidden xl:block">
+        <Input id="search-bar-input" name="q" label="Search" autocapitalize="false" autocomplete="off" />
+      </form>
+    </aside>
+    <main id="main-content" class="flex w-full max-w-6xl flex-1 px-4 py-4">
+      {@render children()}
+    </main>
+  </div>
 </div>

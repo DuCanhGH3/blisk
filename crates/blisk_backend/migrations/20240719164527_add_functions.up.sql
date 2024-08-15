@@ -1,4 +1,4 @@
--- Add up migration script here
+-- Add up migration script here=
 CREATE OR REPLACE FUNCTION fetch_replies(
   request_uid BIGINT,
   request_pid BIGINT,

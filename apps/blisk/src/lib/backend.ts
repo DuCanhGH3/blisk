@@ -36,10 +36,9 @@ export const fetchBackend = async <T>(
     ...init.headers,
   });
   if (authz) {
-    const tokenType = cookies.get("token_type");
     const token = cookies.get("token");
-    if (tokenType && token && tokenType === "Bearer") {
-      headers.set("Authorization", `${tokenType} ${token}`);
+    if (token) {
+      headers.set("Authorization", `Bearer ${token}`);
     } else if (authz !== "optional") {
       setHeaders({
         "WWW-Authenticate":

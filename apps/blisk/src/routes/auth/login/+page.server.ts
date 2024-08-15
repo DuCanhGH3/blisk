@@ -1,6 +1,5 @@
 import { fail, redirect } from "@sveltejs/kit";
 import { z } from "zod";
-import { base } from "$app/paths";
 import { fetchBackend } from "$lib/backend";
 import type { Actions, PageServerLoad } from "./$types";
 import { safeRedirect } from "$lib/utils";
@@ -10,9 +9,9 @@ const loginSchema = z.object({
   password: z.string().min(1, "Please enter a valid password!"),
 });
 
-export const load: PageServerLoad = ({ locals }) => {
+export const load: PageServerLoad = ({ locals, url }) => {
   if (locals.user) {
-    redirect(303, `${base}/`);
+    redirect(303, safeRedirect(url.searchParams.get("redirectTo")));
   }
   return {
     title: "Login",
@@ -20,7 +19,7 @@ export const load: PageServerLoad = ({ locals }) => {
 };
 
 export const actions: Actions = {
-  async login({ cookies, fetch, request, setHeaders }) {
+  async login({ cookies, fetch, request, setHeaders, url }) {
     try {
       const formData = await request.formData();
       const data = await loginSchema.spa({
@@ -30,7 +29,7 @@ export const actions: Actions = {
       if (!data.success) {
         return fail(400, { validationError: data.error.flatten().fieldErrors });
       }
-      const res = await fetchBackend<{ expires_in: number; token: string }>("/auth/login", {
+      const res = await fetchBackend<{ token: string; expires_in: number }>("/auth/login", {
         authz: false,
         type: "url-encoded",
         cookies,
@@ -55,7 +54,7 @@ export const actions: Actions = {
       console.error(err);
       return fail(500, { error: "Internal Server Error" });
     }
-    redirect(303, `${base}/`);
+    redirect(303, safeRedirect(url.searchParams.get("redirectTo")));
   },
   logout({ cookies, locals, url }) {
     const cookiesOptions = {

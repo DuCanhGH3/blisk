@@ -1,7 +1,12 @@
 use super::{auth::OptionalUserClaims, posts::Post};
 use crate::{
     app::AppState,
-    utils::{constants::SLUG_REGEX, errors::AppError, response::response, structs::AppJson},
+    utils::{
+        constants::SLUG_REGEX,
+        errors::AppError,
+        response::response,
+        structs::{AppJson, AppQuery},
+    },
 };
 use axum::{
     extract::{Path, State},
@@ -109,35 +114,74 @@ struct Book {
     reviews: sqlx::types::Json<Vec<Post>>,
 }
 
+#[derive(serde::Deserialize, Validate)]
+pub struct ReadQuery {
+    #[validate(length(min = 1, message = "Query is not valid!"))]
+    q: Option<String>,
+    #[validate(range(min = 0, message = "Offset is not valid!"))]
+    offset: Option<i64>,
+}
+
 pub async fn read(
     State(AppState { pool, .. }): State<AppState>,
     OptionalUserClaims(claims): OptionalUserClaims,
+    AppQuery(ReadQuery { q, offset }): AppQuery<ReadQuery>,
 ) -> Result<Response, AppError> {
     let uid = claims.as_ref().map(|claims| claims.sub);
     let mut transaction = pool.begin().await?;
-    let books_list = sqlx::query_as!(
-        Book,
-        r#"SELECT 
-            b.title AS "title!: String",
-            b.name AS "name!: String",
-            b.summary AS "summary!: String",
-            b.authors AS "authors!: sqlx::types::Json<Vec<BookAuthor>>",
-            b.categories AS "categories!: sqlx::types::Json<Vec<BookCategory>>",
-            COALESCE(JSONB_AGG(rv) FILTER (WHERE rv.id IS NOT NULL), '[]'::JSONB) AS "reviews!: sqlx::types::Json<Vec<Post>>"
-        FROM book_view b
-        LEFT JOIN LATERAL (
-            SELECT *
-            FROM fetch_posts(request_uid => $1) rv
-            WHERE rv.book_id = b.id
-            ORDER BY rv.id DESC
-            LIMIT 5
-            OFFSET 0
-        ) rv ON TRUE
-        GROUP BY b.title, b.name, b.summary, b.authors, b.categories"#,
-        &uid as &_
-    )
-    .fetch_all(&mut *transaction)
-    .await?;
+    let books_list = if let Some(query) = q {
+        let offset = offset.unwrap_or(0);
+        sqlx::query_as!(
+            Book,
+            r#"
+            SELECT
+                b.title AS "title!",
+                b.name AS "name!",
+                b.summary AS "summary!",
+                b.authors AS "authors!: _",
+                b.categories AS "categories!: _",
+                COALESCE(JSONB_AGG(rv) FILTER (WHERE rv.id IS NOT NULL), '[]'::JSONB) AS "reviews!: _"
+            FROM book_view b, websearch_to_tsquery($2) query, ts_rank(b.text_search, query) rank
+            LEFT JOIN LATERAL (
+                SELECT *
+                FROM fetch_posts(request_uid => $1) rv
+                WHERE rv.book_id = b.id
+                ORDER BY rv.id DESC
+                LIMIT 5
+                OFFSET 0
+            ) rv ON TRUE
+            WHERE b.text_search @@ query
+            GROUP BY b.title, b.name, b.summary, b.authors, b.categories, rank.rank
+            ORDER BY rank DESC
+            LIMIT 20
+            OFFSET $3"#,
+            &uid as &_,
+            &query,
+            &offset
+        ).fetch_all(&mut *transaction).await?
+    } else {
+        sqlx::query_as!(
+            Book,
+            r#"SELECT 
+                b.title AS "title!: String",
+                b.name AS "name!: String",
+                b.summary AS "summary!: String",
+                b.authors AS "authors!: sqlx::types::Json<Vec<BookAuthor>>",
+                b.categories AS "categories!: sqlx::types::Json<Vec<BookCategory>>",
+                COALESCE(JSONB_AGG(rv) FILTER (WHERE rv.id IS NOT NULL), '[]'::JSONB) AS "reviews!: sqlx::types::Json<Vec<Post>>"
+            FROM book_view b
+            LEFT JOIN LATERAL (
+                SELECT *
+                FROM fetch_posts(request_uid => $1) rv
+                WHERE rv.book_id = b.id
+                ORDER BY rv.id DESC
+                LIMIT 5
+                OFFSET 0
+            ) rv ON TRUE
+            GROUP BY b.title, b.name, b.summary, b.authors, b.categories"#,
+            &uid as &_
+        ).fetch_all(&mut *transaction).await?
+    };
     transaction.commit().await?;
     Ok(response(StatusCode::OK, None, AppJson(books_list)))
 }

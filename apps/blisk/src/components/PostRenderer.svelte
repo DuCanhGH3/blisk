@@ -8,7 +8,7 @@
   import MarkdownRenderer from "./MarkdownRenderer.svelte";
   import PostRendererButton from "./PostRendererButton.svelte";
   import ReactionBar from "./ReactionBar.svelte";
-  import { rendererButtonAttributes, reactionRender } from "./renderer-constants";
+  import { svgIconAttrs, reactionRender } from "./renderer-constants";
   import TooltipHover from "./TooltipHover.svelte";
 
   interface PostRendererProps {
@@ -56,12 +56,12 @@
     <details bind:this={reactionBar} class="relative flex-grow">
       {#if !post.user_reaction}
         <PostRendererButton as="summary" aria-describedby="post-{post.id}-reaction-bar">
-          <ThumbUp {...rendererButtonAttributes} /> <span class="mb-[-1px] select-none">Like</span>
+          <ThumbUp {...svgIconAttrs} /> <span class="mb-[-1px] select-none">Like</span>
         </PostRendererButton>
       {:else}
         {@const { icon, label, colors } = reactionRender[post.user_reaction]}
         <PostRendererButton customColors={colors} as="summary" aria-describedby="post-{post.id}-reaction-bar">
-          <svelte:component this={icon} animatable={false} {...rendererButtonAttributes} />
+          <svelte:component this={icon} animatable={false} {...svgIconAttrs} />
           <span class="mb-[-1px] select-none text-black dark:text-white">{label}</span>
         </PostRendererButton>
       {/if}
@@ -85,11 +85,11 @@
       />
     </details>
     <PostRendererButton as="a" href="/posts/{post.id}#comments">
-      <Comment {...rendererButtonAttributes} />
+      <Comment {...svgIconAttrs} />
       <span class="mb-[-1px]">Comment</span>
     </PostRendererButton>
     <PostRendererButton as="div">
-      <Share {...rendererButtonAttributes} />
+      <Share {...svgIconAttrs} />
       <span class="mb-[-1px]">Share</span>
     </PostRendererButton>
   </div>

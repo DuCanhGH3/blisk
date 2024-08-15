@@ -8,7 +8,7 @@
   import { clsx } from "$lib/clsx";
   import type { Comment, ReactionType } from "$lib/types";
   import CommentForm from "./CommentForm.svelte";
-  import { rendererButtonAttributes, reactionRender } from "./renderer-constants";
+  import { svgIconAttrs, reactionRender } from "./renderer-constants";
   import MarkdownRenderer from "./MarkdownRenderer.svelte";
   import ThreeDots from "./icons/ThreeDots.svelte";
   import Menu from "./Menu.svelte";
@@ -104,12 +104,12 @@
         <details bind:this={reactionBar} class="relative">
           {#if !comment.user_reaction}
             <CommentRendererButton as="summary" aria-describedby="comment-{comment.id}-reaction-bar">
-              <ThumbUp {...rendererButtonAttributes} /> <span class="select-none pr-1">Like</span>
+              <ThumbUp {...svgIconAttrs} /> <span class="select-none pr-1">Like</span>
             </CommentRendererButton>
           {:else}
             {@const { icon, label, colors } = reactionRender[comment.user_reaction]}
             <CommentRendererButton customColors={colors} as="summary" aria-describedby="comment-{comment.id}-reaction-bar">
-              <svelte:component this={icon} animatable={false} {...rendererButtonAttributes} />
+              <svelte:component this={icon} animatable={false} {...svgIconAttrs} />
               <span class="select-none pr-1 text-black dark:text-white">{label}</span>
             </CommentRendererButton>
           {/if}
@@ -133,15 +133,15 @@
           />
         </details>
         <CommentRendererButton as="label" id="comment-toggle-label-{comment.id}" for="comment-toggle-{comment.id}">
-          <CommentIcon {...rendererButtonAttributes} /> <span class="pr-1">Comment</span>
+          <CommentIcon {...svgIconAttrs} /> <span class="pr-1">Comment</span>
         </CommentRendererButton>
         <CommentRendererButton as="div">
-          <Share {...rendererButtonAttributes} /> <span class="pr-1">Share</span>
+          <Share {...svgIconAttrs} /> <span class="pr-1">Share</span>
         </CommentRendererButton>
         {#if currentUser === comment.author_name}
           <details bind:this={menu} class="relative">
             <CommentRendererButton as="summary" aria-describedby="comment-{comment.id}-menu-bar">
-              <ThreeDots {...rendererButtonAttributes} /> <span class="sr-only">More</span>
+              <ThreeDots {...svgIconAttrs} /> <span class="sr-only">More</span>
             </CommentRendererButton>
             <Menu
               id="comment-{comment.id}-menu-bar"

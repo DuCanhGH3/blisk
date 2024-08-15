@@ -6,6 +6,7 @@ CREATE OR REPLACE VIEW book_view AS (
     b.name,
     b.pages,
     b.summary,
+    b.text_search,
     bl.name AS lang,
     bl.code AS lang_code,
     (

@@ -37,6 +37,8 @@ pub enum AuthError {
     Invalid,
     #[error("this error is not expected")]
     Unexpected,
+    #[error("an token was already used when it was requested again")]
+    TokenUsed,
 }
 
 #[derive(Clone, Debug, PartialEq, PartialOrd, sqlx::Type, serde::Deserialize, serde::Serialize)]
@@ -234,7 +236,7 @@ pub async fn verify_confirmation_token(
     let redis_entry: Option<String> = redis_con.get(redis_key.clone())?;
 
     if redis_entry.is_none() {
-        return Err(AppError::TokenUsed);
+        return Err(AuthError::TokenUsed)?;
     }
 
     let _: () = redis_con.del(redis_key.clone())?;

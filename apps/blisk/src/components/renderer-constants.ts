@@ -41,7 +41,7 @@ export const reactionRender = {
   },
 } satisfies Record<ReactionType, { icon: Component<ReactionProps>; label: string; colors: string }>;
 
-export const rendererButtonAttributes = {
+export const svgIconAttrs = {
   width: 24,
   height: 24,
   class: "h-6 w-auto",

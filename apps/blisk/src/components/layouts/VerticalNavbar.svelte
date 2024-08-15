@@ -7,7 +7,7 @@
 
   import NavLink from "./NavLink.svelte";
   import NavToggleScheme from "./NavToggleScheme.svelte";
-  import { LOGGED_IN_LINKS, LOGGED_OUT_LINKS, GENERAL_LINKS } from "./navbar-constants";
+  import { LOGGED_IN_LINKS, GENERAL_LINKS } from "./navbar-constants";
   import NavUsermenu from "./NavUsermenu.svelte";
 
   interface NavbarProps {
@@ -30,11 +30,13 @@
   let mobileMenu = $state<HTMLDetailsElement | undefined>(undefined);
 
   const links = $derived(
-    [...GENERAL_LINKS, ...(user ? LOGGED_IN_LINKS : LOGGED_OUT_LINKS)].map(({ link, ...rest }) => ({
-      link,
-      ...rest,
-      isActive: isLinkActive(link, $page.url.pathname),
-    }))
+    [...GENERAL_LINKS, ...(user ? LOGGED_IN_LINKS : [{ label: "login", link: `/auth/login?redirectTo=${$page.url.pathname}` }])].map(
+      ({ link, ...rest }) => ({
+        link,
+        ...rest,
+        isActive: isLinkActive(link, $page.url.pathname),
+      })
+    )
   );
 
   $effect(() => {
@@ -45,16 +47,16 @@
   });
 </script>
 
-<div
+<header
   id="sidebar-wrapper"
   class={clsx(
     "z-10 max-h-dvh w-full md:w-64 md:shrink-0 md:self-start xl:w-80 print:hidden",
     "sticky top-0 transform-gpu transition-all duration-150 ease-out",
-    "flex flex-col bg-white p-2 dark:bg-black md:bg-transparent md:px-4 dark:md:bg-transparent",
-    "border-b border-border-light dark:border-border-dark md:border-b-0"
+    "flex flex-col bg-white p-2 md:bg-transparent md:px-4 dark:bg-black dark:md:bg-transparent",
+    "border-border-light dark:border-border-dark border-b md:border-b-0"
   )}
 >
-  <nav class="z-[50] h-fit transition-colors-opacity duration-100">
+  <nav class="transition-colors-opacity z-[50] h-fit duration-100">
     <div class="relative mx-auto flex flex-row justify-between overflow-x-clip md:flex-col">
       <div class="flex items-center gap-2 md:block md:items-start md:py-2">
         <a class="shrink-0 select-none px-3 py-2 font-mono text-base" href="/" aria-label="Go to home">blisk</a>
@@ -89,7 +91,7 @@
             </summary>
             <div class="absolute right-0 w-[150px] md:hidden">
               <ul
-                class="relative top-2 max-h-[60dvh] space-y-1 overflow-y-auto rounded-[14px] border border-border-light bg-white p-2 dark:border-border-dark dark:bg-black"
+                class="border-border-light dark:border-border-dark relative top-2 max-h-[60dvh] space-y-1 overflow-y-auto rounded-[14px] border bg-white p-2 dark:bg-black"
               >
                 {#each links as { label, link, isActive }}
                   <li>
@@ -107,4 +109,4 @@
       </div>
     </div>
   </nav>
-</div>
+</header>

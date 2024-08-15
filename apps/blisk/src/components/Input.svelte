@@ -4,10 +4,11 @@
   import { clsx } from "$lib/clsx";
   import { combineActions } from "$lib/combineActions";
   import type { RequireFields } from "$lib/types";
+  import type { Snippet } from "svelte";
 
   interface InputProps extends RequireFields<Omit<HTMLInputAttributes, "placeholder">, "name"> {
     actions?: [Action<T, P>, P][];
-    label: string;
+    label: Snippet<[]> | string;
     id: string;
     errorTextId?: string;
     errorText?: string | string[];
@@ -30,8 +31,12 @@
     use:combineActions={actions}
     {...rest}
   />
-  <label class="label absolute left-2.5 block select-none font-medium transition-all duration-100 ease-in" for={id}>
-    {label}
+  <label class="label absolute left-2.5 flex select-none flex-row items-center gap-2 font-medium transition-all duration-100 ease-in" for={id}>
+    {#if typeof label === "string"}
+      {label}
+    {:else}
+      {@render label()}
+    {/if}
   </label>
 </div>
 {#if !!errorText && errorTextId}

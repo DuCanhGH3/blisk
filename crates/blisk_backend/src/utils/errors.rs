@@ -9,7 +9,7 @@ use crate::{
     utils::response::ValidationErrorResponse,
 };
 use axum::{
-    extract::rejection::{FormRejection, JsonRejection},
+    extract::rejection::{FormRejection, JsonRejection, QueryRejection},
     http::StatusCode,
     response::{IntoResponse, Response},
 };
@@ -20,8 +20,6 @@ use validator::ValidationErrors;
 pub enum AppError {
     #[error("a validator error was met: {0}")]
     ValidationErrors(#[from] ValidationErrors),
-    #[error("error as an token was already used")]
-    TokenUsed,
     #[error("error while authenticating an user: {0}")]
     AuthError(#[from] AuthError),
     #[error("error while processing an user: {0}")]
@@ -38,6 +36,8 @@ pub enum AppError {
     Unexpected(&'static str),
     #[error("error while procesing form: {0}")]
     FormRejection(#[from] FormRejection),
+    #[error("error while extracing query: {0}")]
+    QueryRejection(#[from] QueryRejection),
     #[error("error while procesing json: {0}")]
     JsonRejection(#[from] JsonRejection),
     #[error("error while processing a multipart request: {0}")]
@@ -75,15 +75,15 @@ impl IntoResponse for AppError {
             AppError::ValidationErrors(error) => {
                 return (StatusCode::BAD_REQUEST, AppJson(ValidationErrorResponse { validation_error: error })).into_response();
             },
-            AppError::TokenUsed => (
-                StatusCode::UNPROCESSABLE_ENTITY,
-                "Token has either expired or been used.".to_owned(),
-            ),
             AppError::AuthError(error) => {
                 match error {
                     AuthError::AlreadyVerified => (
                         StatusCode::UNPROCESSABLE_ENTITY,
                         "The requested user is invalid or already verified.".to_owned(),
+                    ),
+                    AuthError::TokenUsed => (
+                        StatusCode::UNPROCESSABLE_ENTITY,
+                        "Token has either expired or been used.".to_owned(),
                     ),
                     AuthError::Invalid => (
                         StatusCode::UNAUTHORIZED,
@@ -176,6 +176,7 @@ impl IntoResponse for AppError {
                 "Internal Server Error".to_owned(),
             ),
             AppError::FormRejection(rejection) => (rejection.status(), rejection.body_text()),
+            AppError::QueryRejection(rejection) => (rejection.status(), rejection.body_text()),
             AppError::JsonRejection(rejection) => (rejection.status(), rejection.body_text()),
             AppError::MultipartError(error) => (error.get_status(), error.to_string()),
             AppError::SerdeError(_) => (

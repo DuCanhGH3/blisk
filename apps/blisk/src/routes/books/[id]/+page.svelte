@@ -1,4 +1,5 @@
 <script lang="ts">
+  import MarkdownRenderer from "$components/MarkdownRenderer.svelte";
   import PostRenderer from "$components/PostRenderer.svelte";
   import VirtualScroller from "$components/VirtualScroller.svelte";
   import { clsx } from "$lib/clsx";
@@ -14,29 +15,38 @@
 </script>
 
 <div class="mx-auto flex h-full w-full flex-col gap-8 p-4 md:p-10">
-  <div class="flex w-full flex-col gap-4 lg:h-72 lg:flex-row lg:gap-8">
-    <img src="/test-cover.jpg" width="192" height="288" alt="" class="h-auto w-48 select-none" style="view-transition-name:book-{data.book.name}" />
-    <div class="flex flex-1 flex-col gap-2 break-all">
+  <div class="flex w-full flex-col gap-4 lg:flex-row lg:gap-8">
+    <img src="/test-cover.jpg" width="192" height="288" alt="" class="h-72 w-48 select-none" style="view-transition-name:book-{data.book.name}" />
+    <div
+      class={clsx(
+        "flex flex-1 flex-col gap-2 break-all",
+        "[&>div]:flex [&>div]:flex-row [&>div]:flex-wrap [&>div]:items-center [&>div]:gap-2",
+        "[&>div>h3]:text-lg [&>div>h3]:font-semibold [&>div>h3]:leading-3 [&>div>h3]:tracking-tight"
+      )}
+    >
       <h1 class="pt-4 text-5xl lg:text-8xl">{data.book.title}</h1>
       <h2 class="sr-only">About this book</h2>
-      <p class="text-comment text-3xl font-semibold leading-10 tracking-tight">
+      <p class="text-3xl font-semibold leading-10 tracking-tight">
         <span class="sr-only">Written by</span>
-        {data.book.authors.map((author) => author.name).join(", ")} • 1965
+        {#each data.book.authors as author, idx}
+          {@const last = idx === data.book.authors.length - 1}
+          <a class="link" href="/books/authors/{author.id}">{author.name}{last ? "" : ", "}</a>
+        {/each} • 1965
       </p>
-      <p class="max-h-72 overflow-y-auto lg:max-h-full">
-        {data.book.summary}
-      </p>
+      <div class="max-h-72 overflow-y-auto">
+        <MarkdownRenderer source={data.book.summary} startingHeading={3} />
+      </div>
     </div>
   </div>
   <div class="flex flex-col justify-between gap-14 lg:flex-row-reverse">
     <section
       id="statistics"
       class={clsx(
-        "flex h-fit w-fit basis-1/3 flex-col gap-6 overflow-x-auto lg:sticky lg:top-14",
+        "flex h-fit w-fit basis-1/5 flex-col gap-6 overflow-x-auto lg:sticky lg:top-14",
         "[&>div>h3]:mb-3 [&>div>h3]:text-lg [&>div>h3]:font-semibold [&>div>h3]:leading-3 [&>div>h3]:tracking-tight"
       )}
     >
-      <h2 class="text-3xl">About {data.book.title}</h2>
+      <h2 class="text-2xl">About {data.book.title}</h2>
       <div>
         <h3>Author</h3>
         <div class="flex flex-row flex-wrap gap-1">
@@ -55,7 +65,7 @@
       </div>
       <div>
         <h3>Genre</h3>
-        <div class="flex flex-row flex-wrap gap-1">
+        <div class="flex flex-row flex-wrap gap-2">
           {#each data.book.categories as category}
             <LinkButton href="/books/categories/{category.id}">
               {category.name}
@@ -72,8 +82,8 @@
         <p>Overwhelmingly Positive</p>
       </div>
     </section>
-    <section id="reviews" class="flex basis-2/3 flex-col gap-6">
-      <h2 class="text-3xl">Reviews</h2>
+    <section id="reviews" class="flex basis-4/5 flex-col gap-4">
+      <h2 class="text-2xl">Reviews</h2>
       {#if data.book.reviews.length > 0}
         <VirtualScroller bind:items={reviews.state}>
           {#snippet renderer(post: Ref<Post>)}

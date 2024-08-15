@@ -1,6 +1,7 @@
 <script>
   import { enhance } from "$app/forms";
   import { goto } from "$app/navigation";
+  import { page } from "$app/stores";
   import Button from "$components/Button.svelte";
   import Input from "$components/Input.svelte";
 
@@ -12,7 +13,7 @@
   <div class="container flex w-[90dvw] max-w-[500px] items-center gap-6 rounded-lg p-8 shadow-xl">
     <form
       method="POST"
-      action="?/login"
+      action="?/login&redirectTo={$page.url.searchParams.get("redirectTo")}"
       class="flex w-full flex-col gap-3"
       use:enhance={() => {
         isLoading = true;

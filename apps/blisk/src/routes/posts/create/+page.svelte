@@ -47,12 +47,11 @@
         />
       </div>
       <Input
-        type="number"
-        name="bookId"
-        id="create-post-book-id"
-        label="Book ID"
+        name="book"
+        id="create-post-book"
+        label="Book"
         errorTextId="create-post-book-id-error"
-        errorText={form?.validationError?.book_id}
+        errorText={form?.validationError?.book}
         required
       />
       <Textarea

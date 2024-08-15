@@ -1,5 +1,6 @@
 use super::{
     auth::{OptionalUserClaims, UserClaims},
+    books::BooksError,
     comments::Comment,
     reactions::PostReaction,
 };
@@ -46,11 +47,11 @@ pub struct Post {
 
 #[derive(serde::Deserialize, Validate)]
 pub struct CreatePayload {
-    #[validate(range(min = 0))]
-    book_id: i64,
-    #[validate(length(min = 1))]
+    #[validate(length(min = 1, message = "`book` is not valid!"))]
+    book: String,
+    #[validate(length(min = 1, message = "`title` is not valid!"))]
     title: String,
-    #[validate(length(min = 1))]
+    #[validate(length(min = 1, message = "`content` is not valid!"))]
     content: String,
     reaction: Reaction,
 }
@@ -64,7 +65,7 @@ pub async fn create(
     State(AppState { pool, .. }): State<AppState>,
     claims: UserClaims,
     AppJson(CreatePayload {
-        book_id,
+        book,
         title,
         content,
         reaction,
@@ -72,15 +73,27 @@ pub async fn create(
 ) -> Result<Response, AppError> {
     let mut transaction = pool.begin().await?;
     let pid: i64 = sqlx::query_scalar!(
-        "INSERT INTO posts (author_id, book_id, title, content, reaction) VALUES ($1, $2, $3, $4, $5) RETURNING id",
+        "INSERT INTO posts (author_id, book_id, title, content, reaction)
+        VALUES ($1, (SELECT id FROM books WHERE name = $2), $3, $4, $5)
+        RETURNING id",
         &claims.sub,
-        &book_id,
+        &book,
         &title,
         &content,
         &reaction as _
     )
     .fetch_one(&mut *transaction)
-    .await?;
+    .await
+    .map_err(|e| match e {
+        sqlx::Error::Database(ref err) => {
+            if matches!(err.kind(), sqlx::error::ErrorKind::NotNullViolation) {
+                AppError::from(BooksError::BookNotFound(book))
+            } else {
+                AppError::from(e)
+            }
+        },
+        err => AppError::from(err),
+    })?;
     transaction.commit().await?;
     Ok(response(
         StatusCode::CREATED,

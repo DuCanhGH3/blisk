@@ -1,0 +1,5 @@
+DROP FUNCTION IF EXISTS immut_array_to_string;
+
+DROP EXTENSION IF EXISTS fuzzystrmatch;
+
+DROP EXTENSION IF EXISTS ltree;

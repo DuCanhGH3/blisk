@@ -6,5 +6,3 @@ export const LOGGED_IN_LINKS = [
   { label: "post", link: "/posts/create" },
   { label: "books", link: "/books" },
 ] satisfies NavHrefInfo[];
-
-export const LOGGED_OUT_LINKS = [{ label: "login", link: "/auth/login" }] satisfies NavHrefInfo[];

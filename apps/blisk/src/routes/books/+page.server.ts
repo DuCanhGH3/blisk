@@ -3,8 +3,10 @@ import { error } from "@sveltejs/kit";
 import type { PageServerLoad } from "./$types";
 import type { Book } from "$lib/types";
 
-export const load: PageServerLoad = async ({ cookies, fetch, setHeaders }) => {
-  const res = await fetchBackend<Book[]>("/books", {
+export const load: PageServerLoad = async ({ cookies, fetch, setHeaders, url }) => {
+  const query = url.searchParams.get("q");
+  const fetchUrl: `/${string}` = query ? `/books?q=${query}&offset=0` : "/books";
+  const res = await fetchBackend<Book[]>(fetchUrl, {
     authz: "optional",
     cookies,
     fetch,
