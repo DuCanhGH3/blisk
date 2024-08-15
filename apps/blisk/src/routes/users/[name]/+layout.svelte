@@ -31,7 +31,7 @@
     </div>
   </div>
   <div class="flex w-full flex-col gap-8 md:gap-14 lg:flex-row-reverse">
-    <div class="flex h-fit flex-[2_2_0] flex-col gap-4 lg:sticky lg:top-14">
+    <div class="flex h-fit basis-1/3 flex-col gap-4 lg:sticky lg:top-14">
       <h2>About {$page.params.name}</h2>
       <div class="box md">here comes a quote</div>
       <div class="box md">
@@ -69,7 +69,7 @@
         </div>
       </div>
     </div>
-    <article class="flex flex-[3_3_0] flex-col gap-4">
+    <article class="flex basis-2/3 flex-col gap-4">
       <h2>Recent activities</h2>
       <div class="flex h-max w-full flex-row flex-wrap justify-stretch gap-2">
         <Link href={basePath}>Reviews</Link>

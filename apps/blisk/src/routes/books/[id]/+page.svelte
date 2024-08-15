@@ -42,11 +42,11 @@
     <section
       id="statistics"
       class={clsx(
-        "flex h-fit w-fit basis-1/5 flex-col gap-6 overflow-x-auto lg:sticky lg:top-14",
+        "flex h-fit w-fit basis-1/3 flex-col gap-6 overflow-x-auto lg:sticky lg:top-14",
         "[&>div>h3]:mb-3 [&>div>h3]:text-lg [&>div>h3]:font-semibold [&>div>h3]:leading-3 [&>div>h3]:tracking-tight"
       )}
     >
-      <h2 class="text-2xl">About {data.book.title}</h2>
+      <h2>About {data.book.title}</h2>
       <div>
         <h3>Author</h3>
         <div class="flex flex-row flex-wrap gap-1">
@@ -82,8 +82,8 @@
         <p>Overwhelmingly Positive</p>
       </div>
     </section>
-    <section id="reviews" class="flex basis-4/5 flex-col gap-4">
-      <h2 class="text-2xl">Reviews</h2>
+    <section id="reviews" class="flex basis-2/3 flex-col gap-4">
+      <h2>Reviews</h2>
       {#if data.book.reviews.length > 0}
         <VirtualScroller bind:items={reviews.state}>
           {#snippet renderer(post: Ref<Post>)}

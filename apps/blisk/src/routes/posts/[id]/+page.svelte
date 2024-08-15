@@ -31,7 +31,7 @@
   };
 </script>
 
-<article class="flex h-full w-full flex-col gap-8 p-2 md:py-8">
+<article class="flex h-full w-full max-w-6xl flex-col gap-8 p-2 md:py-8">
   <div class="flex flex-col gap-8">
     <h1 class="-order-1">{post.title}</h1>
     <div class="-order-2 flex flex-row flex-wrap items-center gap-4 font-semibold leading-10 tracking-tight">

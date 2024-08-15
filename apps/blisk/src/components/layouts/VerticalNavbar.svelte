@@ -9,6 +9,7 @@
   import NavToggleScheme from "./NavToggleScheme.svelte";
   import { LOGGED_IN_LINKS, GENERAL_LINKS } from "./navbar-constants";
   import NavUsermenu from "./NavUsermenu.svelte";
+  import SearchBar from "./SearchBar.svelte";
 
   interface NavbarProps {
     user: Pick<User, "name"> | null;
@@ -61,7 +62,7 @@
       <div class="flex items-center gap-2 md:block md:items-start md:py-2">
         <a class="shrink-0 select-none px-3 py-2 font-mono text-base" href="/" aria-label="Go to home">blisk</a>
       </div>
-      <div class="flex flex-col gap-[5px] md:flex-col-reverse">
+      <div class="flex flex-row gap-[5px] md:flex-col-reverse">
         <div class="hidden h-full pr-2 md:flex md:pr-0">
           <div class="overflow-x-overlay hidden h-full grow flex-row gap-[5px] overflow-x-auto md:flex">
             <ul class="flex max-h-[50dvh] w-full flex-col gap-[inherit] overflow-y-auto">
@@ -75,6 +76,7 @@
             </ul>
           </div>
         </div>
+        <SearchBar /> 
         <div class="flex flex-row-reverse items-center gap-[5px] md:flex-row">
           <details bind:this={mobileMenu} class="details-anim relative ml-3 md:hidden" id="nav-mobile-menu">
             <summary

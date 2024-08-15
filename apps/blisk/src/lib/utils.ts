@@ -109,3 +109,13 @@ export const safeRedirect = (to: FormDataEntryValue | string | null | undefined)
   }
   return to;
 };
+
+export const debounce = <Args extends any[], Ret>(fn: (...args: Args) => Ret, delay: number) => {
+  let timer: NodeJS.Timeout | undefined = undefined;
+  return (...args: Args) => {
+    clearTimeout(timer);
+    timer = setTimeout(() => {
+      fn(...args);
+    }, delay);
+  };
+};

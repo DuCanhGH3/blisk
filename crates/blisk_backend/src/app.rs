@@ -3,7 +3,7 @@ use std::str::FromStr;
 use crate::{routes, settings::SETTINGS, utils::constants::UPLOADS_DIRECTORY};
 use axum::{
     extract::DefaultBodyLimit,
-    http::{HeaderName, HeaderValue, Method},
+    http::{header, HeaderName, HeaderValue, Method},
     routing::{get, post},
     serve::Serve,
     Router,
@@ -55,11 +55,14 @@ impl Application {
         let listener = tokio::net::TcpListener::bind(&address).await?;
         let port = listener.local_addr().unwrap().port();
         let cors = CorsLayer::new()
+            .allow_credentials(true)
+            .allow_headers([header::ACCEPT, header::CONTENT_TYPE, header::RANGE])
             .allow_methods(vec![
                 Method::GET,
                 Method::POST,
                 Method::PATCH,
                 Method::DELETE,
+                Method::OPTIONS,
             ])
             .allow_origin(
                 SETTINGS
