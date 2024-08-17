@@ -17,6 +17,8 @@ BEGIN
     SELECT
       rp.id,
       rp.content,
+      rp.post_id,
+      u.id AS author_id,
       u.name AS author_name,
       ucr.type AS user_reaction,
       fetch_replies(request_uid, request_pid, rp.id, rp.path, current_level - 1) AS children
@@ -44,8 +46,6 @@ RETURNS TABLE (
   reaction BREACT,
   user_reaction PREACT
 ) AS $$
-BEGIN
-  RETURN QUERY
   SELECT
     rv.id,
     rv.title,
@@ -59,9 +59,8 @@ BEGIN
   ON rv.author_id = rvu.id
   LEFT JOIN post_reactions upr
   ON upr.post_id = rv.id AND upr.user_id = request_uid;
-END;
 $$
-LANGUAGE plpgsql;
+LANGUAGE sql;
 
 CREATE OR REPLACE FUNCTION fetch_comments (
   request_uid BIGINT,
@@ -71,17 +70,17 @@ RETURNS TABLE (
   id BIGINT,
   content TEXT,
   post_id BIGINT,
+  path LTREE,
   author_id BIGINT,
   author_name TEXT,
   user_reaction PREACT,
   children JSONB
 ) AS $$
-BEGIN
-  RETURN QUERY
   SELECT
     c.id,
     c.content,
     c.post_id,
+    c.path,
     u.id AS author_id,
     u.name AS author_name,
     ucr.type AS user_reaction,
@@ -96,11 +95,9 @@ BEGIN
   JOIN users u
   ON c.author_id = u.id
   LEFT JOIN comment_reactions ucr
-  ON ucr.comment_id = c.id AND ucr.user_id = request_uid
-  WHERE c.path = 'Top';
-END;
+  ON ucr.comment_id = c.id AND ucr.user_id = request_uid;
 $$
-LANGUAGE plpgsql;
+LANGUAGE sql;
 
 CREATE OR REPLACE FUNCTION create_post_reaction(
   rtype PREACT,

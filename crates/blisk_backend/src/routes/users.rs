@@ -66,37 +66,40 @@ pub async fn read_posts(
 
 #[derive(serde::Deserialize)]
 pub struct ReadCommentsQuery {
-    offset: Option<i64>,
+    previous_last: Option<i64>,
 }
 
 pub async fn read_comments(
     State(AppState { pool, .. }): State<AppState>,
     OptionalUserClaims(claims): OptionalUserClaims,
     Path(username): Path<String>,
-    Query(ReadCommentsQuery { offset }): Query<ReadCommentsQuery>,
+    Query(ReadCommentsQuery { previous_last }): Query<ReadCommentsQuery>,
 ) -> Result<Response, AppError> {
     let uid = claims.as_ref().map(|claims| claims.sub);
-    let offset = offset.unwrap_or(0);
     let mut transaction = pool.begin().await?;
     let comments = sqlx::query_as!(
         Comment,
         r#"SELECT
-            c.id AS "id!: _",
-            c.content AS "content!: _",
-            c.author_name AS "author_name!: _",
+            c.id AS "id!",
+            c.post_id AS "post_id!",
+            c.content AS "content!",
+            c.author_name AS "author_name!",
             c.user_reaction AS "user_reaction?: _",
             c.children AS "children?: _"
         FROM fetch_comments(
             request_uid => $2,
             replies_depth => 0
         ) c
-        WHERE c.author_name = $1
+        WHERE c.author_name = $1 AND CASE
+            WHEN $3::BIGINT IS NULL THEN TRUE
+            WHEN $3::BIGINT IS NOT NULL AND c.id < $3::BIGINT THEN TRUE
+            ELSE FALSE
+        END
         ORDER BY c.id DESC
-        LIMIT 20
-        OFFSET $3"#,
+        LIMIT 20"#,
         &username,
         &uid as &_,
-        &offset,
+        &previous_last as &_,
     )
     .fetch_all(&mut *transaction)
     .await

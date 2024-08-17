@@ -18,7 +18,9 @@
 <VirtualScroller
   bind:items={comments.state}
   loadMore={async () => {
-    const data = await fetchBackend<Comment[]>(`/users/${$page.params.name}/comments?offset=${comments.state.length}`, {
+    if (comments.state.length === 0) return [];
+    const item = comments.state[comments.state.length - 1];
+    const data = await fetchBackend<Comment[]>(`/users/${$page.params.name}/comments?previous_last=${item.id}`, {
       signal: AbortSignal.timeout(10000),
     });
     if (!data.ok) {
@@ -33,7 +35,7 @@
       <!-- svelte-ignore binding_property_non_reactive -->
       <CommentRenderer
         bind:comment={comment.ref}
-        currentUser={data.user?.name}
+        depth={0}
         removeComment={(commentToFilter) => {
           const oldComments = [...comments.state];
           comments.state = comments.state.filter((comment) => comment.id !== commentToFilter.id);

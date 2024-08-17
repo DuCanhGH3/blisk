@@ -27,6 +27,7 @@ pub enum CommentsError {
 #[derive(serde::Serialize, serde::Deserialize, sqlx::FromRow)]
 pub struct Comment {
     pub id: i64,
+    pub post_id: i64,
     pub content: String,
     pub author_name: String,
     #[sqlx(default)]
@@ -91,39 +92,109 @@ pub async fn create(
 
 #[derive(serde::Deserialize)]
 pub struct ReadQuery {
+    /// The post that owns the comments to be read.
     post_id: i64,
-    offset: i64,
+    /// The comment to be fetched. If specified,
+    /// we will only fetch this comment and its
+    /// descendants.
+    comment_id: Option<i64>,
+    /// The last seen comment. If specified, we will only
+    /// fetch comments with `id` lower than this value.
+    /// This is because comments added earlier always
+    /// have their `id`'s lower.
+    previous_last: Option<i64>,
 }
 
 #[instrument(name = "Reading a comment", skip(pool, claims))]
 pub async fn read(
     State(AppState { pool, .. }): State<AppState>,
     OptionalUserClaims(claims): OptionalUserClaims,
-    Query(ReadQuery { post_id, offset }): Query<ReadQuery>,
+    Query(ReadQuery {
+        post_id,
+        comment_id,
+        previous_last,
+    }): Query<ReadQuery>,
 ) -> Result<Response, AppError> {
     let mut transaction = pool.begin().await?;
     let uid = claims.as_ref().map(|claims| claims.sub);
     let comments = sqlx::query_as!(
         Comment,
         r#"SELECT
-            c.id AS "id!: _",
-            c.content AS "content!: _",
-            c.author_name AS "author_name!: _",
+            c.id AS "id!",
+            c.post_id AS "post_id!",
+            c.content AS "content!",
+            c.author_name AS "author_name!",
             c.user_reaction AS "user_reaction!: _",
             children AS "children?: sqlx::types::Json<Vec<Comment>>"
         FROM fetch_comments(
             request_uid => $1,
-            replies_depth => $3
+            replies_depth => 4
         ) c
-        WHERE c.post_id = $2
+        WHERE c.post_id = $2 AND CASE
+            WHEN $3::BIGINT IS NULL AND $4::BIGINT IS NULL AND c.path = 'Top' THEN TRUE
+            WHEN $3::BIGINT IS NULL AND $4::BIGINT IS NOT NULL AND c.path = 'Top' AND c.id < $4::BIGINT THEN TRUE
+            WHEN $3::BIGINT IS NOT NULL AND c.id = $3::BIGINT THEN TRUE
+            ELSE FALSE
+        END
         ORDER BY c.id DESC
-        LIMIT $4
-        OFFSET $5"#,
+        LIMIT 20"#,
         &uid as &_,
         &post_id,
-        4,
-        20,
-        &offset,
+        &comment_id as &_,
+        &previous_last as &_,
+    )
+    .fetch_all(&mut *transaction)
+    .await?;
+    transaction.commit().await?;
+    Ok(response(StatusCode::OK, None, AppJson(comments)))
+}
+
+#[derive(serde::Deserialize)]
+pub struct ReadRepliesQuery {
+    /// The comment the replies of which are to be fetched.
+    comment_id: i64,
+    /// The last seen reply. If specified, we will only
+    /// fetch replies with `id` lower than this value.
+    /// This is because replies added earlier always
+    /// have their `id`'s lower.
+    previous_last: Option<i64>,
+}
+
+#[instrument(name = "Reading a comment's replies...", skip(pool, claims))]
+pub async fn read_replies(
+    State(AppState { pool, .. }): State<AppState>,
+    OptionalUserClaims(claims): OptionalUserClaims,
+    Query(ReadRepliesQuery {
+        comment_id,
+        previous_last,
+    }): Query<ReadRepliesQuery>,
+) -> Result<Response, AppError> {
+    let mut transaction = pool.begin().await?;
+    let uid = claims.as_ref().map(|claims| claims.sub);
+    let comments = sqlx::query_as!(
+        Comment,
+        r#"WITH parent AS (SELECT id, post_id, path FROM comments WHERE id = $2)
+        SELECT
+            c.id AS "id!",
+            c.post_id AS "post_id!",
+            c.content AS "content!",
+            c.author_name AS "author_name!",
+            c.user_reaction AS "user_reaction!: _",
+            children AS "children?: sqlx::types::Json<Vec<Comment>>"
+        FROM fetch_comments(
+            request_uid => $1,
+            replies_depth => 3
+        ) c, parent
+        WHERE c.post_id = parent.post_id AND c.path = parent.path || TEXT2LTREE(parent.id::TEXT) AND CASE
+            WHEN $3::BIGINT IS NULL THEN TRUE
+            WHEN $3::BIGINT IS NOT NULL AND c.id < $3::BIGINT THEN TRUE
+            ELSE FALSE
+        END
+        ORDER BY c.id DESC
+        LIMIT 20"#,
+        &uid as &_,
+        &comment_id as &_,
+        &previous_last as &_,
     )
     .fetch_all(&mut *transaction)
     .await?;

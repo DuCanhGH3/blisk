@@ -97,6 +97,7 @@ impl Application {
                     .patch(routes::comments::update)
                     .delete(routes::comments::delete),
             )
+            .route("/comments/replies", get(routes::comments::read_replies))
             .route(
                 "/reactions",
                 post(routes::reactions::create).delete(routes::reactions::delete),

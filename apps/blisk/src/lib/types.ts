@@ -26,6 +26,7 @@ export interface Post {
 
 export interface Comment {
   id: number;
+  post_id: number;
   content: string;
   author_name: string;
   user_reaction: ReactionType | null;

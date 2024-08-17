@@ -5,7 +5,7 @@
   import type { Comment, ReactionType } from "$lib/types";
   import { dialog } from "$lib/stores/dialog.svelte";
   import { hotkeys } from "$lib/hotkeys.svelte";
-  import { OPTIMISTIC_ID } from "$lib/constants";
+  import { BASE_COMMENTS_LENGTH, OPTIMISTIC_ID } from "$lib/constants";
   import { fetchBackend } from "$lib/backend.client";
   import CommentForm from "./CommentForm.svelte";
   import { svgIconAttrs, reactionRender } from "./renderer-constants";
@@ -24,16 +24,15 @@
   import ThumbUp from "../icons/ThumbUp.svelte";
   import { getLoginUrl } from "$lib/utils";
 
-
   interface CommentProps {
     /**
      * The comment to be rendered. Must be a state for the component to work properly.
      */
     comment: Comment;
     /**
-     * The current user's name. Used for checking whether the comment belongs to them.
+     * The current comment's render depth.
      */
-    currentUser: string | undefined;
+    depth: number;
     /**
      * The function used to optimistically remove the comment. This should return
      * a function that will be used to revert the optimistic update.
@@ -42,12 +41,13 @@
     removeComment(comment: Comment): () => void;
   }
 
-  let { comment = $bindable(), currentUser, removeComment }: CommentProps = $props();
+  let { comment = $bindable(), depth, removeComment }: CommentProps = $props();
 
   let previousReaction: ReactionType | null = null;
   let deleteCommentError = $state<string | null>(null);
   let reactionBar = $state<HTMLDetailsElement | null>(null);
   let menu = $state<HTMLDetailsElement | null>(null);
+  let noMoreReplies = $state(false);
 
   const isLoggedIn = $derived(!!$page.data.user);
   const loginUrl = $derived(getLoginUrl($page.url.pathname));
@@ -60,6 +60,24 @@
       },
     ],
   ]);
+
+  const loadMoreReplies = async () => {
+    // If the number of replies in the object is not higher than `BASE_COMMENTS_LENGTH`, simply assume
+    // there's no more reply to be fetched.
+    if (noMoreReplies || !comment.children || comment.children.length < BASE_COMMENTS_LENGTH) return;
+    const lastSeen = comment.children[comment.children.length - 1];
+    const data = await fetchBackend<Comment[]>(
+      `/comments/replies?comment_id=${comment.id}&${lastSeen}`
+    );
+    if (!data.ok) {
+      return;
+    }
+    if (data.data.length === 0) {
+      noMoreReplies = true;
+      return;
+    }
+    comment.children.push(...data.data);
+  };
 
   const updateReaction = (reaction: ReactionType | null) => {
     previousReaction = comment.user_reaction;
@@ -139,15 +157,23 @@
               }}
             />
           </details>
-          <CommentRendererButton as="label" id="comment-toggle-label-{comment.id}" for="comment-toggle-{comment.id}">
-            <CommentIcon {...svgIconAttrs} />
-            <span class="pr-1">Comment</span>
-          </CommentRendererButton>
         {:else}
           <CommentRendererButton as="a" href={loginUrl}>
             <ThumbUp {...svgIconAttrs} />
             <span class="select-none pr-1">Like</span>
           </CommentRendererButton>
+        {/if}
+        {#if depth >= 4}
+          <CommentRendererButton as="a" href="/posts/{comment.post_id}/comments/{comment.id}#comments">
+            <CommentIcon {...svgIconAttrs} />
+            <span class="pr-1">Comment</span>
+          </CommentRendererButton>
+        {:else if isLoggedIn}
+          <CommentRendererButton as="label" id="comment-toggle-label-{comment.id}" for="comment-toggle-{comment.id}">
+            <CommentIcon {...svgIconAttrs} />
+            <span class="pr-1">Comment</span>
+          </CommentRendererButton>
+        {:else}
           <CommentRendererButton as="a" href={loginUrl}>
             <CommentIcon {...svgIconAttrs} />
             <span class="pr-1">Comment</span>
@@ -157,7 +183,7 @@
           <Share {...svgIconAttrs} />
           <span class="pr-1">Share</span>
         </CommentRendererButton>
-        {#if currentUser === comment.author_name}
+        {#if $page.data.user?.name === comment.author_name}
           <details bind:this={menu} class="relative">
             <CommentRendererButton as="summary" aria-describedby="comment-{comment.id}-menu-bar">
               <ThreeDots {...svgIconAttrs} /> <span class="sr-only">More</span>
@@ -197,7 +223,7 @@
       "before:left-0 before:w-px before:content-[''] dark:before:bg-neutral-800"
     )}
   >
-    {#if isLoggedIn}
+    {#if depth < 4 && isLoggedIn}
       <input class="peer sr-only" type="checkbox" checked={false} id="comment-toggle-{comment.id}" />
       <div class="hidden pt-3 peer-checked:block">
         <CommentForm
@@ -217,10 +243,17 @@
       <ul class="flex flex-col gap-3 pt-3">
         {#each comment.children as reply (reply.id)}
           <li>
-            <svelte:self comment={reply} {currentUser} />
+            <svelte:self comment={reply} depth={depth + 1} {removeComment} />
           </li>
         {/each}
       </ul>
+      <!-- If at any point in time, this comment does not have at least `BASE_COMMENTS_LENGTH` replies, -->
+      <!-- assume that it does not have any more reply. -->
+      {#if comment.children.length >= BASE_COMMENTS_LENGTH && !noMoreReplies}
+        <button class="text-comment block py-1.5 text-sm underline" onclick={loadMoreReplies}>View more replies</button>
+      {/if}
+    {:else if depth >= 4}
+      <a class="text-comment block py-1.5 text-sm underline" href="/posts/{comment.post_id}/comments/{comment.id}#comments">View more replies</a>
     {/if}
   </div>
 </article>

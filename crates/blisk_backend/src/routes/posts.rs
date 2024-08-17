@@ -91,7 +91,7 @@ pub async fn create(
             } else {
                 AppError::from(e)
             }
-        },
+        }
         err => AppError::from(err),
     })?;
     transaction.commit().await?;
@@ -105,33 +105,42 @@ pub async fn create(
 #[derive(serde::Deserialize)]
 pub struct ReadQuery {
     post_id: i64,
+    comment_id: Option<i64>,
 }
 
 #[instrument(name = "Reading a post", skip(pool, claims))]
 pub async fn read(
     State(AppState { pool, .. }): State<AppState>,
     claims: OptionalUserClaims,
-    Query(ReadQuery { post_id }): Query<ReadQuery>,
+    Query(ReadQuery {
+        post_id,
+        comment_id,
+    }): Query<ReadQuery>,
 ) -> Result<Response, AppError> {
     let uid = claims.0.as_ref().map(|claims| claims.sub);
     let mut transaction = pool.begin().await?;
     let post = sqlx::query_as!(
         Post,
         r#"SELECT
-            p.id AS "id!: _",
-            p.title AS "title!: _",
-            p.content AS "content!: _", 
-            p.author_name AS "author_name!: _",
+            p.id AS "id!",
+            p.title AS "title!",
+            p.content AS "content!", 
+            p.author_name AS "author_name!",
             p.reaction AS "reaction!: _",
             p.user_reaction AS "user_reaction!: _",
-            COALESCE(JSONB_AGG(c) FILTER (WHERE c.id IS NOT NULL), '[]'::JSONB) AS "comments!: sqlx::types::Json<Vec<Comment>>"
+            COALESCE(JSONB_AGG(c) FILTER (WHERE c.id IS NOT NULL), '[]'::JSONB) AS "comments!: _"
         FROM fetch_posts(request_uid => $2) p
         LEFT JOIN LATERAL (
             SELECT * FROM fetch_comments(
                 request_uid => $2,
                 replies_depth => 4
             ) c
-            WHERE c.post_id = p.id
+            WHERE
+            CASE
+                WHEN $3::BIGINT IS NULL AND c.post_id = p.id AND c.path = 'Top' THEN TRUE
+                WHEN $3::BIGINT IS NOT NULL AND c.post_id = p.id AND c.id = $3::BIGINT THEN TRUE
+                ELSE FALSE
+            END
             ORDER BY c.id DESC
             LIMIT 20
             OFFSET 0
@@ -140,6 +149,7 @@ pub async fn read(
         GROUP BY p.id, p.title, p.content, p.author_name, p.reaction, p.user_reaction"#,
         &post_id,
         &uid as &_,
+        &comment_id as &_,
     )
     .fetch_one(&mut *transaction)
     .await

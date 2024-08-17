@@ -12,3 +12,7 @@ export const OPTIMISTIC_ID = -9999;
 export const VALID_REACTIONS = ["like", "love", "laugh", "wow", "sad", "angry"] as const;
 
 export const VALID_REACTION_FOR = ["post", "comment"] as const;
+
+export const REPLY_DEPTH = 4;
+
+export const BASE_COMMENTS_LENGTH = 20;
