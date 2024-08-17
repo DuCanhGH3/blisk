@@ -1,26 +1,29 @@
 <script lang="ts">
   // Component is (mostly) stateless so that it works with the virtual scroller.
-  import CommentRendererButton from "$components/CommentRendererButton.svelte";
-  import CommentIcon from "$components/icons/Comment.svelte";
-  import Share from "$components/icons/Share.svelte";
-  import ThumbUp from "$components/icons/ThumbUp.svelte";
-  import ReactionBar from "$components/ReactionBar.svelte";
+  import { page } from "$app/stores";
   import { clsx } from "$lib/clsx";
   import type { Comment, ReactionType } from "$lib/types";
-  import CommentForm from "./CommentForm.svelte";
-  import { svgIconAttrs, reactionRender } from "./renderer-constants";
-  import MarkdownRenderer from "./MarkdownRenderer.svelte";
-  import ThreeDots from "./icons/ThreeDots.svelte";
-  import Menu from "./Menu.svelte";
-  import MenuItem from "./MenuItem.svelte";
-  import Pencil from "./icons/Pencil.svelte";
-  import CommentEditor from "./CommentEditor.svelte";
-  import Trash from "./icons/Trash.svelte";
   import { dialog } from "$lib/stores/dialog.svelte";
   import { hotkeys } from "$lib/hotkeys.svelte";
   import { OPTIMISTIC_ID } from "$lib/constants";
   import { fetchBackend } from "$lib/backend.client";
-  import TooltipHover from "./TooltipHover.svelte";
+  import CommentForm from "./CommentForm.svelte";
+  import { svgIconAttrs, reactionRender } from "./renderer-constants";
+  import MarkdownRenderer from "./MarkdownRenderer.svelte";
+  import ReactionBar from "./ReactionBar.svelte";
+  import CommentEditor from "./CommentEditor.svelte";
+  import CommentRendererButton from "./CommentRendererButton.svelte";
+  import Menu from "../Menu.svelte";
+  import MenuItem from "../MenuItem.svelte";
+  import ThreeDots from "../icons/ThreeDots.svelte";
+  import Pencil from "../icons/Pencil.svelte";
+  import Trash from "../icons/Trash.svelte";
+  import TooltipHover from "../TooltipHover.svelte";
+  import CommentIcon from "../icons/Comment.svelte";
+  import Share from "../icons/Share.svelte";
+  import ThumbUp from "../icons/ThumbUp.svelte";
+  import { getLoginUrl } from "$lib/utils";
+
 
   interface CommentProps {
     /**
@@ -45,6 +48,9 @@
   let deleteCommentError = $state<string | null>(null);
   let reactionBar = $state<HTMLDetailsElement | null>(null);
   let menu = $state<HTMLDetailsElement | null>(null);
+
+  const isLoggedIn = $derived(!!$page.data.user);
+  const loginUrl = $derived(getLoginUrl($page.url.pathname));
 
   hotkeys([
     [
@@ -101,42 +107,55 @@
     {#if !comment.is_editing}
       <MarkdownRenderer source={comment.content} startingHeading={4} />
       <div class="-m-1 mt-0 flex w-fit flex-row flex-wrap items-center gap-2">
-        <details bind:this={reactionBar} class="relative">
-          {#if !comment.user_reaction}
-            <CommentRendererButton as="summary" aria-describedby="comment-{comment.id}-reaction-bar">
-              <ThumbUp {...svgIconAttrs} /> <span class="select-none pr-1">Like</span>
-            </CommentRendererButton>
-          {:else}
-            {@const { icon, label, colors } = reactionRender[comment.user_reaction]}
-            <CommentRendererButton customColors={colors} as="summary" aria-describedby="comment-{comment.id}-reaction-bar">
-              <svelte:component this={icon} animatable={false} {...svgIconAttrs} />
-              <span class="select-none pr-1 text-black dark:text-white">{label}</span>
-            </CommentRendererButton>
-          {/if}
-          <ReactionBar
-            id="comment-{comment.id}-reaction-bar"
-            class="animate-fly absolute bottom-full -translate-y-1"
-            style="--fly-translate-y:1rem"
-            currentReaction={comment.user_reaction}
-            forId={comment.id}
-            forType="comment"
-            updateReaction={(reaction) => {
-              updateReaction(reaction);
-              if (reactionBar) {
-                reactionBar.open = false;
-              }
-            }}
-            revertReaction={() => {
-              updateReaction(previousReaction);
-              previousReaction = null;
-            }}
-          />
-        </details>
-        <CommentRendererButton as="label" id="comment-toggle-label-{comment.id}" for="comment-toggle-{comment.id}">
-          <CommentIcon {...svgIconAttrs} /> <span class="pr-1">Comment</span>
-        </CommentRendererButton>
+        {#if isLoggedIn}
+          <details bind:this={reactionBar} class="relative">
+            {#if !comment.user_reaction}
+              <CommentRendererButton as="summary" aria-describedby="comment-{comment.id}-reaction-bar">
+                <ThumbUp {...svgIconAttrs} /> <span class="select-none pr-1">Like</span>
+              </CommentRendererButton>
+            {:else}
+              {@const { icon, label, colors } = reactionRender[comment.user_reaction]}
+              <CommentRendererButton customColors={colors} as="summary" aria-describedby="comment-{comment.id}-reaction-bar">
+                <svelte:component this={icon} animatable={false} {...svgIconAttrs} />
+                <span class="select-none pr-1 text-black dark:text-white">{label}</span>
+              </CommentRendererButton>
+            {/if}
+            <ReactionBar
+              id="comment-{comment.id}-reaction-bar"
+              class="animate-fly absolute bottom-full -translate-y-1"
+              style="--fly-translate-y:1rem"
+              currentReaction={comment.user_reaction}
+              forId={comment.id}
+              forType="comment"
+              updateReaction={(reaction) => {
+                updateReaction(reaction);
+                if (reactionBar) {
+                  reactionBar.open = false;
+                }
+              }}
+              revertReaction={() => {
+                updateReaction(previousReaction);
+                previousReaction = null;
+              }}
+            />
+          </details>
+          <CommentRendererButton as="label" id="comment-toggle-label-{comment.id}" for="comment-toggle-{comment.id}">
+            <CommentIcon {...svgIconAttrs} />
+            <span class="pr-1">Comment</span>
+          </CommentRendererButton>
+        {:else}
+          <CommentRendererButton as="a" href={loginUrl}>
+            <ThumbUp {...svgIconAttrs} />
+            <span class="select-none pr-1">Like</span>
+          </CommentRendererButton>
+          <CommentRendererButton as="a" href={loginUrl}>
+            <CommentIcon {...svgIconAttrs} />
+            <span class="pr-1">Comment</span>
+          </CommentRendererButton>
+        {/if}
         <CommentRendererButton as="div">
-          <Share {...svgIconAttrs} /> <span class="pr-1">Share</span>
+          <Share {...svgIconAttrs} />
+          <span class="pr-1">Share</span>
         </CommentRendererButton>
         {#if currentUser === comment.author_name}
           <details bind:this={menu} class="relative">
@@ -178,20 +197,22 @@
       "before:left-0 before:w-px before:content-[''] dark:before:bg-neutral-800"
     )}
   >
-    <input class="peer sr-only" type="checkbox" checked={false} id="comment-toggle-{comment.id}" />
-    <div class="hidden pt-3 peer-checked:block">
-      <CommentForm
-        parentId={comment.id}
-        updateReplies={(reply: Comment) => {
-          if (!comment.children) comment.children = [];
-          comment.children.unshift(reply);
-        }}
-        revertReplies={() => {
-          if (!comment.children) return;
-          comment.children = comment.children.filter((reply) => reply.id !== OPTIMISTIC_ID);
-        }}
-      />
-    </div>
+    {#if isLoggedIn}
+      <input class="peer sr-only" type="checkbox" checked={false} id="comment-toggle-{comment.id}" />
+      <div class="hidden pt-3 peer-checked:block">
+        <CommentForm
+          parentId={comment.id}
+          updateReplies={(reply: Comment) => {
+            if (!comment.children) comment.children = [];
+            comment.children.unshift(reply);
+          }}
+          revertReplies={() => {
+            if (!comment.children) return;
+            comment.children = comment.children.filter((reply) => reply.id !== OPTIMISTIC_ID);
+          }}
+        />
+      </div>
+    {/if}
     {#if comment.children && comment.children.length > 0}
       <ul class="flex flex-col gap-3 pt-3">
         {#each comment.children as reply (reply.id)}

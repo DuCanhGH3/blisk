@@ -1,7 +1,7 @@
 <script lang="ts">
   import MoonStars from "$components/icons/MoonStars.svelte";
   import Sun from "$components/icons/Sun.svelte";
-  import { svgIconAttrs } from "$components/renderer-constants";
+  import { svgIconAttrs } from "$components/renderers/renderer-constants";
   import { toggleColorScheme } from "$lib/stores/colorScheme";
 </script>
 

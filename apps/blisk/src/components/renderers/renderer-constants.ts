@@ -1,12 +1,12 @@
 import type { Component } from "svelte";
 import type { ReactionType } from "$lib/types";
-import Like from "./icons/reactions/Like.svelte";
-import Heart from "./icons/reactions/Heart.svelte";
-import Haha from "./icons/reactions/Haha.svelte";
-import Wow from "./icons/reactions/Wow.svelte";
-import Sad from "./icons/reactions/Sad.svelte";
-import Angry from "./icons/reactions/Angry.svelte";
-import type { IconProps, ReactionProps } from "./icons/types";
+import Like from "../icons/reactions/Like.svelte";
+import Heart from "../icons/reactions/Heart.svelte";
+import Haha from "../icons/reactions/Haha.svelte";
+import Wow from "../icons/reactions/Wow.svelte";
+import Sad from "../icons/reactions/Sad.svelte";
+import Angry from "../icons/reactions/Angry.svelte";
+import type { IconProps, ReactionProps } from "../icons/types";
 
 export const reactionRender = {
   like: {

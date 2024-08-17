@@ -3,9 +3,9 @@
   import type { Comment } from "$lib/types";
   import { OPTIMISTIC_ID } from "$lib/constants";
   import { page } from "$app/stores";
-  import CommentIcon from "./icons/Comment.svelte";
-  import Textarea from "./Textarea.svelte";
-  import Button from "./Button.svelte";
+  import CommentIcon from "../icons/Comment.svelte";
+  import Textarea from "../Textarea.svelte";
+  import Button from "../Button.svelte";
 
   interface CommentFormProps {
     parentId: number | null;

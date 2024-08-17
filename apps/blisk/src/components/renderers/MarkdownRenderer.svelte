@@ -1,8 +1,8 @@
 <script lang="ts">
   import { setContext } from "svelte";
   import type { HeadingLevel } from "$lib/types";
-  import { markdown } from "./markdown";
-  import Parser from "./markdown/Parser.svelte";
+  import { markdown } from "../markdown";
+  import Parser from "../markdown/Parser.svelte";
 
   interface MarkdownRendererProps {
     source: string;

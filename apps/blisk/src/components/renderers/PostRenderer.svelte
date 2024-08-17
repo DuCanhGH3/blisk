@@ -1,15 +1,17 @@
 <script lang="ts">
   // Component is (mostly) stateless so that it works with the virtual scroller.
+  import { page } from "$app/stores";
   import type { Post, ReactionType } from "$lib/types";
-  import Comment from "./icons/Comment.svelte";
-  import Share from "./icons/Share.svelte";
-  import ThumbUp from "./icons/ThumbUp.svelte";
-  import ThumbUpFilled from "./icons/ThumbUpFilled.svelte";
+  import { getLoginUrl } from "$lib/utils";
+  import Comment from "../icons/Comment.svelte";
+  import Share from "../icons/Share.svelte";
+  import ThumbUp from "../icons/ThumbUp.svelte";
+  import ThumbUpFilled from "../icons/ThumbUpFilled.svelte";
   import MarkdownRenderer from "./MarkdownRenderer.svelte";
   import PostRendererButton from "./PostRendererButton.svelte";
   import ReactionBar from "./ReactionBar.svelte";
   import { svgIconAttrs, reactionRender } from "./renderer-constants";
-  import TooltipHover from "./TooltipHover.svelte";
+  import TooltipHover from "../TooltipHover.svelte";
 
   interface PostRendererProps {
     /**
@@ -20,9 +22,12 @@
 
   const { post = $bindable() }: PostRendererProps = $props();
 
-  let previousReaction: ReactionType | null = null;
-
   let reactionBar = $state<HTMLDetailsElement | null>(null);
+
+  const isLoggedIn = $derived(!!$page.data.user);
+  const loginUrl = $derived(getLoginUrl($page.url.pathname));
+
+  let previousReaction: ReactionType | null = null;
 
   const updateReaction = (reaction: ReactionType | null) => {
     previousReaction = post.user_reaction;
@@ -53,37 +58,45 @@
   </div>
   <MarkdownRenderer source={post.content} startingHeading={4} />
   <div class="order-1 -m-1 flex flex-row flex-wrap gap-3">
-    <details bind:this={reactionBar} class="relative flex-grow">
-      {#if !post.user_reaction}
-        <PostRendererButton as="summary" aria-describedby="post-{post.id}-reaction-bar">
-          <ThumbUp {...svgIconAttrs} /> <span class="mb-[-1px] select-none">Like</span>
-        </PostRendererButton>
-      {:else}
-        {@const { icon, label, colors } = reactionRender[post.user_reaction]}
-        <PostRendererButton customColors={colors} as="summary" aria-describedby="post-{post.id}-reaction-bar">
-          <svelte:component this={icon} animatable={false} {...svgIconAttrs} />
-          <span class="mb-[-1px] select-none text-black dark:text-white">{label}</span>
-        </PostRendererButton>
-      {/if}
-      <ReactionBar
-        id="post-{post.id}-reaction-bar"
-        class="animate-fly absolute bottom-full -translate-y-1"
-        style="--fly-translate-y:1rem"
-        currentReaction={post.user_reaction}
-        forId={post.id}
-        forType="post"
-        updateReaction={(reaction) => {
-          updateReaction(reaction);
-          if (reactionBar) {
-            reactionBar.open = false;
-          }
-        }}
-        revertReaction={() => {
-          updateReaction(previousReaction);
-          previousReaction = null;
-        }}
-      />
-    </details>
+    {#if isLoggedIn}
+      <details bind:this={reactionBar} class="relative flex-grow">
+        {#if !post.user_reaction}
+          <PostRendererButton as="summary" aria-describedby="post-{post.id}-reaction-bar">
+            <ThumbUp {...svgIconAttrs} />
+            <span class="mb-[-1px] select-none">Like</span>
+          </PostRendererButton>
+        {:else}
+          {@const { icon, label, colors } = reactionRender[post.user_reaction]}
+          <PostRendererButton customColors={colors} as="summary" aria-describedby="post-{post.id}-reaction-bar">
+            <svelte:component this={icon} animatable={false} {...svgIconAttrs} />
+            <span class="mb-[-1px] select-none text-black dark:text-white">{label}</span>
+          </PostRendererButton>
+        {/if}
+        <ReactionBar
+          id="post-{post.id}-reaction-bar"
+          class="animate-fly absolute bottom-full -translate-y-1"
+          style="--fly-translate-y:1rem"
+          currentReaction={post.user_reaction}
+          forId={post.id}
+          forType="post"
+          updateReaction={(reaction) => {
+            updateReaction(reaction);
+            if (reactionBar) {
+              reactionBar.open = false;
+            }
+          }}
+          revertReaction={() => {
+            updateReaction(previousReaction);
+            previousReaction = null;
+          }}
+        />
+      </details>
+    {:else}
+      <PostRendererButton as="a" href={loginUrl}>
+        <ThumbUp {...svgIconAttrs} />
+        <span class="mb-[-1px] select-none">Like</span>
+      </PostRendererButton>
+    {/if}
     <PostRendererButton as="a" href="/posts/{post.id}#comments">
       <Comment {...svgIconAttrs} />
       <span class="mb-[-1px]">Comment</span>

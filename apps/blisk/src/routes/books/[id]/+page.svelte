@@ -1,7 +1,7 @@
 <script lang="ts">
-  import MarkdownRenderer from "$components/MarkdownRenderer.svelte";
-  import PostRenderer from "$components/PostRenderer.svelte";
-  import VirtualScroller from "$components/VirtualScroller.svelte";
+  import MarkdownRenderer from "$components/renderers/MarkdownRenderer.svelte";
+  import PostRenderer from "$components/renderers/PostRenderer.svelte";
+  import VirtualScroller from "$components/renderers/VirtualScroller.svelte";
   import { clsx } from "$lib/clsx";
   import type { Post, Ref } from "$lib/types";
   import LinkButton from "./LinkButton.svelte";

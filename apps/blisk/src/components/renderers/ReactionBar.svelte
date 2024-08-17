@@ -7,6 +7,7 @@
   import type { HTMLFormAttributes } from "svelte/elements";
   import { OPTIMISTIC_ID, VALID_REACTIONS } from "$lib/constants";
   import { reactionRender } from "./renderer-constants";
+  import { page } from "$app/stores";
 
   interface ReactionBarProps extends HTMLFormAttributes {
     currentReaction: ReactionType | null;
@@ -22,7 +23,7 @@
 
   const isForOptimisticComment = $derived(forType === "comment" && forId === OPTIMISTIC_ID);
 
-  const disabled = $derived(isForOptimisticComment || isProcessing);
+  const disabled = $derived(!$page.data.user || isForOptimisticComment || isProcessing);
 </script>
 
 <form

@@ -8,18 +8,20 @@
 
   const loadData = async (query: string) => {
     if (!query) {
-      searchResult = [];
+      searchResult = null;
       return;
     }
 
-    const data = await fetchBackend<Book[]>(`/books?q=${query}`);
+    const data = await fetchBackend<Book[]>(`/books?q=${query}&include_reviews=false`);
 
     if (data.ok) {
       searchResult = data.data;
+    } else {
+      searchResult = null;
     }
   };
 
-  const loadDataDebounced = debounce(loadData, 250);
+  const loadDataDebounced = debounce(loadData, 500);
 </script>
 
 <form action="/books" class="relative w-fit md:w-full">
@@ -32,7 +34,7 @@
     oninput={(e) => loadDataDebounced(e.currentTarget.value)}
   />
   {#if searchResult}
-    <div class="absolute bottom-0 translate-y-full">
+    <div class="absolute bottom-0 max-h-[min(50dvh,25rem)] w-full translate-y-full overflow-y-auto">
       {JSON.stringify(searchResult)}
     </div>
   {/if}

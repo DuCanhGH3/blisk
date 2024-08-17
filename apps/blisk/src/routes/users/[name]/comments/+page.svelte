@@ -1,7 +1,7 @@
 <script lang="ts">
   import { page } from "$app/stores";
-  import CommentRenderer from "$components/CommentRenderer.svelte";
-  import VirtualScroller from "$components/VirtualScroller.svelte";
+  import CommentRenderer from "$components/renderers/CommentRenderer.svelte";
+  import VirtualScroller from "$components/renderers/VirtualScroller.svelte";
   import { fetchBackend } from "$lib/backend.client.js";
   import type { Comment, Ref } from "$lib/types";
 

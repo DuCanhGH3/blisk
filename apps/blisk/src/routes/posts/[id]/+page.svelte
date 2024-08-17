@@ -1,29 +1,34 @@
 <script lang="ts">
-  import CommentRenderer from "$components/CommentRenderer.svelte";
-  import CommentForm from "$components/CommentForm.svelte";
-  import MarkdownRenderer from "$components/MarkdownRenderer.svelte";
-  import { reactionRender } from "$components/renderer-constants.js";
-  import type { Comment, ReactionType, Ref } from "$lib/types.js";
-  import ThumbUp from "$components/icons/ThumbUp.svelte";
-  import ReactionBar from "$components/ReactionBar.svelte";
-  import CommentIcon from "$components/icons/Comment.svelte";
-  import Share from "$components/icons/Share.svelte";
-  import CommentRendererButton from "$components/CommentRendererButton.svelte";
-  import ThumbUpFilled from "$components/icons/ThumbUpFilled.svelte";
-  import VirtualScroller from "$components/VirtualScroller.svelte";
-  import { svgIconAttrs } from "$components/renderer-constants.js";
+  import { page } from "$app/stores";
   import { OPTIMISTIC_ID } from "$lib/constants.js";
   import { fetchBackend } from "$lib/backend.client.js";
+  import type { Comment, ReactionType, Ref } from "$lib/types.js";
+  import { getLoginUrl } from "$lib/utils.js";
+  import ThumbUp from "$components/icons/ThumbUp.svelte";
+  import CommentForm from "$components/renderers/CommentForm.svelte";
+  import MarkdownRenderer from "$components/renderers/MarkdownRenderer.svelte";
+  import CommentRenderer from "$components/renderers/CommentRenderer.svelte";
+  import CommentRendererButton from "$components/renderers/CommentRendererButton.svelte";
+  import ReactionBar from "$components/renderers/ReactionBar.svelte";
+  import VirtualScroller from "$components/renderers/VirtualScroller.svelte";
+  import { reactionRender, svgIconAttrs } from "$components/renderers/renderer-constants.js";
+  import CommentIcon from "$components/icons/Comment.svelte";
+  import Share from "$components/icons/Share.svelte";
+  import ThumbUpFilled from "$components/icons/ThumbUpFilled.svelte";
   import TooltipHover from "$components/TooltipHover.svelte";
 
   const { data } = $props();
+
+  let reactionBar = $state<HTMLDetailsElement | null>(null);
 
   const post = $derived.by(() => {
     const state = $state(data.post);
     return state;
   });
+  const isLoggedIn = $derived(!!$page.data.user);
+  const loginUrl = $derived(getLoginUrl($page.url.pathname));
+
   let previousReaction: ReactionType | null = null;
-  let reactionBar = $state<HTMLDetailsElement | null>(null);
 
   const updateReaction = (reaction: ReactionType | null) => {
     previousReaction = post.user_reaction;
@@ -55,37 +60,44 @@
     </div>
     <MarkdownRenderer source={post.content} startingHeading={2} />
     <div class="order-1 -m-1 mt-0 flex w-fit flex-row flex-wrap gap-2">
-      <details bind:this={reactionBar} class="relative">
-        {#if !post.user_reaction}
-          <CommentRendererButton as="summary" aria-describedby="reaction-bar-{post.id}">
-            <ThumbUp {...svgIconAttrs} /> <span class="mb-[-1px] pr-1">Like</span>
-          </CommentRendererButton>
-        {:else}
-          {@const { icon, label, colors } = reactionRender[post.user_reaction]}
-          <CommentRendererButton customColors={colors} as="summary" aria-describedby="reaction-bar-{post.id}">
-            <svelte:component this={icon} animatable={false} {...svgIconAttrs} />
-            <span class="mb-[-1px] pr-1 text-black dark:text-white">{label}</span>
-          </CommentRendererButton>
-        {/if}
-        <ReactionBar
-          id="reaction-bar-{post.id}"
-          class="animate-fly absolute bottom-full -translate-y-1"
-          style="--fly-translate-y:1rem"
-          currentReaction={post.user_reaction}
-          forId={post.id}
-          forType="post"
-          updateReaction={(reaction) => {
-            updateReaction(reaction);
-            if (reactionBar) {
-              reactionBar.open = false;
-            }
-          }}
-          revertReaction={() => {
-            updateReaction(previousReaction);
-            previousReaction = null;
-          }}
-        />
-      </details>
+      {#if isLoggedIn}
+        <details bind:this={reactionBar} class="relative">
+          {#if !post.user_reaction}
+            <CommentRendererButton as="summary" aria-describedby="reaction-bar-{post.id}">
+              <ThumbUp {...svgIconAttrs} /> <span class="mb-[-1px] pr-1">Like</span>
+            </CommentRendererButton>
+          {:else}
+            {@const { icon, label, colors } = reactionRender[post.user_reaction]}
+            <CommentRendererButton customColors={colors} as="summary" aria-describedby="reaction-bar-{post.id}">
+              <svelte:component this={icon} animatable={false} {...svgIconAttrs} />
+              <span class="mb-[-1px] pr-1 text-black dark:text-white">{label}</span>
+            </CommentRendererButton>
+          {/if}
+          <ReactionBar
+            id="reaction-bar-{post.id}"
+            class="animate-fly absolute bottom-full -translate-y-1"
+            style="--fly-translate-y:1rem"
+            currentReaction={post.user_reaction}
+            forId={post.id}
+            forType="post"
+            updateReaction={(reaction) => {
+              updateReaction(reaction);
+              if (reactionBar) {
+                reactionBar.open = false;
+              }
+            }}
+            revertReaction={() => {
+              updateReaction(previousReaction);
+              previousReaction = null;
+            }}
+          />
+        </details>
+      {:else}
+        <CommentRendererButton as="a" href={loginUrl}>
+          <ThumbUp {...svgIconAttrs} />
+          <span class="mb-[-1px] pr-1">Like</span>
+        </CommentRendererButton>
+      {/if}
       <CommentRendererButton as="a" href="#comments">
         <CommentIcon {...svgIconAttrs} />
         <span class="mb-[-1px] pr-1">Comment</span>
@@ -98,11 +110,13 @@
   </div>
   <section id="comments" class="flex h-full flex-col gap-3">
     <h2 class="sr-only">Comments</h2>
-    <CommentForm
-      parentId={null}
-      updateReplies={(newComment) => post.comments.unshift(newComment)}
-      revertReplies={() => (post.comments = post.comments.filter((comment) => comment.id !== OPTIMISTIC_ID))}
-    />
+    {#if isLoggedIn}
+      <CommentForm
+        parentId={null}
+        updateReplies={(newComment) => post.comments.unshift(newComment)}
+        revertReplies={() => (post.comments = post.comments.filter((comment) => comment.id !== OPTIMISTIC_ID))}
+      />
+    {/if}
     <VirtualScroller
       bind:items={post.comments}
       loadMore={async () => {

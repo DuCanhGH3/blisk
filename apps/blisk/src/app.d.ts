@@ -12,6 +12,7 @@ declare global {
     interface PageData {
       title?: string;
       ogImage?: string;
+      user: Pick<User, "name"> | null;
     }
     // interface PageState {}
     // interface Platform {}

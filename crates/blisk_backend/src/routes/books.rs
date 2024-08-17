@@ -111,7 +111,7 @@ struct Book {
     summary: String,
     authors: sqlx::types::Json<Vec<BookAuthor>>,
     categories: sqlx::types::Json<Vec<BookCategory>>,
-    reviews: sqlx::types::Json<Vec<Post>>,
+    reviews: Option<sqlx::types::Json<Vec<Post>>>,
 }
 
 #[derive(serde::Deserialize, Validate)]
@@ -120,15 +120,17 @@ pub struct ReadQuery {
     q: Option<String>,
     #[validate(range(min = 0, message = "Offset is not valid!"))]
     offset: Option<i64>,
+    include_reviews: Option<bool>,
 }
 
 pub async fn read(
     State(AppState { pool, .. }): State<AppState>,
     OptionalUserClaims(claims): OptionalUserClaims,
-    AppQuery(ReadQuery { q, offset }): AppQuery<ReadQuery>,
+    AppQuery(ReadQuery { q, offset, include_reviews }): AppQuery<ReadQuery>,
 ) -> Result<Response, AppError> {
     let uid = claims.as_ref().map(|claims| claims.sub);
     let mut transaction = pool.begin().await?;
+    let include_reviews = include_reviews.unwrap_or(true);
     let books_list = if let Some(query) = q {
         let offset = offset.unwrap_or(0);
         sqlx::query_as!(
@@ -140,7 +142,10 @@ pub async fn read(
                 b.summary AS "summary!",
                 b.authors AS "authors!: _",
                 b.categories AS "categories!: _",
-                COALESCE(JSONB_AGG(rv) FILTER (WHERE rv.id IS NOT NULL), '[]'::JSONB) AS "reviews!: _"
+                CASE $4::BOOLEAN
+                    WHEN TRUE THEN COALESCE(JSONB_AGG(rv) FILTER (WHERE rv.id IS NOT NULL), '[]'::JSONB)
+                    ELSE NULL
+                END AS "reviews?: _"
             FROM book_view b, websearch_to_tsquery($2) query, ts_rank(b.text_search, query) rank
             LEFT JOIN LATERAL (
                 SELECT *
@@ -157,7 +162,8 @@ pub async fn read(
             OFFSET $3"#,
             &uid as &_,
             &query,
-            &offset
+            &offset,
+            &include_reviews,
         ).fetch_all(&mut *transaction).await?
     } else {
         sqlx::query_as!(
@@ -168,7 +174,10 @@ pub async fn read(
                 b.summary AS "summary!: String",
                 b.authors AS "authors!: sqlx::types::Json<Vec<BookAuthor>>",
                 b.categories AS "categories!: sqlx::types::Json<Vec<BookCategory>>",
-                COALESCE(JSONB_AGG(rv) FILTER (WHERE rv.id IS NOT NULL), '[]'::JSONB) AS "reviews!: sqlx::types::Json<Vec<Post>>"
+                CASE $2::BOOLEAN
+                    WHEN TRUE THEN COALESCE(JSONB_AGG(rv) FILTER (WHERE rv.id IS NOT NULL), '[]'::JSONB)
+                    ELSE NULL
+                END AS "reviews?: _"
             FROM book_view b
             LEFT JOIN LATERAL (
                 SELECT *
@@ -179,7 +188,8 @@ pub async fn read(
                 OFFSET 0
             ) rv ON TRUE
             GROUP BY b.title, b.name, b.summary, b.authors, b.categories"#,
-            &uid as &_
+            &uid as &_,
+            &include_reviews,
         ).fetch_all(&mut *transaction).await?
     };
     transaction.commit().await?;

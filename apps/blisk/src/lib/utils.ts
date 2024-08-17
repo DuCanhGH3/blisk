@@ -103,8 +103,10 @@ export function* range<T = number>(startOrLength: number, end?: number, mapper: 
   }
 }
 
+const isSafeRedirect = (to: unknown) => to && typeof to === "string" && to.startsWith("/") && !to.startsWith("//");
+
 export const safeRedirect = (to: FormDataEntryValue | string | null | undefined) => {
-  if (!to || typeof to !== "string" || !to.startsWith("/") || to.startsWith("//")) {
+  if (!isSafeRedirect(to)) {
     to = `${base}/`;
   }
   return to;
@@ -119,3 +121,6 @@ export const debounce = <Args extends any[], Ret>(fn: (...args: Args) => Ret, de
     }, delay);
   };
 };
+
+export const getLoginUrl = (currentPath: string) =>
+  isSafeRedirect(currentPath) ? `${base}/auth/login?redirectTo=${currentPath}` : `${base}/auth/login`;

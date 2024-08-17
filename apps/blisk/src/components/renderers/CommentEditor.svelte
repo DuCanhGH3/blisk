@@ -7,9 +7,9 @@
   import type { Comment } from "$lib/types";
   import { enhance } from "$app/forms";
   import { OPTIMISTIC_ID } from "$lib/constants";
-  import Textarea from "./Textarea.svelte";
   import { hotkeys } from "$lib/hotkeys.svelte";
-  import Button from "./Button.svelte";
+  import Textarea from "../Textarea.svelte";
+  import Button from "../Button.svelte";
 
   interface CommentEditorProps {
     comment: Comment;

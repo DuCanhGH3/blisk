@@ -1,7 +1,7 @@
 <script lang="ts">
   import { page } from "$app/stores";
-  import PostRenderer from "$components/PostRenderer.svelte";
-  import VirtualScroller from "$components/VirtualScroller.svelte";
+  import PostRenderer from "$components/renderers/PostRenderer.svelte";
+  import VirtualScroller from "$components/renderers/VirtualScroller.svelte";
   import { fetchBackend } from "$lib/backend.client.js";
   import type { Post, Ref } from "$lib/types";
 

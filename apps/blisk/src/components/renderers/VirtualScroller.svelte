@@ -3,8 +3,8 @@
   // states will not work properly.
   import { tick, untrack, type Snippet } from "svelte";
   import type { Ref } from "$lib/types";
-  import { debounce, range } from "$lib/utils";
-  import ProgressRing from "./ProgressRing.svelte";
+  import { range } from "$lib/utils";
+  import ProgressRing from "../ProgressRing.svelte";
 
   interface VirtualScrollerProps {
     items: T[];
@@ -224,11 +224,9 @@
       recalculate();
     });
   });
-
-  const handleLayoutDebounced = debounce(handleLayout, 250);
 </script>
 
-<svelte:window onscroll={handleLayoutDebounced} onresize={handleLayoutDebounced} />
+<svelte:window onscroll={handleLayout} onresize={handleLayout} />
 
 <div bind:this={container} style="padding-top:{paddingTop}px;padding-bottom:{paddingBottom}px">
   {#each range(start, end, (idx) => items[idx]) as item, i (item?.id)}
