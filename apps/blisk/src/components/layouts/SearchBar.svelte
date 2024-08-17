@@ -4,6 +4,8 @@
   import type { Book } from "$lib/types";
   import { debounce } from "$lib/utils";
 
+  let activeElement = $state<HTMLElement | null>(null);
+  let input = $state<HTMLInputElement | null>(null);
   let searchResult = $state<Book[] | null>(null);
 
   const loadData = async (query: string) => {
@@ -24,8 +26,11 @@
   const loadDataDebounced = debounce(loadData, 500);
 </script>
 
+<svelte:document bind:activeElement={activeElement} />
+
 <form action="/books" class="relative w-fit md:w-full">
   <Input
+    bind:self={input}
     id="search-bar-input"
     name="q"
     label="Search"
@@ -33,7 +38,7 @@
     autocomplete="off"
     oninput={(e) => loadDataDebounced(e.currentTarget.value)}
   />
-  {#if searchResult}
+  {#if activeElement === input && searchResult}
     <div class="absolute bottom-0 max-h-[min(50dvh,25rem)] w-full translate-y-full overflow-y-auto">
       {JSON.stringify(searchResult)}
     </div>

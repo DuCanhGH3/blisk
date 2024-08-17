@@ -7,6 +7,7 @@
   import type { Snippet } from "svelte";
 
   interface InputProps extends RequireFields<Omit<HTMLInputAttributes, "placeholder">, "name"> {
+    self?: HTMLInputElement | null;
     actions?: [Action<T, P>, P][];
     label: Snippet<[]> | string;
     id: string;
@@ -14,11 +15,12 @@
     errorText?: string | string[];
   }
 
-  const { actions, label, id, errorTextId, errorText, ...rest }: InputProps = $props();
+  let { self = $bindable(), actions, label, id, errorTextId, errorText, ...rest }: InputProps = $props();
 </script>
 
 <div class="relative w-full">
   <input
+    bind:this={self}
     {id}
     class={clsx(
       "input block h-[44px] w-full rounded-lg px-2.5 pt-2.5 text-sm shadow-md transition-opacity disabled:opacity-50",
