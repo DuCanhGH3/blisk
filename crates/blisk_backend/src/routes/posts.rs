@@ -6,10 +6,14 @@ use super::{
 };
 use crate::{
     app::AppState,
-    utils::{errors::AppError, response::response, structs::{AppImage, AppJson}},
+    utils::{
+        errors::AppError,
+        response::response,
+        structs::{AppImage, AppJson},
+    },
 };
 use axum::{
-    extract::{Query, State},
+    extract::{Path, Query, State},
     http::StatusCode,
     response::{IntoResponse, Response},
 };
@@ -48,11 +52,11 @@ pub struct Post {
 
 #[derive(serde::Deserialize, Validate)]
 pub struct CreatePayload {
-    #[validate(length(min = 1, message = "`book` is not valid!"))]
+    #[validate(length(min = 1, message = "`book` must point to a valid slug!"))]
     book: String,
-    #[validate(length(min = 1, message = "`title` is not valid!"))]
+    #[validate(length(min = 1, max = 500, message = "Title is either too short or too long!"))]
     title: String,
-    #[validate(length(min = 1, message = "`content` is not valid!"))]
+    #[validate(length(min = 1, message = "Content is not valid!"))]
     content: String,
     reaction: Reaction,
 }
@@ -105,8 +109,8 @@ pub async fn create(
 
 #[derive(serde::Deserialize)]
 pub struct ReadQuery {
-    post_id: i64,
     comment_id: Option<i64>,
+    previous_last: Option<i64>,
 }
 
 #[instrument(name = "Reading a post", skip(pool, claims))]
@@ -114,9 +118,66 @@ pub async fn read(
     State(AppState { pool, .. }): State<AppState>,
     claims: OptionalUserClaims,
     Query(ReadQuery {
-        post_id,
         comment_id,
+        previous_last,
     }): Query<ReadQuery>,
+) -> Result<Response, AppError> {
+    let uid = claims.0.as_ref().map(|claims| claims.sub);
+    let mut transaction = pool.begin().await?;
+    let post = sqlx::query_as!(
+        Post,
+        r#"SELECT
+            p.id AS "id!",
+            p.title AS "title!",
+            p.content AS "content!", 
+            p.author_name AS "author_name!",
+            p.author_picture AS "author_picture?: _",
+            p.reaction AS "reaction!: _",
+            p.user_reaction AS "user_reaction!: _",
+            COALESCE(JSONB_AGG(c) FILTER (WHERE c.id IS NOT NULL), '[]'::JSONB) AS "comments!: _"
+        FROM fetch_posts(request_uid => $1) p
+        LEFT JOIN LATERAL (
+            SELECT * FROM fetch_comments(
+                request_uid => $1,
+                replies_depth => 4
+            ) c
+            WHERE CASE
+                WHEN $2::BIGINT IS NULL AND c.post_id = p.id AND c.path = 'Top' THEN TRUE
+                WHEN $2::BIGINT IS NOT NULL AND c.post_id = p.id AND c.id = $2::BIGINT THEN TRUE
+                ELSE FALSE
+            END
+            ORDER BY c.id DESC
+            LIMIT 20
+        ) c ON TRUE
+        WHERE CASE
+            WHEN $3::BIGINT IS NULL THEN TRUE
+            WHEN $3::BIGINT IS NOT NULL AND p.id < $3::BIGINT THEN TRUE
+            ELSE FALSE
+        END
+        GROUP BY p.id, p.title, p.content, p.author_name, p.author_picture, p.reaction, p.user_reaction
+        ORDER BY p.id DESC
+        LIMIT 20"#,
+        &uid as &_,
+        &comment_id as &_,
+        &previous_last as &_,
+    )
+    .fetch_all(&mut *transaction)
+    .await?;
+    transaction.commit().await?;
+    Ok(response(StatusCode::OK, None, AppJson(post)))
+}
+
+#[derive(serde::Deserialize)]
+pub struct ReadSlugQuery {
+    comment_id: Option<i64>,
+}
+
+#[instrument(name = "Reading a post", skip(pool, claims))]
+pub async fn read_slug(
+    State(AppState { pool, .. }): State<AppState>,
+    claims: OptionalUserClaims,
+    Path(post_id): Path<i64>,
+    Query(ReadSlugQuery { comment_id }): Query<ReadSlugQuery>,
 ) -> Result<Response, AppError> {
     let uid = claims.0.as_ref().map(|claims| claims.sub);
     let mut transaction = pool.begin().await?;
@@ -145,7 +206,6 @@ pub async fn read(
             END
             ORDER BY c.id DESC
             LIMIT 20
-            OFFSET 0
         ) c ON TRUE
         WHERE p.id = $1
         GROUP BY p.id, p.title, p.content, p.author_name, p.author_picture, p.reaction, p.user_reaction"#,

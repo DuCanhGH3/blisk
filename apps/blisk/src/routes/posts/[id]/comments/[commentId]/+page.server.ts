@@ -16,7 +16,7 @@ export const actions: Actions = {
 };
 
 export const load = async ({ cookies, fetch, params, setHeaders }) => {
-  const res = await fetchBackend<RequireFields<Post, "comments">>(`/posts?post_id=${params.id}&comment_id=${params.commentId}`, {
+  const res = await fetchBackend<RequireFields<Post, "comments">>(`/posts/${params.id}?comment_id=${params.commentId}`, {
     authz: "optional",
     cookies,
     fetch,

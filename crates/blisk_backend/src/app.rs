@@ -90,6 +90,7 @@ impl Application {
                     .patch(routes::posts::update)
                     .delete(routes::posts::delete),
             )
+            .route("/posts/:id", get(routes::posts::read_slug))
             .route(
                 "/comments",
                 post(routes::comments::create)

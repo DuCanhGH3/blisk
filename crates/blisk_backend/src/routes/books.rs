@@ -182,7 +182,7 @@ pub async fn read(
                 b.authors AS "authors!: _",
                 b.categories AS "categories!: _",
                 CASE $4::BOOLEAN
-                    WHEN TRUE THEN COALESCE(JSONB_AGG(rv) FILTER (WHERE rv.id IS NOT NULL), '[]'::JSONB)
+                    WHEN TRUE THEN coalesce(jsonb_agg(rv) FILTER (WHERE rv.id IS NOT NULL), '[]'::JSONB)
                     ELSE NULL
                 END AS "reviews?: _"
             FROM book_view b, websearch_to_tsquery($2) query, ts_rank(b.text_search, query) rank
@@ -213,10 +213,10 @@ pub async fn read(
                 b.summary AS "summary!: String",
                 b.cover_image AS "cover_image!: _",
                 b.spine_image AS "spine_image!: _",
-                b.authors AS "authors!: sqlx::types::Json<Vec<BookAuthor>>",
-                b.categories AS "categories!: sqlx::types::Json<Vec<BookCategory>>",
+                b.authors AS "authors!: _",
+                b.categories AS "categories!: _",
                 CASE $2::BOOLEAN
-                    WHEN TRUE THEN COALESCE(JSONB_AGG(rv) FILTER (WHERE rv.id IS NOT NULL), '[]'::JSONB)
+                    WHEN TRUE THEN coalesce(jsonb_agg(rv) FILTER (WHERE rv.id IS NOT NULL), '[]'::JSONB)
                     ELSE NULL
                 END AS "reviews?: _"
             FROM book_view b
@@ -247,13 +247,13 @@ pub async fn read_slug(
     let book = sqlx::query_as!(
         Book,
         r#"SELECT
-            b.title AS "title!: String",
-            b.name AS "name!: String",
-            b.summary AS "summary!: String",
+            b.title AS "title!",
+            b.name AS "name!",
+            b.summary AS "summary!",
             b.cover_image AS "cover_image!: _",
             b.spine_image AS "spine_image!: _",
-            b.authors AS "authors!: sqlx::types::Json<Vec<BookAuthor>>",
-            b.categories AS "categories!: sqlx::types::Json<Vec<BookCategory>>",
+            b.authors AS "authors!: _",
+            b.categories AS "categories!: _",
             COALESCE(JSONB_AGG(rv) FILTER (WHERE rv.id IS NOT NULL), '[]'::JSONB) AS "reviews!: sqlx::types::Json<Vec<Post>>"
         FROM book_view b
         LEFT JOIN LATERAL (

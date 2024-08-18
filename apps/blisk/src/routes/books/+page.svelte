@@ -8,6 +8,7 @@
   // import VirtualScroller from "$components/VirtualScroller.svelte";
   // import Button from "$components/Button.svelte";
   import { clsx } from "$lib/clsx";
+  import { getImage } from "$lib/utils.js";
   // import type { Book, MouseEventEvent, Post, Ref } from "$lib/types.js";
 
   const { data } = $props();
@@ -68,7 +69,7 @@
           <!-- <a href="/books/{book.name}" onclick={(e: MouseEventEvent<HTMLAnchorElement>) => showModal(e, book.name)}> -->
           <a href="/books/{book.name}">
             <img
-              src="/test-cover.jpg"
+              src={getImage(book.cover_image, "/test-cover.jpg")}
               width="192"
               height="288"
               alt=""

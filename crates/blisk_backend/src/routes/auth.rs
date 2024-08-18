@@ -45,6 +45,7 @@ pub enum AuthError {
 }
 
 #[derive(Clone, Debug, PartialEq, PartialOrd, sqlx::Type, serde::Deserialize, serde::Serialize)]
+#[serde(rename_all = "lowercase")]
 #[sqlx(type_name = "urole", rename_all = "lowercase")]
 pub enum UserRole {
     Admin,
@@ -58,8 +59,8 @@ pub struct User {
     pub email: Option<String>,
     pub name: Option<String>,
     pub role: Option<UserRole>,
-    pub picture: Option<sqlx::types::Json<AppImage>>,
     pub is_verified: Option<bool>,
+    pub picture: Option<sqlx::types::Json<AppImage>>,
     pub password: Option<String>,
 }
 
@@ -331,6 +332,15 @@ pub async fn send_confirmation_email(
     .await
 }
 
+#[derive(serde::Serialize)]
+pub struct AuthenticateResponse {
+    email: String,
+    name: String,
+    role: UserRole,
+    is_verified: bool,
+    picture: Option<sqlx::types::Json<AppImage>>,
+}
+
 #[instrument(name = "Fetching user info...", skip(pool, claims), fields(
     uid = &claims.sub
 ))]
@@ -340,15 +350,13 @@ pub async fn authenticate(
 ) -> Result<Response, AppError> {
     let mut transaction = pool.begin().await?;
     let user = sqlx::query_as!(
-        User,
+        AuthenticateResponse,
         r#"SELECT
-            NULL AS "id?: _",
-            email,
-            name,
+            email AS "email!",
+            name AS "name!",
             role AS "role!: _",
-            picture AS "picture?: _",
-            is_verified,
-            NULL as "password?: _"
+            is_verified AS "is_verified!",
+            picture AS "picture?: _"
         FROM users_view u
         WHERE u.id = $1"#,
         &claims.sub

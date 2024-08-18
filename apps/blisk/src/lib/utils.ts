@@ -107,9 +107,9 @@ export function* range<T = number>(startOrLength: number, end?: number, mapper: 
 
 const isSafeRedirect = (to: unknown): to is `/${string}` => !!to && typeof to === "string" && to.startsWith("/") && !to.startsWith("//");
 
-export const safeRedirect = (to: FormDataEntryValue | string | null | undefined) => {
+export const safeRedirect = (to: FormDataEntryValue | string | null | undefined, fallback: `/${string}` = `${base}/`) => {
   if (!isSafeRedirect(to)) {
-    to = `${base}/`;
+    to = fallback;
   }
   return to;
 };

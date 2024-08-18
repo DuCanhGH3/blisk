@@ -14,7 +14,9 @@ declare global {
       ogImage?: string;
       user: Pick<User, "name" | "picture"> | null;
     }
-    // interface PageState {}
+    interface PageState {
+      createPost?: boolean;
+    }
     // interface Platform {}
   }
   interface ViewTransition {

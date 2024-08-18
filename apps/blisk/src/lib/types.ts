@@ -6,12 +6,14 @@ export type RequireFields<T, K extends keyof T> = Omit<T, K> & {
 
 export type ColorScheme = (typeof COLOR_SCHEMES)[number];
 
+export type UserRole = "user" | "admin";
+
 export interface User {
   email: string;
   name: string;
-  role: string;
-  picture: Image | null;
+  role: UserRole;
   is_verified: boolean;
+  picture: Image | null;
 }
 
 export type BookReaction = "like" | "dislike";

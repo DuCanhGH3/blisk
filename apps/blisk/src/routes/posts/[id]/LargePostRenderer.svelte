@@ -2,7 +2,7 @@
   import { page } from "$app/stores";
   import { OPTIMISTIC_ID } from "$lib/constants.js";
   import type { Comment, Post, ReactionType, Ref, RequireFields } from "$lib/types.js";
-  import { getLoginUrl } from "$lib/utils.js";
+  import { getLoginUrl, getProfilePicture } from "$lib/utils.js";
   import ThumbUp from "$components/icons/ThumbUp.svelte";
   import CommentForm from "$components/renderers/CommentForm.svelte";
   import MarkdownRenderer from "$components/renderers/MarkdownRenderer.svelte";
@@ -50,7 +50,11 @@
   <div class="flex flex-col gap-8">
     <h1 class="-order-1">{post.title}</h1>
     <div class="-order-2 flex flex-row flex-wrap items-center gap-4 font-semibold leading-10 tracking-tight">
-      <img src="/no-avatar.webp" class="border-border-light dark:border-border-dark size-12 select-none rounded-full border shadow-lg" alt="" />
+      <img
+        src={getProfilePicture(post.author_picture)}
+        class="border-border-light dark:border-border-dark size-12 select-none rounded-full border shadow-lg"
+        alt=""
+      />
       <div>
         <div class="text-comment flex flex-row flex-wrap items-center gap-1 text-base">
           <a href="/users/{post.author_name}" class="link sm -mt-[1px]">{post.author_name}</a>
@@ -122,7 +126,7 @@
     <h2 class="sr-only">Comments</h2>
     {#if showCommentForm && isLoggedIn}
       <!-- TODO(ducanhgh): VirtualScroller's update doesn't seem to be triggered when we push a new entry -->
-      <!-- to `post.comments` right now, so we reassign `post.comments`. Hopefully this is just a bug. -->
+      <!-- to `post.comments`, so we reassign `post.comments` for now. Hopefully this is just a bug. -->
       <CommentForm
         parentId={null}
         updateReplies={(newComment) => (post.comments = [newComment, ...(post.comments ?? [])])}

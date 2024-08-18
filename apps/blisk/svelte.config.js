@@ -21,7 +21,7 @@ const config = {
         "frame-src": ["self"],
         "connect-src": ["self", "http://localhost:8080"],
         "font-src": ["self"],
-        "img-src": ["self", "https://wsrv.nl", "http://localhost:8080"],
+        "img-src": ["self", "blob:", "https://wsrv.nl", "http://localhost:8080"],
         "object-src": ["self"],
         "script-src": ["self", "wasm-unsafe-eval", "strict-dynamic", "sha256-DjP3mqXEHW08gJZjCdT8u4O2YkjsRGagw6vMJOyKiN4="],
         "style-src": ["self", "https:", "unsafe-inline"],

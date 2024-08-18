@@ -16,7 +16,7 @@ export const actions: Actions = {
 };
 
 export const load: PageServerLoad = async ({ cookies, fetch, params, setHeaders }) => {
-  const res = await fetchBackend<RequireFields<Post, "comments">>(`/posts?post_id=${params.id}`, {
+  const res = await fetchBackend<RequireFields<Post, "comments">>(`/posts/${params.id}`, {
     authz: "optional",
     cookies,
     fetch,
@@ -26,5 +26,5 @@ export const load: PageServerLoad = async ({ cookies, fetch, params, setHeaders 
   if (!res.ok) {
     error(res.status, { message: res.error });
   }
-  return { post: res.data };
+  return { title: `${res.data.title.slice(0, 50)}`, post: res.data };
 };

@@ -5,4 +5,4 @@ export const GENERAL_LINKS = [
   { label: "books", link: "/books" },
 ] satisfies NavHrefInfo[];
 
-export const LOGGED_IN_LINKS = [{ label: "post", link: "/posts/create" }] satisfies NavHrefInfo[];
+export const LOGGED_IN_LINKS = [{ label: "posts", link: "/posts" }] satisfies NavHrefInfo[];
