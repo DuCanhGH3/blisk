@@ -21,6 +21,7 @@
     "@sveltejs/vite-plugin-svelte": "3.1.1",
     "autoprefixer": "10.4.20",
     "dayjs": "1.11.12",
+    "dotenv": "16.4.5",
     "embla-carousel": "8.1.8",
     "embla-carousel-autoplay": "8.1.8",
     "embla-carousel-svelte": "8.1.8",

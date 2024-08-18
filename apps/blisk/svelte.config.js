@@ -1,6 +1,11 @@
 // @ts-check
+import "dotenv/config";
 import adapter from "@sveltejs/adapter-auto";
 import { vitePreprocess } from "@sveltejs/vite-plugin-svelte";
+
+const publicBackend = /** @type {import("@sveltejs/kit").Csp.Source | undefined} */(process.env.PUBLIC_BACKEND_URL);
+
+if (!publicBackend) throw new Error("`process.env.PUBLIC_BACKEND_URL` is not defined.")
 
 /** @type {import('@sveltejs/kit').Config} */
 const config = {
@@ -19,9 +24,9 @@ const config = {
     csp: {
       directives: {
         "frame-src": ["self"],
-        "connect-src": ["self", "http://localhost:8080"],
+        "connect-src": ["self", publicBackend],
         "font-src": ["self"],
-        "img-src": ["self", "blob:", "https://wsrv.nl", "http://localhost:8080"],
+        "img-src": ["self", "blob:", "https://wsrv.nl", publicBackend],
         "object-src": ["self"],
         "script-src": ["self", "wasm-unsafe-eval", "strict-dynamic", "sha256-DjP3mqXEHW08gJZjCdT8u4O2YkjsRGagw6vMJOyKiN4="],
         "style-src": ["self", "https:", "unsafe-inline"],

@@ -135,10 +135,7 @@ pub async fn read(
             c.author_picture AS "author_picture?: _",
             c.user_reaction AS "user_reaction!: _",
             children AS "children?: _"
-        FROM fetch_comments(
-            request_uid => $1,
-            replies_depth => 4
-        ) c
+        FROM fetch_comments(request_uid => $1, replies_depth => 4) c
         WHERE CASE
             WHEN $2::BIGINT IS NULL THEN TRUE
             WHEN $2::BIGINT IS NOT NULL AND c.post_id = $2 THEN TRUE

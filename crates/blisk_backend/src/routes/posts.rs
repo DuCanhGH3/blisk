@@ -142,10 +142,7 @@ pub async fn read(
             COALESCE(JSONB_AGG(c) FILTER (WHERE c.id IS NOT NULL), '[]'::JSONB) AS "comments!: _"
         FROM fetch_posts(request_uid => $1) p
         LEFT JOIN LATERAL (
-            SELECT * FROM fetch_comments(
-                request_uid => $1,
-                replies_depth => 4
-            ) c
+            SELECT * FROM fetch_comments(request_uid => $1, replies_depth => 4) c
             WHERE CASE
                 WHEN $3::BIGINT IS NULL AND c.post_id = p.id AND c.path = 'Top' THEN TRUE
                 WHEN $3::BIGINT IS NOT NULL AND c.post_id = p.id AND c.id = $3::BIGINT THEN TRUE
