@@ -3,9 +3,11 @@ import "dotenv/config";
 import adapter from "@sveltejs/adapter-auto";
 import { vitePreprocess } from "@sveltejs/vite-plugin-svelte";
 
-const publicBackend = /** @type {import("@sveltejs/kit").Csp.Source | undefined} */(process.env.PUBLIC_BACKEND_URL);
+const envBasedCsp = /** @type {import("@sveltejs/kit").Csp.Sources} */ ([]);
 
-if (!publicBackend) throw new Error("`process.env.PUBLIC_BACKEND_URL` is not defined.")
+const publicBackend = /** @type {import("@sveltejs/kit").Csp.Source | undefined} */ (process.env.PUBLIC_BACKEND_URL);
+
+if (publicBackend) envBasedCsp.push(publicBackend);
 
 /** @type {import('@sveltejs/kit').Config} */
 const config = {
@@ -24,9 +26,9 @@ const config = {
     csp: {
       directives: {
         "frame-src": ["self"],
-        "connect-src": ["self", publicBackend],
+        "connect-src": ["self", ...envBasedCsp],
         "font-src": ["self"],
-        "img-src": ["self", "blob:", "https://wsrv.nl", publicBackend],
+        "img-src": ["self", "blob:", "https://wsrv.nl", ...envBasedCsp],
         "object-src": ["self"],
         "script-src": ["self", "wasm-unsafe-eval", "strict-dynamic", "sha256-DjP3mqXEHW08gJZjCdT8u4O2YkjsRGagw6vMJOyKiN4="],
         "style-src": ["self", "https:", "unsafe-inline"],

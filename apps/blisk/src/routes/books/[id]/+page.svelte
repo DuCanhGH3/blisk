@@ -60,7 +60,7 @@
         <h3>Author</h3>
         <div class="flex flex-row flex-wrap gap-1">
           {#each data.book.authors as author}
-            <LinkButton href="/books/authors/{author.id}">{author.name}</LinkButton>
+            <LinkButton href="/books?author={author.id}">{author.name}</LinkButton>
           {/each}
         </div>
       </div>
@@ -76,7 +76,7 @@
         <h3>Genre</h3>
         <div class="flex flex-row flex-wrap gap-2">
           {#each data.book.categories as category}
-            <LinkButton href="/books/categories/{category.id}">
+            <LinkButton href="/books?category={category.id}">
               {category.name}
             </LinkButton>
           {/each}

@@ -4,7 +4,11 @@ use super::{
 };
 use crate::{
     app::AppState,
-    utils::{errors::AppError, response::response, structs::{AppImage, AppJson, AppQuery}},
+    utils::{
+        errors::AppError,
+        response::response,
+        structs::{AppImage, AppJson, AppQuery},
+    },
 };
 use axum::{
     extract::{Query, State},

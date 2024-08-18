@@ -107,13 +107,11 @@ impl Application {
             .route("/auth/confirm", post(routes::auth::confirm))
             .route("/auth/register", post(routes::auth::register))
             .route("/auth/login", post(routes::auth::login))
-            .route(
-                "/assets/upload",
-                post(routes::files::upload).layer(DefaultBodyLimit::max(10_000_000)),
-            )
+            .route("/assets/upload", post(routes::files::upload))
             .nest_service("/assets", ServeDir::new(UPLOADS_DIRECTORY))
             .with_state(app_state)
-            .layer(ServiceBuilder::new().layer(cors).layer(robots));
+            .layer(ServiceBuilder::new().layer(cors).layer(robots))
+            .layer(DefaultBodyLimit::max(10_000_000));
         let server = axum::serve(listener, app);
 
         Ok(Self { port, server })

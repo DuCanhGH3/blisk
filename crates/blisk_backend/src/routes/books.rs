@@ -50,9 +50,9 @@ pub struct CreatePayload {
     authors: Vec<i64>,
     #[validate(length(min = 1, message = "Book must has at least one category!"))]
     categories: Vec<i64>,
-    /// The cover image of the book.
+    #[form_data(limit = "2000000")]
     cover_image: FieldData<Bytes>,
-    /// The spine image of the book.
+    #[form_data(limit = "2000000")]
     spine_image: FieldData<Bytes>,
 }
 #[derive(serde::Serialize)]
@@ -149,90 +149,75 @@ struct Book {
 
 #[derive(serde::Deserialize, Validate)]
 pub struct ReadQuery {
+    /// Whether reviews should be included with books.
+    include_reviews: Option<bool>,
     #[validate(length(min = 1, message = "Query is not valid!"))]
     q: Option<String>,
-    #[validate(range(min = 0, message = "Offset is not valid!"))]
-    offset: Option<i64>,
-    include_reviews: Option<bool>,
+    #[validate(length(min = 1, message = "No categories are specified!"))]
+    categories: Option<Vec<i64>>,
+    #[validate(length(min = 1, message = "No authors are specified!"))]
+    authors: Option<Vec<i64>>,
 }
 
+#[instrument(name = "Reading books...", skip(pool, claims))]
 pub async fn read(
     State(AppState { pool, .. }): State<AppState>,
     OptionalUserClaims(claims): OptionalUserClaims,
     AppQuery(ReadQuery {
-        q,
-        offset,
         include_reviews,
+        q,
+        categories,
+        authors,
     }): AppQuery<ReadQuery>,
 ) -> Result<Response, AppError> {
     let uid = claims.as_ref().map(|claims| claims.sub);
     let mut transaction = pool.begin().await?;
     let include_reviews = include_reviews.unwrap_or(true);
-    let books_list = if let Some(query) = q {
-        let offset = offset.unwrap_or(0);
-        sqlx::query_as!(
-            Book,
-            r#"
-            SELECT
-                b.title AS "title!",
-                b.name AS "name!",
-                b.summary AS "summary!",
-                b.cover_image AS "cover_image!: _",
-                b.spine_image AS "spine_image!: _",
-                b.authors AS "authors!: _",
-                b.categories AS "categories!: _",
-                CASE $4::BOOLEAN
-                    WHEN TRUE THEN coalesce(jsonb_agg(rv) FILTER (WHERE rv.id IS NOT NULL), '[]'::JSONB)
-                    ELSE NULL
-                END AS "reviews?: _"
-            FROM book_view b, websearch_to_tsquery($2) query, ts_rank(b.text_search, query) rank
-            LEFT JOIN LATERAL (
-                SELECT *
-                FROM fetch_posts(request_uid => $1) rv
-                WHERE rv.book_id = b.id
-                ORDER BY rv.id DESC
-                LIMIT 5
-                OFFSET 0
-            ) rv ON TRUE
-            WHERE b.text_search @@ query
-            GROUP BY b.title, b.name, b.summary, b.cover_image, b.spine_image, b.authors, b.categories, rank.rank
-            ORDER BY rank DESC
-            LIMIT 20
-            OFFSET $3"#,
-            &uid as &_,
-            &query,
-            &offset,
-            &include_reviews,
-        ).fetch_all(&mut *transaction).await?
-    } else {
-        sqlx::query_as!(
-            Book,
-            r#"SELECT 
-                b.title AS "title!: String",
-                b.name AS "name!: String",
-                b.summary AS "summary!: String",
-                b.cover_image AS "cover_image!: _",
-                b.spine_image AS "spine_image!: _",
-                b.authors AS "authors!: _",
-                b.categories AS "categories!: _",
-                CASE $2::BOOLEAN
-                    WHEN TRUE THEN coalesce(jsonb_agg(rv) FILTER (WHERE rv.id IS NOT NULL), '[]'::JSONB)
-                    ELSE NULL
-                END AS "reviews?: _"
-            FROM book_view b
-            LEFT JOIN LATERAL (
-                SELECT *
-                FROM fetch_posts(request_uid => $1) rv
-                WHERE rv.book_id = b.id
-                ORDER BY rv.id DESC
-                LIMIT 5
-                OFFSET 0
-            ) rv ON TRUE
-            GROUP BY b.title, b.name, b.summary, b.cover_image, b.spine_image, b.authors, b.categories"#,
-            &uid as &_,
-            &include_reviews,
-        ).fetch_all(&mut *transaction).await?
-    };
+    let books_list = sqlx::query_as!(
+        Book,
+        r#"
+        SELECT
+            b.title AS "title!",
+            b.name AS "name!",
+            b.summary AS "summary!",
+            b.cover_image AS "cover_image!: _",
+            b.spine_image AS "spine_image!: _",
+            b.authors AS "authors!: _",
+            b.categories AS "categories!: _",
+            CASE $5::BOOLEAN
+                WHEN TRUE THEN coalesce(jsonb_agg(rv) FILTER (WHERE rv.id IS NOT NULL), '[]'::JSONB)
+                ELSE NULL
+            END AS "reviews?: _"
+        FROM books_view b, websearch_to_tsquery(coalesce($2, '')) query, ts_rank(b.text_search, query) rank
+        LEFT JOIN LATERAL (
+            SELECT *
+            FROM fetch_posts(request_uid => $1) rv
+            WHERE rv.book_id = b.id
+            ORDER BY rv.id DESC
+            LIMIT 5
+            OFFSET 0
+        ) rv ON TRUE
+        WHERE CASE
+            WHEN $2::TEXT IS NULL THEN TRUE
+            WHEN $2 IS NOT NULL AND b.text_search @@ query THEN TRUE
+            ELSE FALSE
+        END AND CASE
+            WHEN $3::BIGINT[] IS NULL THEN TRUE
+            WHEN $3 IS NOT NULL AND b.categories_raw @> $3 THEN TRUE
+            ELSE FALSE
+        END AND CASE
+            WHEN $4::BIGINT[] IS NULL THEN TRUE
+            WHEN $4 IS NOT NULL AND b.authors_raw @> $4 THEN TRUE
+            ELSE FALSE
+        END
+        GROUP BY b.title, b.name, b.summary, b.cover_image, b.spine_image, b.authors, b.categories, rank.rank
+        ORDER BY rank DESC"#,
+        &uid as &_,
+        &q as &_,
+        &categories as &_,
+        &authors as &_,
+        &include_reviews,
+    ).fetch_all(&mut *transaction).await?;
     transaction.commit().await?;
     Ok(response(StatusCode::OK, None, AppJson(books_list)))
 }
@@ -255,7 +240,7 @@ pub async fn read_slug(
             b.authors AS "authors!: _",
             b.categories AS "categories!: _",
             COALESCE(JSONB_AGG(rv) FILTER (WHERE rv.id IS NOT NULL), '[]'::JSONB) AS "reviews!: sqlx::types::Json<Vec<Post>>"
-        FROM book_view b
+        FROM books_view b
         LEFT JOIN LATERAL (
             SELECT *
             FROM fetch_posts(request_uid => $2) rv

@@ -9,10 +9,11 @@ use crate::{
     utils::response::ValidationErrorResponse,
 };
 use axum::{
-    extract::rejection::{FormRejection, JsonRejection, QueryRejection},
+    extract::rejection::{FormRejection, JsonRejection},
     http::StatusCode,
     response::{IntoResponse, Response},
 };
+use axum_extra::extract::QueryRejection;
 use axum_typed_multipart::TypedMultipartError;
 use validator::ValidationErrors;
 
@@ -176,7 +177,16 @@ impl IntoResponse for AppError {
                 "Internal Server Error".to_owned(),
             ),
             AppError::FormRejection(rejection) => (rejection.status(), rejection.body_text()),
-            AppError::QueryRejection(rejection) => (rejection.status(), rejection.body_text()),
+            AppError::QueryRejection(rejection) => match rejection {
+                QueryRejection::FailedToDeserializeQueryString(inner) => (
+                    StatusCode::BAD_REQUEST,
+                    format!("Failed to deserialize query string: {inner}")
+                ),
+                _ => (
+                    StatusCode::BAD_REQUEST,
+                    "Failed to deserialize query string".to_owned()
+                )
+            },
             AppError::JsonRejection(rejection) => (rejection.status(), rejection.body_text()),
             AppError::MultipartError(error) => (error.get_status(), error.to_string()),
             AppError::SerdeError(_) => (

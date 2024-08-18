@@ -46,7 +46,7 @@ where
     type Rejection = AppError;
 
     async fn from_request_parts(parts: &mut Parts, state: &S) -> Result<Self, Self::Rejection> {
-        let base = axum::extract::Query::<T>::from_request_parts(parts, state).await?;
+        let base = axum_extra::extract::Query::<T>::from_request_parts(parts, state).await?;
         base.0.validate()?;
         Ok(Self(base.0))
     }
