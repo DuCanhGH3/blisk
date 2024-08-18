@@ -23,17 +23,16 @@ pub enum UserError {
 
 #[derive(serde::Deserialize)]
 pub struct ReadPostsQuery {
-    offset: Option<i64>,
+    previous_last: Option<i64>,
 }
 
 pub async fn read_posts(
     State(AppState { pool, .. }): State<AppState>,
     OptionalUserClaims(claims): OptionalUserClaims,
     Path(username): Path<String>,
-    Query(ReadPostsQuery { offset }): Query<ReadPostsQuery>,
+    Query(ReadPostsQuery { previous_last }): Query<ReadPostsQuery>,
 ) -> Result<Response, AppError> {
     let uid = claims.as_ref().map(|claims| claims.sub);
-    let offset = offset.unwrap_or(0);
     let mut transaction = pool.begin().await?;
     let posts = sqlx::query_as!(
         Post,
@@ -46,13 +45,17 @@ pub async fn read_posts(
             user_reaction AS "user_reaction?: _",
             NULL AS "comments?: _"
         FROM fetch_posts(request_uid => $2)
-        WHERE author_name = $1
+        WHERE author_name = $1 AND CASE
+            WHEN $3::BIGINT IS NULL THEN TRUE
+            WHEN $3::BIGINT IS NOT NULL AND id < $3::BIGINT THEN TRUE
+            ELSE FALSE
+        END
         ORDER BY id DESC
         LIMIT 5
         OFFSET $3"#,
         &username,
         &uid as &_,
-        &offset,
+        &previous_last as &_,
     )
     .fetch_all(&mut *transaction)
     .await
@@ -86,10 +89,7 @@ pub async fn read_comments(
             c.author_name AS "author_name!",
             c.user_reaction AS "user_reaction?: _",
             c.children AS "children?: _"
-        FROM fetch_comments(
-            request_uid => $2,
-            replies_depth => 0
-        ) c
+        FROM fetch_comments(request_uid => $2, replies_depth => 0) c
         WHERE c.author_name = $1 AND CASE
             WHEN $3::BIGINT IS NULL THEN TRUE
             WHEN $3::BIGINT IS NOT NULL AND c.id < $3::BIGINT THEN TRUE

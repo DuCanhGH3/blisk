@@ -31,7 +31,7 @@
     loadMoreComments?(): Promise<Comment[]> | Comment[];
   }
 
-  let { post = $bindable(), showCommentForm = false, loadMoreComments }: LargePostRendererProps = $props();
+  let { post = $bindable(), showCommentForm = true, loadMoreComments }: LargePostRendererProps = $props();
 
   let reactionBar = $state<HTMLDetailsElement | null>(null);
 
