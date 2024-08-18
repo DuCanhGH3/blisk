@@ -3,6 +3,7 @@ import type { Actions, PageServerLoad } from "./$types";
 import { fail, redirect } from "@sveltejs/kit";
 import { fetchBackend } from "$lib/backend";
 import { base } from "$app/paths";
+import { convertFormData } from "$lib/utils";
 
 const postSchema = z.object({
   title: z.string().min(1, "Title must not be empty!"),
@@ -13,13 +14,7 @@ const postSchema = z.object({
 
 export const actions: Actions = {
   async default({ cookies, fetch, setHeaders, request }) {
-    const formData = await request.formData();
-    const data = await postSchema.spa({
-      title: formData.get("title"),
-      content: formData.get("content"),
-      book: formData.get("book"),
-      images: formData.getAll("images"),
-    });
+    const data = await postSchema.spa(convertFormData(await request.formData()));
     if (!data.success) {
       return fail(400, { validationError: data.error.flatten().fieldErrors });
     }

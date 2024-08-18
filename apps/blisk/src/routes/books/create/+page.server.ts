@@ -5,6 +5,7 @@ import { fetchBackend } from "$lib/backend";
 import type { BookCategory } from "$lib/types";
 import { bookCategoryIdSchema } from "$lib/schemas";
 import { base } from "$app/paths";
+import { convertFormData } from "$lib/utils";
 
 const createSchema = z.object({
   title: z.string().min(1, "Title must not be empty!"),
@@ -27,21 +28,12 @@ const createSchema = z.object({
 export const actions: Actions = {
   async default({ cookies, fetch, setHeaders, request }) {
     const formData = await request.formData();
-    const data = await createSchema.spa({
-      title: formData.get("title"),
-      slug: formData.get("slug"),
-      pages: formData.get("pages"),
-      summary: formData.get("summary"),
-      categories: formData.getAll("categories"),
-      cover_image: formData.get("cover_image"),
-      spine_image: formData.get("spine_image"),
-    });
+    const data = await createSchema.spa(convertFormData(formData));
     if (!data.success) {
       return fail(400, { validationError: data.error.flatten().fieldErrors });
     }
     formData.set("language", "en-US");
     formData.append("authors", "1");
-    console.log("test");
     const backendResponse = await fetchBackend<{ id: number }>("/books", {
       authz: true,
       type: "multipart",

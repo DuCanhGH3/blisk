@@ -128,3 +128,21 @@ export const getLoginUrl = (currentPath: string) =>
   isSafeRedirect(currentPath) ? `${base}/auth/login?redirectTo=${currentPath}` : `${base}/auth/login`;
 
 export const getImage = (image: Image) => `${PUBLIC_BACKEND_URL}/assets/${image.owner}/${image.id}.${image.ext}`;
+
+// Source: https://stackoverflow.com/a/46774073
+export const convertFormData = (formData: FormData) => {
+  const object: Record<string, FormDataEntryValue | FormDataEntryValue[]> = {};
+  formData.forEach((value, key) => {
+    // If `object` does have `key`, this is the first entry.
+    if (!Reflect.has(object, key)) {
+      object[key] = value;
+      return;
+    }
+    // If `object` does have `key`, it means that there are
+    // duplicates of the same `key`. Therefore, we convert
+    // `object[key]` to an array.
+    if (!Array.isArray(object[key])) object[key] = [object[key]];
+    object[key].push(value);
+  });
+  return object;
+};

@@ -2,7 +2,7 @@ import { fail, redirect } from "@sveltejs/kit";
 import { z } from "zod";
 import { fetchBackend } from "$lib/backend";
 import type { Actions, PageServerLoad } from "./$types";
-import { safeRedirect } from "$lib/utils";
+import { convertFormData, safeRedirect } from "$lib/utils";
 
 const loginSchema = z.object({
   username: z.string().min(1, "Please enter a valid username!"),
@@ -21,11 +21,7 @@ export const load: PageServerLoad = ({ locals, url }) => {
 export const actions: Actions = {
   async login({ cookies, fetch, request, setHeaders, url }) {
     try {
-      const formData = await request.formData();
-      const data = await loginSchema.spa({
-        username: formData.get("username"),
-        password: formData.get("password"),
-      });
+      const data = await loginSchema.spa(convertFormData(await request.formData()));
       if (!data.success) {
         return fail(400, { validationError: data.error.flatten().fieldErrors });
       }

@@ -2,6 +2,7 @@ import dayjs from "dayjs";
 import { z } from "zod";
 import type { Actions, PageServerLoad } from "./$types";
 import { fail } from "@sveltejs/kit";
+import { convertFormData } from "$lib/utils";
 
 const readSchema = z
   .object({
@@ -23,12 +24,7 @@ const readSchema = z
 
 export const actions: Actions = {
   async default({ request }) {
-    const formData = await request.formData();
-
-    const data = await readSchema.spa({
-      startingDate: formData.get("startingDate"),
-      endingDate: formData.get("endingDate"),
-    });
+    const data = await readSchema.spa(convertFormData(await request.formData()));
 
     if (!data.success) {
       const flattenedErrors = data.error.flatten();

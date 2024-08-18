@@ -2,6 +2,7 @@ import { BACKEND_URL } from "$env/static/private";
 import { fail, redirect, type Cookies } from "@sveltejs/kit";
 import type { ReactionType, SetHeaders } from "./types";
 import { commentSchema, editCommentSchema, errorSchema, reactionSchema } from "./schemas";
+import { convertFormData } from "./utils";
 
 export type Authz = boolean | "optional";
 
@@ -88,11 +89,7 @@ export const fetchBackend = async <T>(
 };
 
 export const createReaction = async (formData: FormData, fetch: typeof globalThis.fetch, cookies: Cookies, setHeaders: SetHeaders) => {
-  const data = await reactionSchema.spa({
-    for_type: formData.get("forType"),
-    post_id: formData.get("forId"),
-    reaction_type: formData.get("reactionType"),
-  });
+  const data = await reactionSchema.spa(convertFormData(formData));
 
   if (!data.success) {
     return fail(400, { validationError: data.error.flatten().fieldErrors });
@@ -171,10 +168,7 @@ export const createComment = async (
 };
 
 export const editComment = async (formData: FormData, fetch: typeof globalThis.fetch, cookies: Cookies, setHeaders: SetHeaders) => {
-  const data = await editCommentSchema.spa({
-    id: formData.get("id"),
-    content: formData.get("content"),
-  });
+  const data = await editCommentSchema.spa(convertFormData(formData));
 
   if (!data.success) {
     return fail(400, { validationError: data.error.flatten().fieldErrors });

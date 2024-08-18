@@ -32,7 +32,7 @@
   class={clsx("dark:bg-neutral-915 border-border-light dark:border-border-dark z-10 rounded-full border bg-white p-1 shadow-md", className)}
   use:enhance={({ formData }) => {
     isProcessing = true;
-    const reactionType = formData.get("reactionType");
+    const reactionType = formData.get("reaction_type");
     if (reactionType) {
       if (isValidReaction(reactionType)) {
         updateReaction(reactionType);
@@ -51,8 +51,8 @@
   }}
   {...props}
 >
-  <input type="hidden" name="forId" value={forId} />
-  <input type="hidden" name="forType" value={forType} />
+  <input type="hidden" name="post_id" value={forId} />
+  <input type="hidden" name="for_type" value={forType} />
   <menu class="flex flex-row gap-2">
     {#each VALID_REACTIONS as reactionType}
       {@const mappedRender = reactionRender[reactionType]}
@@ -61,7 +61,7 @@
         <button
           class="flex h-full w-full items-center justify-center"
           type="submit"
-          name="reactionType"
+          name="reaction_type"
           value={isCurrent ? "cancel" : reactionType}
           {disabled}
           role="menuitemcheckbox"
