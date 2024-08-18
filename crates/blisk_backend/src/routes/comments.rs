@@ -4,7 +4,7 @@ use super::{
 };
 use crate::{
     app::AppState,
-    utils::{errors::AppError, response::response, structs::{AppImage, AppJson}},
+    utils::{errors::AppError, response::response, structs::{AppImage, AppJson, AppQuery}},
 };
 use axum::{
     extract::{Query, State},
@@ -91,18 +91,24 @@ pub async fn create(
     ))
 }
 
-#[derive(serde::Deserialize)]
+#[derive(serde::Deserialize, Validate)]
 pub struct ReadQuery {
+    #[validate(length(min = 0, message = "`user` must point to a valid user!"))]
+    user: Option<String>,
     /// The post that owns the comments to be read.
-    post_id: i64,
+    #[validate(range(min = 0, message = "`post_id` must point to a valid post!"))]
+    post_id: Option<i64>,
     /// The comment to be fetched. If specified,
     /// we will only fetch this comment and its
     /// descendants.
+    #[validate(range(min = 0, message = "`comment_id` must point to a valid user!"))]
     comment_id: Option<i64>,
     /// The last seen comment. If specified, we will only
     /// fetch comments with `id` lower than this value.
     /// This is because comments added earlier always
-    /// have their `id`'s lower.
+    /// have their `id`'s lower. When `comment_id` is
+    /// specified, this query is ignored.
+    #[validate(range(min = 0, message = "`previous_last` must point to a valid comment!"))]
     previous_last: Option<i64>,
 }
 
@@ -110,11 +116,12 @@ pub struct ReadQuery {
 pub async fn read(
     State(AppState { pool, .. }): State<AppState>,
     OptionalUserClaims(claims): OptionalUserClaims,
-    Query(ReadQuery {
+    AppQuery(ReadQuery {
+        user,
         post_id,
         comment_id,
         previous_last,
-    }): Query<ReadQuery>,
+    }): AppQuery<ReadQuery>,
 ) -> Result<Response, AppError> {
     let mut transaction = pool.begin().await?;
     let uid = claims.as_ref().map(|claims| claims.sub);
@@ -132,16 +139,25 @@ pub async fn read(
             request_uid => $1,
             replies_depth => 4
         ) c
-        WHERE c.post_id = $2 AND CASE
-            WHEN $3::BIGINT IS NULL AND $4::BIGINT IS NULL AND c.path = 'Top' THEN TRUE
-            WHEN $3::BIGINT IS NULL AND $4::BIGINT IS NOT NULL AND c.path = 'Top' AND c.id < $4::BIGINT THEN TRUE
-            WHEN $3::BIGINT IS NOT NULL AND c.id = $3::BIGINT THEN TRUE
+        WHERE CASE
+            WHEN $2::BIGINT IS NULL THEN TRUE
+            WHEN $2::BIGINT IS NOT NULL AND c.post_id = $2 THEN TRUE
+            ELSE FALSE
+        END AND CASE
+            WHEN $3::TEXT IS NULL THEN TRUE
+            WHEN $3::TEXT IS NOT NULL AND c.author_name = $3::TEXT THEN TRUE
+            ELSE FALSE
+        END AND CASE
+            WHEN $4::BIGINT IS NULL AND $5::BIGINT IS NULL AND c.path = 'Top' THEN TRUE
+            WHEN $4::BIGINT IS NULL AND $5::BIGINT IS NOT NULL AND c.path = 'Top' AND c.id < $5::BIGINT THEN TRUE
+            WHEN $4::BIGINT IS NOT NULL AND c.id = $4::BIGINT THEN TRUE
             ELSE FALSE
         END
         ORDER BY c.id DESC
         LIMIT 20"#,
         &uid as &_,
-        &post_id,
+        &post_id as &_,
+        &user as &_,
         &comment_id as &_,
         &previous_last as &_,
     )

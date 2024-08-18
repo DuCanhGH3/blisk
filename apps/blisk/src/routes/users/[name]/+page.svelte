@@ -21,7 +21,7 @@
   loadMore={async () => {
     if (posts.length === 0) return [];
     const previousLast = posts[posts.length - 1];
-    const data = await fetchBackend<Post[]>(`/users/${$page.params.name}/posts?previous_last=${previousLast.id}`, {
+    const data = await fetchBackend<Post[]>(`/posts?user=${$page.params.name}&previous_last=${previousLast.id}`, {
       signal: AbortSignal.timeout(10000),
     });
     if (!data.ok) {

@@ -9,11 +9,11 @@ use crate::{
     utils::{
         errors::AppError,
         response::response,
-        structs::{AppImage, AppJson},
+        structs::{AppImage, AppJson, AppQuery},
     },
 };
 use axum::{
-    extract::{Path, Query, State},
+    extract::{Path, State},
     http::StatusCode,
     response::{IntoResponse, Response},
 };
@@ -107,9 +107,13 @@ pub async fn create(
     ))
 }
 
-#[derive(serde::Deserialize)]
+#[derive(serde::Deserialize, Validate)]
 pub struct ReadQuery {
+    #[validate(length(min = 0, message = "`user` must point to a valid user!"))]
+    user: Option<String>,
+    #[validate(range(min = 0, message = "`comment_id` must point to a valid comment!"))]
     comment_id: Option<i64>,
+    #[validate(range(min = 0, message = "`previous_last` must point to a valid post!"))]
     previous_last: Option<i64>,
 }
 
@@ -117,10 +121,11 @@ pub struct ReadQuery {
 pub async fn read(
     State(AppState { pool, .. }): State<AppState>,
     claims: OptionalUserClaims,
-    Query(ReadQuery {
+    AppQuery(ReadQuery {
+        user,
         comment_id,
         previous_last,
-    }): Query<ReadQuery>,
+    }): AppQuery<ReadQuery>,
 ) -> Result<Response, AppError> {
     let uid = claims.0.as_ref().map(|claims| claims.sub);
     let mut transaction = pool.begin().await?;
@@ -142,22 +147,27 @@ pub async fn read(
                 replies_depth => 4
             ) c
             WHERE CASE
-                WHEN $2::BIGINT IS NULL AND c.post_id = p.id AND c.path = 'Top' THEN TRUE
-                WHEN $2::BIGINT IS NOT NULL AND c.post_id = p.id AND c.id = $2::BIGINT THEN TRUE
+                WHEN $3::BIGINT IS NULL AND c.post_id = p.id AND c.path = 'Top' THEN TRUE
+                WHEN $3::BIGINT IS NOT NULL AND c.post_id = p.id AND c.id = $3::BIGINT THEN TRUE
                 ELSE FALSE
             END
             ORDER BY c.id DESC
             LIMIT 20
         ) c ON TRUE
         WHERE CASE
-            WHEN $3::BIGINT IS NULL THEN TRUE
-            WHEN $3::BIGINT IS NOT NULL AND p.id < $3::BIGINT THEN TRUE
+            WHEN $2::TEXT IS NULL THEN TRUE
+            WHEN $2::TEXT IS NOT NULL AND p.author_name = $2::TEXT THEN TRUE
+            ELSE FALSE
+        END AND CASE
+            WHEN $4::BIGINT IS NULL THEN TRUE
+            WHEN $4::BIGINT IS NOT NULL AND p.id < $4::BIGINT THEN TRUE
             ELSE FALSE
         END
         GROUP BY p.id, p.title, p.content, p.author_name, p.author_picture, p.reaction, p.user_reaction
         ORDER BY p.id DESC
         LIMIT 20"#,
         &uid as &_,
+        &user as &_,
         &comment_id as &_,
         &previous_last as &_,
     )
@@ -167,8 +177,9 @@ pub async fn read(
     Ok(response(StatusCode::OK, None, AppJson(post)))
 }
 
-#[derive(serde::Deserialize)]
+#[derive(serde::Deserialize, Validate)]
 pub struct ReadSlugQuery {
+    #[validate(range(min = 0, message = "`comment_id` must point to a valid comment!"))]
     comment_id: Option<i64>,
 }
 
@@ -177,7 +188,7 @@ pub async fn read_slug(
     State(AppState { pool, .. }): State<AppState>,
     claims: OptionalUserClaims,
     Path(post_id): Path<i64>,
-    Query(ReadSlugQuery { comment_id }): Query<ReadSlugQuery>,
+    AppQuery(ReadSlugQuery { comment_id }): AppQuery<ReadSlugQuery>,
 ) -> Result<Response, AppError> {
     let uid = claims.0.as_ref().map(|claims| claims.sub);
     let mut transaction = pool.begin().await?;
@@ -191,7 +202,7 @@ pub async fn read_slug(
             p.author_picture AS "author_picture?: _",
             p.reaction AS "reaction!: _",
             p.user_reaction AS "user_reaction!: _",
-            COALESCE(JSONB_AGG(c) FILTER (WHERE c.id IS NOT NULL), '[]'::JSONB) AS "comments!: _"
+            coalesce(jsonb_agg(c) FILTER (WHERE c.id IS NOT NULL), '[]'::JSONB) AS "comments!: _"
         FROM fetch_posts(request_uid => $2) p
         LEFT JOIN LATERAL (
             SELECT * FROM fetch_comments(

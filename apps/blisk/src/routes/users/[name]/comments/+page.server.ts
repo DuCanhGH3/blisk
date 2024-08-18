@@ -1,6 +1,6 @@
 import { error } from "@sveltejs/kit";
 import { createReaction, editComment, fetchBackend } from "$lib/backend";
-import type { Actions, PageServerLoad  } from "./$types";
+import type { Actions, PageServerLoad } from "./$types";
 import type { Comment } from "$lib/types";
 
 export const actions: Actions = {
@@ -13,7 +13,7 @@ export const actions: Actions = {
 };
 
 export const load: PageServerLoad = async ({ cookies, fetch, params, setHeaders }) => {
-  const user = await fetchBackend<Comment[]>(`/users/${params.name}/comments`, {
+  const user = await fetchBackend<Comment[]>(`/comments?user=${params.name}`, {
     authz: "optional",
     cookies,
     fetch,

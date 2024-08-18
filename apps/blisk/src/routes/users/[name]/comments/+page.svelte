@@ -21,7 +21,7 @@
   loadMore={async () => {
     if (comments.length === 0) return [];
     const item = comments[comments.length - 1];
-    const data = await fetchBackend<Comment[]>(`/users/${$page.params.name}/comments?previous_last=${item.id}`, {
+    const data = await fetchBackend<Comment[]>(`/comments?user=${$page.params.name}&previous_last=${item.id}`, {
       signal: AbortSignal.timeout(10000),
     });
     if (!data.ok) {

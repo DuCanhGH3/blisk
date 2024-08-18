@@ -10,7 +10,7 @@ export const actions: Actions = {
 };
 
 export const load: PageServerLoad = async ({ cookies, fetch, params, setHeaders }) => {
-  const user = await fetchBackend<Post[]>(`/users/${params.name}/posts`, {
+  const user = await fetchBackend<Post[]>(`/posts?user=${params.name}`, {
     authz: "optional",
     cookies,
     fetch,

@@ -103,8 +103,6 @@ impl Application {
                 "/reactions",
                 post(routes::reactions::create).delete(routes::reactions::delete),
             )
-            .route("/users/:user/posts", get(routes::users::read_posts))
-            .route("/users/:user/comments", get(routes::users::read_comments))
             .route("/auth/authenticate", post(routes::auth::authenticate))
             .route("/auth/confirm", post(routes::auth::confirm))
             .route("/auth/register", post(routes::auth::register))
