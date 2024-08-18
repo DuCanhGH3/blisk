@@ -28,13 +28,16 @@
     isProcessing = true;
     const content = formData.get("content");
     const author_name = $page.data.user?.name;
+    const author_picture = $page.data.user?.picture ?? null;
     const post_id = Number.parseInt($page.params.id);
     let comment = $state<Comment | null>(null);
     if (typeof author_name === "string" && typeof content === "string" && !Number.isNaN(post_id)) {
       comment = {
         id: OPTIMISTIC_ID,
+        post_id,
         content,
         author_name,
+        author_picture,
         user_reaction: null,
         children: [],
         is_editing: false,

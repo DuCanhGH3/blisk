@@ -4,7 +4,7 @@ use super::{
 };
 use crate::{
     app::AppState,
-    utils::{errors::AppError, response::response, structs::AppJson},
+    utils::{errors::AppError, response::response, structs::{AppImage, AppJson}},
 };
 use axum::{
     extract::{Query, State},
@@ -30,6 +30,7 @@ pub struct Comment {
     pub post_id: i64,
     pub content: String,
     pub author_name: String,
+    pub author_picture: Option<sqlx::types::Json<AppImage>>,
     #[sqlx(default)]
     pub user_reaction: Option<PostReaction>,
     #[sqlx(default)]
@@ -124,6 +125,7 @@ pub async fn read(
             c.post_id AS "post_id!",
             c.content AS "content!",
             c.author_name AS "author_name!",
+            c.author_picture AS "author_picture?: _",
             c.user_reaction AS "user_reaction!: _",
             children AS "children?: _"
         FROM fetch_comments(
@@ -179,6 +181,7 @@ pub async fn read_replies(
             c.post_id AS "post_id!",
             c.content AS "content!",
             c.author_name AS "author_name!",
+            c.author_picture AS "author_picture?: _",
             c.user_reaction AS "user_reaction!: _",
             children AS "children?: _"
         FROM fetch_comments(

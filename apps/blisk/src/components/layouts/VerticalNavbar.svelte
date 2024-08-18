@@ -3,19 +3,12 @@
   import { clsx } from "$lib/clsx";
   import { isLinkActive } from "$lib/isLinkActive";
   import { BREAKPOINTS } from "$lib/constants";
-  import type { User } from "$lib/types";
 
   import NavLink from "./NavLink.svelte";
   import NavToggleScheme from "./NavToggleScheme.svelte";
   import { LOGGED_IN_LINKS, GENERAL_LINKS } from "./navbar-constants";
   import NavUsermenu from "./NavUsermenu.svelte";
   import SearchBar from "./SearchBar.svelte";
-
-  interface NavbarProps {
-    user: Pick<User, "name"> | null;
-  }
-
-  const { user }: NavbarProps = $props();
 
   let menuCheckbox = $state<HTMLInputElement | null>(null);
 
@@ -31,7 +24,7 @@
   let mobileMenu = $state<HTMLDetailsElement | undefined>(undefined);
 
   const links = $derived(
-    [...GENERAL_LINKS, ...(user ? LOGGED_IN_LINKS : [{ label: "login", link: `/auth/login?redirectTo=${$page.url.pathname}` }])].map(
+    [...GENERAL_LINKS, ...($page.data.user ? LOGGED_IN_LINKS : [{ label: "login", link: `/auth/login?redirectTo=${$page.url.pathname}` }])].map(
       ({ link, ...rest }) => ({
         link,
         ...rest,
@@ -76,7 +69,7 @@
             </ul>
           </div>
         </div>
-        <SearchBar /> 
+        <SearchBar />
         <div class="flex flex-row-reverse items-center gap-[5px] md:flex-row">
           <details bind:this={mobileMenu} class="details-anim relative ml-3 md:hidden" id="nav-mobile-menu">
             <summary
@@ -105,7 +98,7 @@
               </ul>
             </div>
           </details>
-          <NavUsermenu {user} leftSided summaryIcon />
+          <NavUsermenu leftSided summaryIcon />
           <NavToggleScheme />
         </div>
       </div>

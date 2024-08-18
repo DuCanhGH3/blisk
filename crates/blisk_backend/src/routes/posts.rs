@@ -6,7 +6,7 @@ use super::{
 };
 use crate::{
     app::AppState,
-    utils::{errors::AppError, response::response, structs::AppJson},
+    utils::{errors::AppError, response::response, structs::{AppImage, AppJson}},
 };
 use axum::{
     extract::{Query, State},
@@ -40,6 +40,7 @@ pub struct Post {
     pub title: String,
     pub content: String,
     pub author_name: String,
+    pub author_picture: Option<sqlx::types::Json<AppImage>>,
     pub reaction: Reaction,
     pub user_reaction: Option<PostReaction>,
     pub comments: Option<sqlx::types::Json<Vec<Comment>>>,
@@ -126,6 +127,7 @@ pub async fn read(
             p.title AS "title!",
             p.content AS "content!", 
             p.author_name AS "author_name!",
+            p.author_picture AS "author_picture?: _",
             p.reaction AS "reaction!: _",
             p.user_reaction AS "user_reaction!: _",
             COALESCE(JSONB_AGG(c) FILTER (WHERE c.id IS NOT NULL), '[]'::JSONB) AS "comments!: _"
@@ -146,7 +148,7 @@ pub async fn read(
             OFFSET 0
         ) c ON TRUE
         WHERE p.id = $1
-        GROUP BY p.id, p.title, p.content, p.author_name, p.reaction, p.user_reaction"#,
+        GROUP BY p.id, p.title, p.content, p.author_name, p.author_picture, p.reaction, p.user_reaction"#,
         &post_id,
         &uid as &_,
         &comment_id as &_,

@@ -3,6 +3,7 @@
 
   import { onNavigate } from "$app/navigation";
 
+  import { mount, unmount } from "svelte";
   import { getSerwist } from "virtual:serwist";
 
   import { dev } from "$app/environment";
@@ -13,11 +14,9 @@
   import { colorScheme } from "$lib/stores/colorScheme";
   import { PUBLIC_CANONICAL_URL } from "$env/static/public";
   import Dialog from "$components/layouts/Dialog.svelte";
-  import { mount, unmount } from "svelte";
   import Tooltip from "$components/layouts/Tooltip.svelte";
-  // import SearchBar from "./SearchBar.svelte";
 
-  const { data, children } = $props();
+  const { children } = $props();
   const isDark = $derived($colorScheme === "dark");
   const title = $derived($page.data.title ? `${$page.data.title} - blisk` : "blisk");
   const ogImage = $derived($page.data.ogImage);
@@ -80,7 +79,7 @@
 <GlobalSvgDefs />
 <Dialog />
 <div class="flex flex-1 flex-col md:flex-row">
-  <VerticalNavbar user={data.user} />
+  <VerticalNavbar />
   <div class="flex w-full flex-col xl:flex-row xl:justify-between">
     <!-- <aside class="top-0 shrink-0 px-4 pt-4 transition-all duration-100 xl:sticky xl:order-last xl:max-h-dvh print:hidden"> -->
     <!-- </aside> -->

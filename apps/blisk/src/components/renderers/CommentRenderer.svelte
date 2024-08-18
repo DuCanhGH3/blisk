@@ -22,7 +22,7 @@
   import CommentIcon from "../icons/Comment.svelte";
   import Share from "../icons/Share.svelte";
   import ThumbUp from "../icons/ThumbUp.svelte";
-  import { getLoginUrl } from "$lib/utils";
+  import { getLoginUrl, getProfilePicture } from "$lib/utils";
 
   interface CommentProps {
     /**
@@ -66,9 +66,7 @@
     // there's no more reply to be fetched.
     if (noMoreReplies || !comment.children || comment.children.length < BASE_COMMENTS_LENGTH) return;
     const lastSeen = comment.children[comment.children.length - 1];
-    const data = await fetchBackend<Comment[]>(
-      `/comments/replies?comment_id=${comment.id}&previous_last=${lastSeen.id}`
-    );
+    const data = await fetchBackend<Comment[]>(`/comments/replies?comment_id=${comment.id}&previous_last=${lastSeen.id}`);
     if (!data.ok) {
       return;
     }
@@ -116,7 +114,13 @@
   <h3 class="sr-only">A comment from user {comment.author_name}</h3>
   <div class="box flex flex-col gap-2 rounded-[21px] p-2.5 shadow-md">
     <div class="flex flex-row items-center gap-2">
-      <img src="/no-avatar.webp" class="border-border-light dark:border-border-dark size-10 select-none rounded-full border shadow-lg" alt="" />
+      <img
+        src={getProfilePicture(comment.author_picture)}
+        class="border-border-light dark:border-border-dark size-10 select-none rounded-full border shadow-lg"
+        width={40}
+        height={40}
+        alt=""
+      />
       <span class="flex flex-col gap-1">
         <a href="/users/{comment.author_name}" class="link sm text-sm">{comment.author_name}</a>
         <TooltipHover class="text-comment text-xs" tooltipId="comment-{comment.id}-timestamp-tooltip" content="Just now">Just now</TooltipHover>

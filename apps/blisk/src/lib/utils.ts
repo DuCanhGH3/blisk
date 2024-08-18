@@ -127,7 +127,10 @@ export const debounce = <Args extends any[], Ret>(fn: (...args: Args) => Ret, de
 export const getLoginUrl = (currentPath: string) =>
   isSafeRedirect(currentPath) ? `${base}/auth/login?redirectTo=${currentPath}` : `${base}/auth/login`;
 
-export const getImage = (image: Image) => `${PUBLIC_BACKEND_URL}/assets/${image.owner}/${image.id}.${image.ext}`;
+export const getImage = (image: Image | null, fallback: string) =>
+  image ? `${PUBLIC_BACKEND_URL}/assets/${image.owner}/${image.id}.${image.ext}` : fallback;
+
+export const getProfilePicture = (profilePicture: Image | null) => getImage(profilePicture, "/no-avatar.webp");
 
 // Source: https://stackoverflow.com/a/46774073
 export const convertFormData = (formData: FormData) => {

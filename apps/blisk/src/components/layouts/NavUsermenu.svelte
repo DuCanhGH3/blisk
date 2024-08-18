@@ -6,17 +6,18 @@
   import Menu from "$components/Menu.svelte";
   import MenuItem from "$components/MenuItem.svelte";
   import { clsx } from "$lib/clsx";
-  import type { User } from "$lib/types";
+  import { getProfilePicture } from "$lib/utils";
 
   interface NavUsermenuProps {
-    user: Pick<User, "name"> | null;
     leftSided?: boolean;
     summaryIcon?: boolean;
   }
 
-  const { user, leftSided = false }: NavUsermenuProps = $props();
+  const { leftSided = false }: NavUsermenuProps = $props();
 
   let navUsermenu = $state<HTMLDetailsElement | null>(null);
+
+  const user = $derived($page.data.user);
 
   $effect(() => {
     $page.url.pathname;
@@ -29,7 +30,7 @@
 {#if user}
   <details bind:this={navUsermenu} id="nav-usermenu" class="details-anim relative inline-block text-left">
     <summary class="nav-button flex-shrink-0" id="navbar-usermenu-button">
-      <img alt="Your avatar" width={24} height={24} class="h-6 w-6 rounded-full text-transparent" src="/no-avatar.webp" />
+      <img alt="Your avatar" width={24} height={24} class="h-6 w-6 rounded-full text-transparent" src={getProfilePicture(user.picture)} />
     </summary>
     <Menu
       id="navbar-usermenu"

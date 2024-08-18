@@ -2,7 +2,7 @@
   // Component is (mostly) stateless so that it works with the virtual scroller.
   import { page } from "$app/stores";
   import type { Post, ReactionType } from "$lib/types";
-  import { getLoginUrl } from "$lib/utils";
+  import { getLoginUrl, getProfilePicture } from "$lib/utils";
   import Comment from "../icons/Comment.svelte";
   import Share from "../icons/Share.svelte";
   import ThumbUp from "../icons/ThumbUp.svelte";
@@ -38,7 +38,13 @@
 <article class="box flex flex-col gap-3 rounded-[31px] p-4 shadow-md">
   <h3 class="h1 -order-1 mb-4">{post.title}</h3>
   <div class="-order-2 flex flex-row flex-wrap gap-2 font-semibold leading-10 tracking-tight">
-    <img src="/no-avatar.webp" class="border-border-light dark:border-border-dark size-10 select-none rounded-full border shadow-lg" alt="" />
+    <img
+      src={getProfilePicture(post.author_picture)}
+      class="border-border-light dark:border-border-dark size-10 select-none rounded-full border shadow-lg"
+      width={40}
+      height={40}
+      alt=""
+    />
     <div>
       <div class="text-comment flex flex-row flex-wrap items-center gap-1 text-sm">
         <a href="/users/{post.author_name}" class="link sm">{post.author_name}</a>

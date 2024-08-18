@@ -7,7 +7,7 @@ use crate::{
         emails::send_email,
         errors::AppError,
         response::{response, SuccessResponse},
-        structs::{AppForm, AppJson, AppMultipart},
+        structs::{AppForm, AppImage, AppJson, AppMultipart},
         uploads::upload_file,
     },
 };
@@ -57,8 +57,9 @@ pub struct User {
     pub id: Option<i64>,
     pub email: Option<String>,
     pub name: Option<String>,
-    pub is_verified: Option<bool>,
     pub role: Option<UserRole>,
+    pub picture: Option<sqlx::types::Json<AppImage>>,
+    pub is_verified: Option<bool>,
     pub password: Option<String>,
 }
 
@@ -338,10 +339,22 @@ pub async fn authenticate(
     claims: UserClaims,
 ) -> Result<Response, AppError> {
     let mut transaction = pool.begin().await?;
-    let user: User = sqlx::query_as("SELECT email, name, role FROM users WHERE id = $1")
-        .bind(&claims.sub)
-        .fetch_one(&mut *transaction)
-        .await?;
+    let user = sqlx::query_as!(
+        User,
+        r#"SELECT
+            NULL AS "id?: _",
+            email,
+            name,
+            role AS "role!: _",
+            picture AS "picture?: _",
+            is_verified,
+            NULL as "password?: _"
+        FROM users_view u
+        WHERE u.id = $1"#,
+        &claims.sub
+    )
+    .fetch_one(&mut *transaction)
+    .await?;
     Ok(response(StatusCode::OK, None, AppJson(user)))
 }
 

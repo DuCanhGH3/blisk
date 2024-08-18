@@ -20,10 +20,11 @@ BEGIN
       rp.post_id,
       u.id AS author_id,
       u.name AS author_name,
+      u.picture AS author_picture,
       ucr.type AS user_reaction,
       fetch_replies(request_uid, request_pid, rp.id, rp.path, current_level - 1) AS children
     FROM comments rp
-    JOIN users u
+    JOIN users_view u
     ON u.id = rp.author_id
     LEFT JOIN comment_reactions ucr
     ON ucr.comment_id = rp.id AND ucr.user_id = request_uid
@@ -43,6 +44,7 @@ RETURNS TABLE (
   content TEXT,
   book_id BIGINT,
   author_name TEXT,
+  author_picture JSONB,
   reaction BREACT,
   user_reaction PREACT
 ) AS $$
@@ -52,10 +54,11 @@ RETURNS TABLE (
     rv.content,
     rv.book_id,
     rvu.name AS author_name,
+    rvu.picture AS author_picture,
     rv.reaction,
     upr.type AS user_reaction
   FROM posts rv
-  JOIN users rvu
+  JOIN users_view rvu
   ON rv.author_id = rvu.id
   LEFT JOIN post_reactions upr
   ON upr.post_id = rv.id AND upr.user_id = request_uid;
@@ -73,6 +76,7 @@ RETURNS TABLE (
   path LTREE,
   author_id BIGINT,
   author_name TEXT,
+  author_picture JSONB,
   user_reaction PREACT,
   children JSONB
 ) AS $$
@@ -83,6 +87,7 @@ RETURNS TABLE (
     c.path,
     u.id AS author_id,
     u.name AS author_name,
+    u.picture AS author_picture,
     ucr.type AS user_reaction,
     fetch_replies(
       request_uid => request_uid,
@@ -92,7 +97,7 @@ RETURNS TABLE (
       current_level => replies_depth
     ) AS children
   FROM comments c
-  JOIN users u
+  JOIN users_view u
   ON c.author_id = u.id
   LEFT JOIN comment_reactions ucr
   ON ucr.comment_id = c.id AND ucr.user_id = request_uid;

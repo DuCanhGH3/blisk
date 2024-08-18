@@ -41,6 +41,7 @@ pub async fn read_posts(
             title AS "title!: _",
             content AS "content!: _",
             author_name AS "author_name!: _",
+            author_picture AS "author_picture?: _",
             reaction AS "reaction!: _",
             user_reaction AS "user_reaction?: _",
             NULL AS "comments?: _"
@@ -87,6 +88,7 @@ pub async fn read_comments(
             c.post_id AS "post_id!",
             c.content AS "content!",
             c.author_name AS "author_name!",
+            c.author_picture AS "author_picture?: _",
             c.user_reaction AS "user_reaction?: _",
             c.children AS "children?: _"
         FROM fetch_comments(request_uid => $2, replies_depth => 0) c

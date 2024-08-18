@@ -11,7 +11,7 @@ use validator::Validate;
 
 use super::errors::AppError;
 
-#[derive(sqlx::Type, serde::Serialize, serde::Deserialize)]
+#[derive(Debug, sqlx::Type, serde::Serialize, serde::Deserialize)]
 pub struct AppImage {
     id: i64,
     ext: String,

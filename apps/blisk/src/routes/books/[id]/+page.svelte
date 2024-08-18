@@ -18,7 +18,7 @@
 <div class="mx-auto flex h-full w-full flex-col gap-8 p-4 md:p-10">
   <div class="flex w-full flex-col gap-4 lg:flex-row lg:gap-8">
     <img
-      src={getImage(data.book.cover_image)}
+      src={getImage(data.book.cover_image, "/test-cover.jpg")}
       width="192"
       height="288"
       alt=""

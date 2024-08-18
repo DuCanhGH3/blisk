@@ -7,9 +7,11 @@ export type RequireFields<T, K extends keyof T> = Omit<T, K> & {
 export type ColorScheme = (typeof COLOR_SCHEMES)[number];
 
 export interface User {
-  name: string;
   email: string;
+  name: string;
   role: string;
+  picture: Image | null;
+  is_verified: boolean;
 }
 
 export type BookReaction = "like" | "dislike";
@@ -19,6 +21,7 @@ export interface Post {
   title: string;
   content: string;
   author_name: string;
+  author_picture: Image | null;
   reaction: BookReaction;
   user_reaction: ReactionType | null;
   comments: Comment[] | null;
@@ -29,6 +32,7 @@ export interface Comment {
   post_id: number;
   content: string;
   author_name: string;
+  author_picture: Image | null;
   user_reaction: ReactionType | null;
   children: Comment[] | null;
   // The following are states that will be attached
@@ -54,8 +58,8 @@ export interface Book {
   title: string;
   name: string;
   summary: string;
-  cover_image: Image;
-  spine_image: Image;
+  cover_image: Image | null;
+  spine_image: Image | null;
   authors: BookAuthor[];
   categories: BookCategory[];
   reviews: Post[];
