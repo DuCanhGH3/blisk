@@ -67,6 +67,10 @@ export interface Book {
   reviews: Post[];
 }
 
+export interface BookCategoryWithBooks extends BookCategory {
+  books: Pick<Book, "title" | "name" | "cover_image" | "spine_image">[];
+}
+
 export type ReactionFor = (typeof VALID_REACTION_FOR)[number];
 
 export type ReactionType = (typeof VALID_REACTIONS)[number];

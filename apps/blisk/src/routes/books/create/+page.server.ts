@@ -2,7 +2,7 @@ import { z } from "zod";
 import type { Actions, PageServerLoad } from "./$types";
 import { error, fail, redirect } from "@sveltejs/kit";
 import { fetchBackend } from "$lib/backend";
-import type { BookCategory } from "$lib/types";
+import type { BookAuthor, BookCategory } from "$lib/types";
 import { bookCategoryIdSchema } from "$lib/schemas";
 import { base } from "$app/paths";
 import { convertFormData } from "$lib/utils";
@@ -34,7 +34,7 @@ export const actions: Actions = {
     }
     formData.set("language", "en-US");
     formData.append("authors", "1");
-    const backendResponse = await fetchBackend<{ id: number }>("/books", {
+    const backendResponse = await fetchBackend("/books", {
       authz: true,
       type: "multipart",
       cookies,
@@ -46,12 +46,12 @@ export const actions: Actions = {
     if (!backendResponse.ok) {
       return fail(backendResponse.status, { error: backendResponse.error });
     }
-    redirect(307, `${base}/books/${backendResponse.data.id}`);
+    redirect(307, `${base}/books/${data.data.slug}`);
   },
 };
 
 export const load: PageServerLoad = async ({ cookies, fetch, setHeaders }) => {
-  const res = await fetchBackend<BookCategory[]>(`/books/categories`, {
+  const res = await fetchBackend<{ authors: BookAuthor[]; categories: BookCategory[] }>("/books/metadata", {
     authz: false,
     cookies,
     fetch,
@@ -60,5 +60,5 @@ export const load: PageServerLoad = async ({ cookies, fetch, setHeaders }) => {
   if (!res.ok) {
     error(res.status, res.error);
   }
-  return { categories: res.data };
+  return { authors: res.data.authors, categories: res.data.categories };
 };

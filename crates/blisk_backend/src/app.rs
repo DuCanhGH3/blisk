@@ -83,6 +83,7 @@ impl Application {
             )
             .route("/books/:slug", get(routes::books::read_slug))
             .route("/books/categories", get(routes::books::read_categories))
+            .route("/books/metadata", get(routes::books::read_metadata))
             .route(
                 "/posts",
                 post(routes::posts::create)

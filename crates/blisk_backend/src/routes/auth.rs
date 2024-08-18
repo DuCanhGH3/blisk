@@ -6,7 +6,7 @@ use crate::{
         constants::TEMPLATES,
         emails::send_email,
         errors::AppError,
-        response::{response, SuccessResponse},
+        response::{created, response, SuccessResponse},
         structs::{AppForm, AppImage, AppJson, AppMultipart},
         uploads::upload_file,
     },
@@ -457,6 +457,7 @@ pub async fn register(
     .execute(&mut *transaction)
     .await?;
     transaction.commit().await?;
+    let location = format!("{}/users/{}", SETTINGS.frontend.url, username);
     let mut redis_con = redis_client.get_connection()?;
     send_confirmation_email(
         &mut redis_con,
@@ -467,13 +468,7 @@ pub async fn register(
         false,
     )
     .await?;
-    Ok(response(
-        StatusCode::CREATED,
-        None,
-        AppJson(SuccessResponse {
-            message: "Account created successfully.".to_owned(),
-        }),
-    ))
+    Ok(created(location))
 }
 
 #[derive(serde::Deserialize, Validate)]

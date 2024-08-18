@@ -193,6 +193,19 @@ export default {
         wood: "url('/wood-pattern.png')",
       },
       colors: {
+        wood: {
+          50: "#fbf6ef",
+          100: "#f7eedf",
+          200: "#efdcbf",
+          300: "#e8cb9f",
+          400: "#e0b97f",
+          500: "#d8a85f",
+          600: "#ad864c",
+          700: "#826539",
+          800: "#564326",
+          900: "#2b2213",
+          950: "#301a0e",
+        },
         error: {
           light: "#a51a12",
           dark: "#f87171",

@@ -7,13 +7,13 @@
 </script>
 
 {#if ordered}
-  <ol class="list-inside list-disc break-words pl-4 marker:text-black dark:marker:text-white" start={start || null}>
+  <ol class="list-inside list-disc break-words pl-4 marker:text-wood-950 dark:marker:text-white" start={start || null}>
     {#each items as item}
       <ListItem {...item} />
     {/each}
   </ol>
 {:else}
-  <ul class="list-inside list-disc break-words pl-4 marker:text-black dark:marker:text-white">
+  <ul class="list-inside list-disc break-words pl-4 marker:text-wood-950 dark:marker:text-white">
     {#each items as item}
       <ListItem {...item} />
     {/each}

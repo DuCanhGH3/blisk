@@ -4,10 +4,11 @@ use super::{
 };
 use crate::{
     app::AppState,
+    settings::SETTINGS,
     utils::{
         constants::SLUG_REGEX,
         errors::AppError,
-        response::response,
+        response::{created, response},
         structs::{AppImage, AppJson, AppMultipart, AppQuery},
         uploads::upload_file,
     },
@@ -21,6 +22,12 @@ use axum::{
 use axum_typed_multipart::{FieldData, TryFromMultipart};
 use tracing::instrument;
 use validator::Validate;
+
+#[derive(serde::Serialize)]
+pub struct BooksMetadata {
+    authors: sqlx::types::Json<Vec<BookAuthor>>,
+    categories: sqlx::types::Json<Vec<BookCategory>>,
+}
 
 #[derive(Debug, thiserror::Error)]
 pub enum BooksError {
@@ -54,10 +61,6 @@ pub struct CreatePayload {
     cover_image: FieldData<Bytes>,
     #[form_data(limit = "2000000")]
     spine_image: FieldData<Bytes>,
-}
-#[derive(serde::Serialize)]
-pub struct CreateResponse {
-    id: i64,
 }
 
 #[instrument(name = "Creating a new book...", skip(pool, claims, cover_image, spine_image), fields(uid = %claims.sub))]
@@ -95,7 +98,7 @@ pub async fn create(
     .await
     .map_err(|err| match err {
         sqlx::Error::Database(ref db_err) => match db_err.constraint() {
-            Some("books_name_key") => AppError::from(BooksError::SlugAlreadyExists(slug)),
+            Some("books_name_key") => AppError::from(BooksError::SlugAlreadyExists(slug.clone())),
             Some("books_language_fkey") => AppError::from(BooksError::LanguageInvalid(language)),
             _ => AppError::from(err),
         },
@@ -116,11 +119,7 @@ pub async fn create(
     .execute(&mut *transaction)
     .await?;
     transaction.commit().await?;
-    Ok(response(
-        StatusCode::CREATED,
-        None,
-        AppJson(CreateResponse { id: bid }),
-    ))
+    Ok(created(format!("{}/books/{}", SETTINGS.frontend.url, slug)))
 }
 
 #[derive(serde::Serialize, serde::Deserialize)]
@@ -239,7 +238,7 @@ pub async fn read_slug(
             b.spine_image AS "spine_image!: _",
             b.authors AS "authors!: _",
             b.categories AS "categories!: _",
-            COALESCE(JSONB_AGG(rv) FILTER (WHERE rv.id IS NOT NULL), '[]'::JSONB) AS "reviews!: sqlx::types::Json<Vec<Post>>"
+            coalesce(jsonb_agg(rv) FILTER (WHERE rv.id IS NOT NULL), '[]'::JSONB) AS "reviews!: sqlx::types::Json<Vec<Post>>"
         FROM books_view b
         LEFT JOIN LATERAL (
             SELECT *
@@ -264,16 +263,66 @@ pub async fn read_slug(
     Ok(response(StatusCode::OK, None, AppJson(book)))
 }
 
+#[derive(serde::Serialize, serde::Deserialize)]
+pub struct ReadCategoriesBook {
+    title: String,
+    name: String,
+    cover_image: Option<AppImage>,
+    spine_image: Option<AppImage>,
+}
+#[derive(serde::Serialize)]
+pub struct ReadCategoriesResponse {
+    id: i64,
+    name: String,
+    books: sqlx::types::Json<Vec<ReadCategoriesBook>>,
+}
+
 pub async fn read_categories(
     State(AppState { pool, .. }): State<AppState>,
 ) -> Result<Response, AppError> {
     let mut transaction = pool.begin().await?;
     let categories = sqlx::query_as!(
-        BookCategory,
-        r#"SELECT id AS "id!: _", name AS "name!: _" FROM book_categories"#
+        ReadCategoriesResponse,
+        r#"SELECT
+            bc.id AS "id!",
+            bc.name AS "name!",
+            b.books AS "books!: _"
+        FROM book_categories bc
+        LEFT JOIN LATERAL (
+            SELECT coalesce(jsonb_agg(b) FILTER (WHERE b.name IS NOT NULL), '[]'::JSONB) AS books
+            FROM (
+                SELECT btc.book_id
+                FROM book_to_category btc
+                WHERE btc.category_id = bc.id
+            ) btc
+            LEFT JOIN LATERAL (
+                SELECT b.title, b.name, b.cover_image, b.spine_image
+                FROM books_view b
+                WHERE b.id = btc.book_id
+            ) b ON TRUE
+        ) b ON TRUE
+        GROUP BY bc.id, bc.name, b.books
+        ORDER BY bc.id DESC"#,
     )
     .fetch_all(&mut *transaction)
     .await?;
     transaction.commit().await?;
     Ok(response(StatusCode::OK, None, AppJson(categories)))
+}
+
+pub async fn read_metadata(
+    State(AppState { pool, .. }): State<AppState>,
+) -> Result<Response, AppError> {
+    let mut transaction = pool.begin().await?;
+    let metadata = sqlx::query_as!(
+        BooksMetadata,
+        r#"SELECT
+            (SELECT json_agg(ba) FROM (SELECT id, name FROM book_authors) ba) AS "authors!: _",
+            (SELECT json_agg(bc) FROM (SELECT id, name FROM book_categories) bc) AS "categories!: _"
+        "#
+    )
+    .fetch_one(&mut *transaction)
+    .await?;
+    transaction.commit().await?;
+    Ok(response(StatusCode::OK, None, AppJson(metadata)))
 }

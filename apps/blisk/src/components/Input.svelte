@@ -25,7 +25,7 @@
     class={clsx(
       "input block h-[44px] w-full rounded-lg px-2.5 pt-2.5 text-sm shadow-md transition-opacity disabled:opacity-50",
       "focus:border-accent-light dark:focus:border-accent-dark border-border-light dark:border-border-dark border focus:outline-none",
-      "dark:bg-neutral-915 bg-white text-black opacity-80 dark:text-white"
+      "dark:bg-neutral-915 bg-white text-wood-950 opacity-80 dark:text-white"
     )}
     aria-invalid={!!errorText}
     aria-describedby={errorText ? errorTextId : undefined}

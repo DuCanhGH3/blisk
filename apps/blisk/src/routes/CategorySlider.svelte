@@ -2,8 +2,12 @@
   import ChevronLeft from "$components/icons/ChevronLeft.svelte";
   import ChevronRight from "$components/icons/ChevronRight.svelte";
   import { clsx } from "$lib/clsx";
+  import type { BookCategoryWithBooks } from "$lib/types";
+  import { getImage } from "$lib/utils";
   import type { EmblaCarouselType } from "embla-carousel";
   import emblaCarousel from "embla-carousel-svelte";
+
+  const { category }: { category: BookCategoryWithBooks } = $props();
 
   let emblaApi = $state<EmblaCarouselType | null>(null);
 
@@ -31,9 +35,8 @@
   };
 </script>
 
-<div class="h-full w-full">
-  <h2 class="mb-2 text-4xl"><span class="sr-only">Category: </span>mystery thrillers</h2>
-  <div class="relative w-full py-4">
+<div class="w-full">
+  <div class="absolute h-full w-full py-4">
     <button
       class={clsx(
         "absolute left-4 top-1/2 z-10 flex -translate-y-1/2 active:!bg-neutral-400 dark:active:!bg-neutral-700",
@@ -43,6 +46,7 @@
       onclick={emblaPrev}
     >
       <ChevronLeft width={24} height={24} class="transition-all duration-100" />
+      <span class="sr-only">Go to previous page of category: {category.name}</span>
     </button>
     <button
       class={clsx(
@@ -53,29 +57,28 @@
       onclick={emblaNext}
     >
       <ChevronRight width={24} height={24} class="transition-all duration-100" />
+      <span class="sr-only">Go to next page of category: {category.name}</span>
     </button>
+  </div>
+  <div
+    class="relative w-full border-[8px] border-t-0 border-x-[#856940] border-b-[#6b5330] border-t-transparent px-10 shadow-[inset_0_0_20px_5px_#000000]"
+  >
+    <a href="/books?category={category.id}">
+      <h2 class="py-5"><span class="sr-only">Category: </span>{category.name}</h2>
+    </a>
     <div
-      class="z-[2] mb-[-65px] flex h-full w-full overflow-x-hidden pb-[65px]"
+      class="mx-[-4px] mb-[-4px] overflow-x-hidden"
       use:emblaCarousel={{ options: { align: "start", containScroll: false, dragFree: true, loop: true }, plugins: [] }}
       onemblaInit={onEmbiaInit}
     >
       <div class="flex w-full flex-row">
-        {#each Array.from({ length: 1 }) as _}
-          <a href="/books/1" class="book-container z-[3] mr-1 shrink-0 hover:z-[4]">
-            <span class="book">
-              <span class="book-side spine">
-                <img src="/test-spine.jpg" width="48" height="288" alt="" class="h-full w-full" />
-              </span>
-              <span class="book-side top"></span>
-              <span class="book-side back-cover"></span>
-              <span class="book-side cover">
-                <img src="/test-cover.jpg" width="192" height="288" alt="" class="h-full w-full" />
-              </span>
-            </span>
+        {#each category.books as book}
+          <a href="/books/{book.name}" class="book-container z-[3] mr-10 shrink-0 select-none shadow-[5px_2px_20px_-1px_#000000] hover:z-[4]">
+            <img src={getImage(book.cover_image, "/test-cover.jpg")} width="192" height="288" alt="Book: {book.title}" class="h-auto w-48" />
           </a>
         {/each}
       </div>
     </div>
-    <div class="dark:bg-neutral-915 z-[1] h-7 w-full bg-white shadow-[0_0_10px_2px_rgb(0,_0,_0,_0.5)]" aria-hidden="true"></div>
   </div>
 </div>
+<div class="bg-wood h-[20px] bg-[#d8a85f] last:hidden" aria-hidden="true"></div>

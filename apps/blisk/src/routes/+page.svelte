@@ -7,6 +7,8 @@
   import emblaCarouselSvelte from "embla-carousel-svelte";
   import CategorySlider from "./CategorySlider.svelte";
 
+  const { data } = $props();
+
   let emblaApi = $state<EmblaCarouselType | null>(null);
 
   const onEmbiaInit = (event: CustomEvent<EmblaCarouselType>) => {
@@ -52,7 +54,7 @@
     <div
       class={clsx(
         "flex h-full w-full overflow-hidden rounded-[21px] border shadow-md transition-colors duration-100",
-        "border-border-light bg-white dark:border-border-dark dark:bg-neutral-915 hover:bg-neutral-100 dark:hover:bg-neutral-800"
+        "border-border-light dark:border-border-dark dark:bg-neutral-915 bg-white hover:bg-neutral-100 dark:hover:bg-neutral-800"
       )}
       use:emblaCarouselSvelte={{ options: { containScroll: false, dragFree: true, loop: true }, plugins: [emblaAutoplay()] }}
       onemblaInit={onEmbiaInit}
@@ -64,19 +66,15 @@
               <h2 class="text-comment text-2xl font-semibold">book of the day</h2>
               <h3 class="line-clamp-1 text-4xl font-semibold">Lorem ipsum</h3>
             </span>
-            <img
-              width={900}
-              height={400}
-              class="h-96 w-full rounded-md object-cover opacity-75 md:h-[600px]"
-              src="/AGI2.webp"
-              alt=""
-            />
+            <img width={900} height={400} class="h-96 w-full rounded-md object-cover opacity-75 md:h-[600px]" src="/AGI2.webp" alt="" />
           </a>
         {/each}
       </div>
     </div>
   </div>
-  {#each Array.from({ length: 1 }) as _}
-    <CategorySlider />
-  {/each}
+  <div class="bg-wood w-full bg-wood-500 text-wood-950 dark:bg-wood-900 dark:text-wood-50">
+    {#each data.categories as category}
+      <CategorySlider {category} />
+    {/each}
+  </div>
 </div>

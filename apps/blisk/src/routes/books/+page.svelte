@@ -90,7 +90,7 @@
 {/if}
 <!-- {#if selectedBook}
   <div class="fixed left-0 top-0 z-50 flex h-full w-full items-center justify-center bg-black/80">
-    <div class="box lg relative flex w-[90dvw] max-w-screen-lg flex-col gap-4 !p-8 text-black lg:flex-row lg:gap-8 dark:text-white">
+    <div class="box lg relative flex w-[90dvw] max-w-screen-lg flex-col gap-4 !p-8 text-wood-950 lg:flex-row lg:gap-8 dark:text-white">
       <Button as="button" variant="light" class="absolute right-4 top-4 z-[2] !p-2" onclick={() => history.back()}>
         <X {...rendererButtonAttributes} />
         <span class="sr-only">Go back</span>

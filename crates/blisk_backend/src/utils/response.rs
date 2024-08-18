@@ -1,5 +1,5 @@
 use axum::{
-    http::{HeaderMap, HeaderName, HeaderValue, StatusCode},
+    http::{header, HeaderMap, HeaderName, HeaderValue, StatusCode},
     response::{IntoResponse, Response},
 };
 use validator::ValidationErrors;
@@ -17,6 +17,20 @@ pub struct ErrorResponse {
 #[derive(serde::Serialize)]
 pub struct ValidationErrorResponse {
     pub validation_error: ValidationErrors,
+}
+
+pub fn empty(headers: Option<Vec<(HeaderName, HeaderValue)>>) -> Response {
+    let mut res = StatusCode::NO_CONTENT.into_response();
+    if let Some(headers) = headers {
+        *res.headers_mut() = HeaderMap::from_iter(headers);
+    }
+    res
+}
+
+pub fn created(location: String) -> Response {
+    let mut res = StatusCode::CREATED.into_response();
+    res.headers_mut().insert(header::LOCATION, header::HeaderValue::from_str(&location).unwrap());
+    res
 }
 
 pub fn response<T>(
