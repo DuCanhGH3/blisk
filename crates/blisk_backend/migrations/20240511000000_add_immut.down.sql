@@ -1,4 +1,4 @@
-DROP FUNCTION IF EXISTS immut_array_to_string;
+DROP FUNCTION IF EXISTS construct_image, immut_array_to_string;
 
 DROP EXTENSION IF EXISTS fuzzystrmatch;
 

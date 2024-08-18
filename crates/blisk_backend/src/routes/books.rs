@@ -1,18 +1,25 @@
-use super::{auth::OptionalUserClaims, posts::Post};
+use super::{
+    auth::{OptionalUserClaims, UserClaims},
+    posts::Post,
+};
 use crate::{
     app::AppState,
     utils::{
         constants::SLUG_REGEX,
         errors::AppError,
         response::response,
-        structs::{AppJson, AppQuery},
+        structs::{AppImage, AppJson, AppMultipart, AppQuery},
+        uploads::upload_file,
     },
 };
 use axum::{
+    body::Bytes,
     extract::{Path, State},
     http::StatusCode,
     response::Response,
 };
+use axum_typed_multipart::{FieldData, TryFromMultipart};
+use tracing::instrument;
 use validator::Validate;
 
 #[derive(Debug, thiserror::Error)]
@@ -27,7 +34,7 @@ pub enum BooksError {
     Unexpected,
 }
 
-#[derive(serde::Deserialize, Validate)]
+#[derive(TryFromMultipart, Validate)]
 pub struct CreatePayload {
     #[validate(length(min = 1, message = "Title must not be empty!"))]
     title: String,
@@ -39,33 +46,50 @@ pub struct CreatePayload {
     language: String,
     #[validate(length(min = 1, message = "Synopsis must not be empty!"))]
     summary: String,
+    #[validate(length(min = 1, message = "Book must has at least one author!"))]
+    authors: Vec<i64>,
     #[validate(length(min = 1, message = "Book must has at least one category!"))]
     categories: Vec<i64>,
+    /// The cover image of the book.
+    cover_image: FieldData<Bytes>,
+    /// The spine image of the book.
+    spine_image: FieldData<Bytes>,
 }
 #[derive(serde::Serialize)]
 pub struct CreateResponse {
     id: i64,
 }
 
+#[instrument(name = "Creating a new book...", skip(pool, claims, cover_image, spine_image), fields(uid = %claims.sub))]
 pub async fn create(
     State(AppState { pool, .. }): State<AppState>,
-    AppJson(CreatePayload {
+    claims: UserClaims,
+    AppMultipart(CreatePayload {
         title,
         slug,
         pages,
         language,
         summary,
+        authors,
         categories,
-    }): AppJson<CreatePayload>,
+        cover_image,
+        spine_image,
+    }): AppMultipart<CreatePayload>,
 ) -> Result<Response, AppError> {
     let mut transaction = pool.begin().await?;
+    let cover_id = upload_file(&mut transaction, claims.sub, None, cover_image).await?;
+    let spine_id = upload_file(&mut transaction, claims.sub, None, spine_image).await?;
     let bid: i64 = sqlx::query_scalar!(
-        "INSERT INTO books (title, name, pages, language, summary) VALUES ($1, $2, $3, $4, $5) RETURNING id",
+        "INSERT INTO books (is_approved, title, name, pages, language, summary, cover_id, spine_id)
+        VALUES (FALSE, $1, $2, $3, $4, $5, $6, $7)
+        RETURNING id",
         &title,
         &slug,
         &pages,
         &language,
-        &summary
+        &summary,
+        &cover_id,
+        &spine_id,
     )
     .fetch_one(&mut *transaction)
     .await
@@ -73,10 +97,17 @@ pub async fn create(
         sqlx::Error::Database(ref db_err) => match db_err.constraint() {
             Some("books_name_key") => AppError::from(BooksError::SlugAlreadyExists(slug)),
             Some("books_language_fkey") => AppError::from(BooksError::LanguageInvalid(language)),
-            _ => AppError::from(err)
+            _ => AppError::from(err),
         },
         err => AppError::from(err),
     })?;
+    sqlx::query!(
+        "INSERT INTO book_to_author (book_id, author_id) SELECT $1, * FROM UNNEST($2::BIGINT[])",
+        &bid,
+        &authors[..]
+    )
+    .execute(&mut *transaction)
+    .await?;
     sqlx::query!(
         "INSERT INTO book_to_category (book_id, category_id) SELECT $1, * FROM UNNEST($2::BIGINT[])",
         &bid,
@@ -109,6 +140,8 @@ struct Book {
     title: String,
     name: String,
     summary: String,
+    cover_image: sqlx::types::Json<AppImage>,
+    spine_image: sqlx::types::Json<AppImage>,
     authors: sqlx::types::Json<Vec<BookAuthor>>,
     categories: sqlx::types::Json<Vec<BookCategory>>,
     reviews: Option<sqlx::types::Json<Vec<Post>>>,
@@ -126,7 +159,11 @@ pub struct ReadQuery {
 pub async fn read(
     State(AppState { pool, .. }): State<AppState>,
     OptionalUserClaims(claims): OptionalUserClaims,
-    AppQuery(ReadQuery { q, offset, include_reviews }): AppQuery<ReadQuery>,
+    AppQuery(ReadQuery {
+        q,
+        offset,
+        include_reviews,
+    }): AppQuery<ReadQuery>,
 ) -> Result<Response, AppError> {
     let uid = claims.as_ref().map(|claims| claims.sub);
     let mut transaction = pool.begin().await?;
@@ -140,6 +177,8 @@ pub async fn read(
                 b.title AS "title!",
                 b.name AS "name!",
                 b.summary AS "summary!",
+                b.cover_image AS "cover_image!: _",
+                b.spine_image AS "spine_image!: _",
                 b.authors AS "authors!: _",
                 b.categories AS "categories!: _",
                 CASE $4::BOOLEAN
@@ -156,7 +195,7 @@ pub async fn read(
                 OFFSET 0
             ) rv ON TRUE
             WHERE b.text_search @@ query
-            GROUP BY b.title, b.name, b.summary, b.authors, b.categories, rank.rank
+            GROUP BY b.title, b.name, b.summary, b.cover_image, b.spine_image, b.authors, b.categories, rank.rank
             ORDER BY rank DESC
             LIMIT 20
             OFFSET $3"#,
@@ -172,6 +211,8 @@ pub async fn read(
                 b.title AS "title!: String",
                 b.name AS "name!: String",
                 b.summary AS "summary!: String",
+                b.cover_image AS "cover_image!: _",
+                b.spine_image AS "spine_image!: _",
                 b.authors AS "authors!: sqlx::types::Json<Vec<BookAuthor>>",
                 b.categories AS "categories!: sqlx::types::Json<Vec<BookCategory>>",
                 CASE $2::BOOLEAN
@@ -187,7 +228,7 @@ pub async fn read(
                 LIMIT 5
                 OFFSET 0
             ) rv ON TRUE
-            GROUP BY b.title, b.name, b.summary, b.authors, b.categories"#,
+            GROUP BY b.title, b.name, b.summary, b.cover_image, b.spine_image, b.authors, b.categories"#,
             &uid as &_,
             &include_reviews,
         ).fetch_all(&mut *transaction).await?
@@ -209,6 +250,8 @@ pub async fn read_slug(
             b.title AS "title!: String",
             b.name AS "name!: String",
             b.summary AS "summary!: String",
+            b.cover_image AS "cover_image!: _",
+            b.spine_image AS "spine_image!: _",
             b.authors AS "authors!: sqlx::types::Json<Vec<BookAuthor>>",
             b.categories AS "categories!: sqlx::types::Json<Vec<BookCategory>>",
             COALESCE(JSONB_AGG(rv) FILTER (WHERE rv.id IS NOT NULL), '[]'::JSONB) AS "reviews!: sqlx::types::Json<Vec<Post>>"
@@ -222,7 +265,7 @@ pub async fn read_slug(
             OFFSET 0
         ) rv ON TRUE
         WHERE b.name = $1
-        GROUP BY b.title, b.name, b.summary, b.authors, b.categories"#,
+        GROUP BY b.title, b.name, b.summary, b.cover_image, b.spine_image, b.authors, b.categories"#,
         &slug,
         &uid as &_
     )

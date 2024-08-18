@@ -1,5 +1,6 @@
 use crate::utils::{constants::UPLOADS_DIRECTORY, errors::AppError, validators::path_is_valid};
 use axum::body::Bytes;
+use axum_typed_multipart::FieldData;
 use sqlx::Postgres;
 use std::{ffi::OsStr, path::Path};
 
@@ -23,12 +24,16 @@ fn validate_file_name<'a>(file_path: impl ToString) -> Result<String, UploadsErr
 
 pub async fn upload_file<'c>(
     transaction: &mut sqlx::Transaction<'c, Postgres>,
-    file_name: &str,
     user_id: i64,
     parent_id: Option<i64>,
-    bytes: Bytes,
+    file: FieldData<Bytes>,
 ) -> Result<i64, AppError> {
-    let file_name = validate_file_name(file_name)?;
+    let file_name = validate_file_name(
+        file.metadata
+            .file_name
+            .ok_or(UploadsError::InvalidName("None".to_owned()))?
+            .as_str(),
+    )?;
     let ext = Path::new(&file_name)
         .extension()
         .and_then(OsStr::to_str)
@@ -39,17 +44,19 @@ pub async fn upload_file<'c>(
     let fid = {
         if let Some(pid) = parent_id {
             sqlx::query_scalar!(
-                "INSERT INTO files (owner_id, parent_id, path)
-                VALUES ($1, $2, (SELECT path || TEXT2LTREE(id::VARCHAR(255)) FROM files WHERE id = $2))
+                "INSERT INTO files (owner_id, parent_id, ext, path)
+                VALUES ($1, $2, $3, (SELECT path || TEXT2LTREE(id::VARCHAR(255)) FROM files WHERE id = $2))
                 RETURNING id",
                 &user_id,
-                &pid
+                &pid,
+                &ext,
             )
             .fetch_one(&mut **transaction)
         } else {
             sqlx::query_scalar!(
-                "INSERT INTO files (owner_id, path) VALUES ($1, 'Top') RETURNING id",
-                &user_id
+                "INSERT INTO files (owner_id, ext, path) VALUES ($1, $2, 'Top') RETURNING id",
+                &user_id,
+                &ext,
             )
             .fetch_one(&mut **transaction)
         }
@@ -65,9 +72,9 @@ pub async fn upload_file<'c>(
 
         tokio::fs::create_dir_all(dir).await?;
 
-        let mut file = tokio::io::BufWriter::new(tokio::fs::File::create(path).await?);
+        let mut file_stream = tokio::io::BufWriter::new(tokio::fs::File::create(path).await?);
 
-        tokio::io::copy(&mut bytes.as_ref(), &mut file).await?;
+        tokio::io::copy(&mut file.contents.as_ref(), &mut file_stream).await?;
 
         Ok::<_, UploadsError>(())
     }

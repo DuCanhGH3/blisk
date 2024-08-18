@@ -11,6 +11,13 @@ use validator::Validate;
 
 use super::errors::AppError;
 
+#[derive(sqlx::Type, serde::Serialize, serde::Deserialize)]
+pub struct AppImage {
+    id: i64,
+    ext: String,
+    owner: i64,
+}
+
 pub struct AppForm<T>(pub T);
 
 #[async_trait]
@@ -91,13 +98,14 @@ impl<T> DerefMut for AppMultipart<T> {
 #[async_trait]
 impl<T, S> FromRequest<S> for AppMultipart<T>
 where
-    T: TryFromMultipart,
+    T: TryFromMultipart + Validate,
     S: Send + Sync,
 {
     type Rejection = AppError;
 
     async fn from_request(req: Request, state: &S) -> Result<Self, Self::Rejection> {
         let base = BaseMultipart::<T, Self::Rejection>::from_request(req, state).await?;
+        base.validate()?;
         Ok(Self(base.data))
     }
 }

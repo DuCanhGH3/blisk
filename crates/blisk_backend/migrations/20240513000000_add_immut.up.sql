@@ -1,6 +1,0 @@
-CREATE EXTENSION IF NOT EXISTS ltree;
-
-CREATE EXTENSION IF NOT EXISTS fuzzystrmatch;
-
-CREATE OR REPLACE FUNCTION immut_array_to_string(text[]) 
-RETURNS TEXT LANGUAGE sql IMMUTABLE AS $$SELECT array_to_string($1, ',')$$;

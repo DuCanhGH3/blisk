@@ -6,6 +6,8 @@ CREATE OR REPLACE VIEW book_view AS (
     b.name,
     b.pages,
     b.summary,
+    construct_image(ci.owner_id, ci.id, ci.ext) AS cover_image,
+    construct_image(si.owner_id, si.id, si.ext) AS spine_image,
     b.text_search,
     bl.name AS lang,
     bl.code AS lang_code,
@@ -31,5 +33,13 @@ CREATE OR REPLACE VIEW book_view AS (
     ) AS authors
   FROM books b
   JOIN book_languages bl ON b.language = bl.code
-  GROUP BY b.id, bl.name, bl.code
+  LEFT JOIN LATERAL (
+    SELECT id, owner_id, ext
+    FROM files WHERE id = b.cover_id
+  ) ci ON TRUE
+  LEFT JOIN LATERAL (
+    SELECT id, owner_id, ext
+    FROM files WHERE id = b.spine_id
+  ) si ON TRUE
+  GROUP BY b.id, bl.name, bl.code, ci.id, ci.ext, ci.owner_id, si.id, si.ext, si.owner_id
 );

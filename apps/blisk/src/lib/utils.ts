@@ -1,5 +1,7 @@
 import { base } from "$app/paths";
+import { PUBLIC_BACKEND_URL } from "$env/static/public";
 import { VALID_REACTIONS } from "./constants";
+import type { Image } from "./types";
 
 /**
  * Determines whether an array includes a certain element, returning true or false as appropriate.
@@ -124,3 +126,5 @@ export const debounce = <Args extends any[], Ret>(fn: (...args: Args) => Ret, de
 
 export const getLoginUrl = (currentPath: string) =>
   isSafeRedirect(currentPath) ? `${base}/auth/login?redirectTo=${currentPath}` : `${base}/auth/login`;
+
+export const getImage = (image: Image) => `${PUBLIC_BACKEND_URL}/assets/${image.owner}/${image.id}.${image.ext}`;

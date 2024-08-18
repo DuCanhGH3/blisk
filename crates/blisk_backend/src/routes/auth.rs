@@ -7,11 +7,13 @@ use crate::{
         emails::send_email,
         errors::AppError,
         response::{response, SuccessResponse},
-        structs::{AppForm, AppJson},
+        structs::{AppForm, AppJson, AppMultipart},
+        uploads::upload_file,
     },
 };
 use axum::{
     async_trait,
+    body::Bytes,
     extract::{FromRequestParts, Query, State},
     http::{header, request::Parts, HeaderValue, StatusCode},
     response::Response,
@@ -23,6 +25,7 @@ use axum_extra::{
     typed_header::TypedHeaderRejectionReason,
     TypedHeader,
 };
+use axum_typed_multipart::{FieldData, TryFromMultipart};
 use jsonwebtoken::{decode, encode, DecodingKey, EncodingKey, Header, Validation};
 use rand::{distributions::Alphanumeric, Rng};
 use redis::Commands;
@@ -375,7 +378,7 @@ pub async fn confirm(
     ))
 }
 
-#[derive(serde::Deserialize, Validate)]
+#[derive(TryFromMultipart, Validate)]
 pub struct RegisterPayload {
     #[validate(length(min = 1))]
     email: String,
@@ -383,21 +386,24 @@ pub struct RegisterPayload {
     password: String,
     #[validate(length(min = 1))]
     username: String,
+    /// User's profile picture.
+    picture: FieldData<Bytes>,
 }
 
 #[instrument(
     name = "Registering a new user",
-    skip(pool, redis_client, email, password, username)
+    skip(pool, redis_client, email, password, username, picture)
 )]
 pub async fn register(
     State(AppState {
         pool, redis_client, ..
     }): State<AppState>,
-    AppJson(RegisterPayload {
+    AppMultipart(RegisterPayload {
         email,
         password,
         username,
-    }): AppJson<RegisterPayload>,
+        picture,
+    }): AppMultipart<RegisterPayload>,
 ) -> Result<Response, AppError> {
     let mut transaction = pool.begin().await?;
     let password = utils::password::hash(&password)?;
@@ -421,6 +427,14 @@ pub async fn register(
             return Err(AppError::from(err));
         }
     };
+    let picture_id = upload_file(&mut transaction, uid, None, picture).await?;
+    sqlx::query!(
+        "UPDATE users SET picture_id = $1 WHERE id = $2",
+        &picture_id,
+        &uid
+    )
+    .execute(&mut *transaction)
+    .await?;
     transaction.commit().await?;
     let mut redis_con = redis_client.get_connection()?;
     send_confirmation_email(

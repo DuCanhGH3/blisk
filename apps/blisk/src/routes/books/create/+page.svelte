@@ -6,6 +6,7 @@
   import Textarea from "$components/Textarea.svelte";
   import Button from "$components/Button.svelte";
   import Select from "$components/Select.svelte";
+  import FilePicker from "$components/FilePicker.svelte";
 
   const { data, form } = $props();
 
@@ -66,6 +67,7 @@
     </nav>
     <form
       method="POST"
+      enctype="multipart/form-data"
       class="flex flex-1 flex-col gap-3"
       use:enhance={() => {
         isLoading = true;
@@ -111,6 +113,20 @@
         errorTextId="create-book-content-error"
         errorText={form?.validationError?.summary}
         actions={[[trackActive, observer]]}
+      />
+      <FilePicker
+        id="create-book-cover"
+        name="cover_image"
+        errorText={form?.validationError?.cover_image}
+        errorTextId="create-book-cover-error"
+        fileType="image"
+      />
+      <FilePicker
+        id="create-book-spine"
+        name="spine_image"
+        errorText={form?.validationError?.spine_image}
+        errorTextId="create-book-spine-error"
+        fileType="image"
       />
       <Select id="create-book-category" label="Categories" options={data.categories} />
       <div class="flex w-full flex-row-reverse items-center gap-4">

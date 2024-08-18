@@ -4,6 +4,7 @@
   import VirtualScroller from "$components/renderers/VirtualScroller.svelte";
   import { clsx } from "$lib/clsx";
   import type { Post, Ref } from "$lib/types";
+  import { getImage } from "$lib/utils";
   import LinkButton from "./LinkButton.svelte";
 
   const { data } = $props();
@@ -16,7 +17,14 @@
 
 <div class="mx-auto flex h-full w-full flex-col gap-8 p-4 md:p-10">
   <div class="flex w-full flex-col gap-4 lg:flex-row lg:gap-8">
-    <img src="/test-cover.jpg" width="192" height="288" alt="" class="h-72 w-48 select-none" style="view-transition-name:book-{data.book.name}" />
+    <img
+      src={getImage(data.book.cover_image)}
+      width="192"
+      height="288"
+      alt=""
+      class="h-72 w-48 select-none"
+      style="view-transition-name:book-{data.book.name}"
+    />
     <div
       class={clsx(
         "flex flex-1 flex-col gap-2 break-all",

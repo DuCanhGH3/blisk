@@ -8,6 +8,7 @@ const registerSchema = z.object({
   username: z.string().min(1, "Please enter a valid username!"),
   email: z.string().email("Please enter a valid email!"),
   password: z.string().min(6, "Please enter a valid password of at least 6 characters!"),
+  picture: z.instanceof(File, { message: "Please provide a valid profile picture!" }),
 });
 
 export const load: PageServerLoad = ({ locals }) => {
@@ -22,21 +23,18 @@ export const load: PageServerLoad = ({ locals }) => {
 export const actions: Actions = {
   async default({ cookies, fetch, request, setHeaders }) {
     const formData = await request.formData();
-    const data = await registerSchema.spa({
-      username: formData.get("username"),
-      email: formData.get("email"),
-      password: formData.get("password"),
-    });
-    if (!data.success) {
-      return fail(400, { validationError: data.error.flatten().fieldErrors });
+    const validation = await registerSchema.spa(Object.fromEntries(formData.entries()));
+    if (!validation.success) {
+      return fail(400, { validationError: validation.error.flatten().fieldErrors });
     }
     const res = await fetchBackend("/auth/register", {
       authz: false,
+      type: "multipart",
       cookies,
       fetch,
       setHeaders,
       method: "POST",
-      body: JSON.stringify(data.data),
+      body: formData,
       signal: AbortSignal.timeout(10000),
     });
     if (!res.ok) {

@@ -6,7 +6,7 @@ use crate::{
         futures::flatten,
         response::response,
         structs::{AppJson, AppMultipart},
-        uploads::{upload_file, UploadsError},
+        uploads::upload_file,
     },
 };
 use axum::{body::Bytes, extract::State, http::StatusCode, response::Response};
@@ -14,8 +14,9 @@ use axum_typed_multipart::{FieldData, TryFromMultipart};
 use futures::future::TryJoinAll;
 use tokio::try_join;
 use tracing::instrument;
+use validator::Validate;
 
-#[derive(TryFromMultipart)]
+#[derive(TryFromMultipart, Validate)]
 pub struct UploadPayload {
     files: Vec<FieldData<Bytes>>,
 }
@@ -38,18 +39,7 @@ pub async fn upload(
         let pool = pool.clone();
         tasks.push(flatten(tokio::spawn(async move {
             let mut transaction = pool.begin().await?;
-            let file_name = file
-                .metadata
-                .file_name
-                .ok_or(UploadsError::InvalidName("None".to_owned()))?;
-            let file_id = upload_file(
-                &mut transaction,
-                file_name.as_str(),
-                claims.sub,
-                None,
-                file.contents,
-            )
-            .await?;
+            let file_id = upload_file(&mut transaction, claims.sub, None, file).await?;
             transaction.commit().await?;
             Ok::<i64, AppError>(file_id)
         })));

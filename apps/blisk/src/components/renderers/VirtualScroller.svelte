@@ -255,7 +255,7 @@
     {#if error}
       {@render error(errorMessage)}
     {:else}
-      <p class="text-error-light dark:text-error-dark">Failed to load more: {errorMessage}</p>
+      <p class="text-error-light dark:text-error-dark" role="alert">Failed to load more: {errorMessage}</p>
     {/if}
   {:else if loading}
     {@render loading()}
