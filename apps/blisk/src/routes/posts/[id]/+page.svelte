@@ -5,18 +5,19 @@
 
   const { data } = $props();
 
-  const post = $derived.by(() => {
-    const state = $state(data.post);
-    return { state };
+  let post = $state(data.post);
+
+  $effect(() => {
+    post = data.post;
   });
 </script>
 
 <LargePostRenderer
-  bind:post={post.state}
+  bind:post
   loadMoreComments={async () => {
-    if (post.state.comments.length === 0) return [];
-    const lastComment = post.state.comments[post.state.comments.length - 1];
-    const data = await fetchBackend<Comment[]>(`/comments?post_id=${post.state.id}&previous_last=${lastComment.id}`, {
+    if (post.comments.length === 0) return [];
+    const lastComment = post.comments[post.comments.length - 1];
+    const data = await fetchBackend<Comment[]>(`/comments?post_id=${post.id}&previous_last=${lastComment.id}`, {
       signal: AbortSignal.timeout(10000),
     });
     if (!data.ok) {

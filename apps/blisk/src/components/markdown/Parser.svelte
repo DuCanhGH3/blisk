@@ -8,7 +8,8 @@
 
 {#each tokens as token}
   {#if token.type in renderers}
-    <svelte:component this={renderers[token.type as RendererKey]} {...token as any} />
+    {@const Component = renderers[token.type as RendererKey]}
+    <Component {...token as any} />
   {:else}
     {token.raw}
   {/if}

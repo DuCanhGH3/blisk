@@ -9,10 +9,11 @@
 
   const { data } = $props();
 
-  const reviews = $derived.by(() => {
-    const state = $state(data.book.reviews);
-    return { state };
-  });
+  let reviews = $state(data.book.reviews);
+
+  $effect(() => {
+    reviews = data.book.reviews;
+  })
 </script>
 
 <div class="mx-auto flex h-full w-full flex-col gap-8 p-4 md:p-10">
@@ -92,8 +93,8 @@
     </section>
     <section id="reviews" class="flex basis-2/3 flex-col gap-4">
       <h2>Reviews</h2>
-      {#if data.book.reviews.length > 0}
-        <VirtualScroller bind:items={reviews.state}>
+      {#if reviews.length > 0}
+        <VirtualScroller bind:items={reviews}>
           {#snippet renderer(post: Ref<Post>)}
             <div class="pb-6">
               <PostRenderer bind:post={post.ref} />

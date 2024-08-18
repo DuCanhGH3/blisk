@@ -136,9 +136,9 @@
                 <ThumbUp {...svgIconAttrs} /> <span class="select-none pr-1">Like</span>
               </CommentRendererButton>
             {:else}
-              {@const { icon, label, colors } = reactionRender[comment.user_reaction]}
+              {@const { icon: Icon, label, colors } = reactionRender[comment.user_reaction]}
               <CommentRendererButton customColors={colors} as="summary" aria-describedby="comment-{comment.id}-reaction-bar">
-                <svelte:component this={icon} animatable={false} {...svgIconAttrs} />
+                <Icon animatable={false} {...svgIconAttrs} />
                 <span class="select-none pr-1 text-black dark:text-white">{label}</span>
               </CommentRendererButton>
             {/if}
@@ -233,8 +233,7 @@
         <CommentForm
           parentId={comment.id}
           updateReplies={(reply: Comment) => {
-            if (!comment.children) comment.children = [];
-            comment.children.unshift(reply);
+            comment.children = [reply, ...(comment.children ?? [])];
           }}
           revertReplies={() => {
             if (!comment.children) return;

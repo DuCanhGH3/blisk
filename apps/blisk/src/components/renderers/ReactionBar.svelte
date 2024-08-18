@@ -57,6 +57,7 @@
     {#each VALID_REACTIONS as reactionType}
       {@const mappedRender = reactionRender[reactionType]}
       {@const isCurrent = reactionType === currentReaction}
+      {@const Icon = mappedRender.icon}
       <li class="react-button" role="presentation">
         <button
           class="flex h-full w-full items-center justify-center"
@@ -68,7 +69,7 @@
           aria-checked={isCurrent}
           aria-label={isCurrent ? `Undo ${mappedRender.label} reaction` : mappedRender.label}
         >
-          <svelte:component this={mappedRender.icon} animatable={!isCurrent && reactionType !== "wow"} aria-hidden="true" tabindex={-1}>
+          <Icon animatable={!isCurrent && reactionType !== "wow"} aria-hidden="true" tabindex={-1}>
             {#if isCurrent}
               <path
                 d="M8 8m7.25 0a7.25 7.25 0 1 0 -14.5 0a7.25 7.25 0 1 0 14.5 0"
@@ -79,7 +80,7 @@
               />
               <path d="M12.242 3.757l-8.485 8.485" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
             {/if}
-          </svelte:component>
+          </Icon>
         </button>
       </li>
     {/each}

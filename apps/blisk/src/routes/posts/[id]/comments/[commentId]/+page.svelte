@@ -3,10 +3,11 @@
 
   const { data } = $props();
 
-  const post = $derived.by(() => {
-    const state = $state(data.post);
-    return { state };
+  let post = $state(data.post);
+
+  $effect(() => {
+    post = data.post;
   });
 </script>
 
-<LargePostRenderer bind:post={post.state} showCommentForm={false} />
+<LargePostRenderer bind:post showCommentForm={false} />

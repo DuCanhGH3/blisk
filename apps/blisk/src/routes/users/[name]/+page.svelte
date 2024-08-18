@@ -7,19 +7,20 @@
 
   const { data } = $props();
 
-  let posts = $derived.by(() => {
-    const state = $state(data.posts);
-    return { state };
+  let posts = $state(data.posts);
+
+  $effect(() => {
+    posts = data.posts;
   });
 </script>
 
 <!-- eslint-disable-next-line svelte/no-unused-svelte-ignore -->
 <!-- svelte-ignore binding_property_non_reactive -->
 <VirtualScroller
-  bind:items={posts.state}
+  bind:items={posts}
   loadMore={async () => {
-    if (posts.state.length === 0) return [];
-    const previousLast = posts.state[posts.state.length - 1];
+    if (posts.length === 0) return [];
+    const previousLast = posts[posts.length - 1];
     const data = await fetchBackend<Post[]>(`/users/${$page.params.name}/posts?previous_last=${previousLast.id}`, {
       signal: AbortSignal.timeout(10000),
     });

@@ -7,19 +7,20 @@
 
   const { data } = $props();
 
-  const comments = $derived.by(() => {
-    const state = $state(data.comments);
-    return { state };
+  let comments = $state(data.comments);
+
+  $effect(() => {
+    comments = data.comments;
   });
 </script>
 
 <!-- eslint-disable-next-line svelte/no-unused-svelte-ignore -->
 <!-- svelte-ignore binding_property_non_reactive -->
 <VirtualScroller
-  bind:items={comments.state}
+  bind:items={comments}
   loadMore={async () => {
-    if (comments.state.length === 0) return [];
-    const item = comments.state[comments.state.length - 1];
+    if (comments.length === 0) return [];
+    const item = comments[comments.length - 1];
     const data = await fetchBackend<Comment[]>(`/users/${$page.params.name}/comments?previous_last=${item.id}`, {
       signal: AbortSignal.timeout(10000),
     });
@@ -37,10 +38,10 @@
         bind:comment={comment.ref}
         depth={0}
         removeComment={(commentToFilter) => {
-          const oldComments = [...comments.state];
-          comments.state = comments.state.filter((comment) => comment.id !== commentToFilter.id);
+          const oldComments = [...comments];
+          comments = comments.filter((comment) => comment.id !== commentToFilter.id);
           return () => {
-            comments.state = oldComments;
+            comments = oldComments;
           };
         }}
       />

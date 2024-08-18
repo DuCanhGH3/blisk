@@ -77,9 +77,9 @@
               <ThumbUp {...svgIconAttrs} /> <span class="mb-[-1px] pr-1">Like</span>
             </CommentRendererButton>
           {:else}
-            {@const { icon, label, colors } = reactionRender[post.user_reaction]}
+            {@const { icon: Icon, label, colors } = reactionRender[post.user_reaction]}
             <CommentRendererButton customColors={colors} as="summary" aria-describedby="reaction-bar-{post.id}">
-              <svelte:component this={icon} animatable={false} {...svgIconAttrs} />
+              <Icon animatable={false} {...svgIconAttrs} />
               <span class="mb-[-1px] pr-1 text-black dark:text-white">{label}</span>
             </CommentRendererButton>
           {/if}
@@ -121,9 +121,11 @@
   <section id="comments" class="flex h-full flex-col gap-3">
     <h2 class="sr-only">Comments</h2>
     {#if showCommentForm && isLoggedIn}
+      <!-- TODO(ducanhgh): VirtualScroller's update doesn't seem to be triggered when we push a new entry -->
+      <!-- to `post.comments` right now, so we reassign `post.comments`. Hopefully this is just a bug. -->
       <CommentForm
         parentId={null}
-        updateReplies={(newComment) => post.comments.unshift(newComment)}
+        updateReplies={(newComment) => (post.comments = [newComment, ...(post.comments ?? [])])}
         revertReplies={() => (post.comments = post.comments.filter((comment) => comment.id !== OPTIMISTIC_ID))}
       />
     {/if}

@@ -72,9 +72,9 @@
             <span class="mb-[-1px] select-none">Like</span>
           </PostRendererButton>
         {:else}
-          {@const { icon, label, colors } = reactionRender[post.user_reaction]}
+          {@const { icon: Icon, label, colors } = reactionRender[post.user_reaction]}
           <PostRendererButton customColors={colors} as="summary" aria-describedby="post-{post.id}-reaction-bar">
-            <svelte:component this={icon} animatable={false} {...svgIconAttrs} />
+            <Icon animatable={false} {...svgIconAttrs} />
             <span class="mb-[-1px] select-none text-black dark:text-white">{label}</span>
           </PostRendererButton>
         {/if}
