@@ -125,7 +125,7 @@ pub async fn read(
             c.content AS "content!",
             c.author_name AS "author_name!",
             c.user_reaction AS "user_reaction!: _",
-            children AS "children?: sqlx::types::Json<Vec<Comment>>"
+            children AS "children?: _"
         FROM fetch_comments(
             request_uid => $1,
             replies_depth => 4
@@ -180,7 +180,7 @@ pub async fn read_replies(
             c.content AS "content!",
             c.author_name AS "author_name!",
             c.user_reaction AS "user_reaction!: _",
-            children AS "children?: sqlx::types::Json<Vec<Comment>>"
+            children AS "children?: _"
         FROM fetch_comments(
             request_uid => $1,
             replies_depth => 3

@@ -1,6 +1,4 @@
 <script lang="ts" generics="T extends { id: number | string }">
-  // Note: since the virtual scroller destroys any component not in view,
-  // states will not work properly.
   import { tick, untrack, type Snippet } from "svelte";
   import type { Ref } from "$lib/types";
   import { range } from "$lib/utils";
@@ -12,8 +10,10 @@
      * The data renderer. Should be stateless to work properly.
      * We pass `Ref<T>` instead of `T` so that binding is possible,
      * allowing the component to assign its states to the data.
+     * Note: since the virtual scroller destroys any component not in
+     * view, states will not work properly.
      */
-    renderer: Snippet<[Ref<T>]>;
+    renderer: Snippet<[data: Ref<T>]>;
     /**
      * Replaces the default loading spinner.
      */
@@ -21,7 +21,7 @@
     /**
      * Replaces the default error renderer.
      */
-    error?: Snippet<[]>;
+    error?: Snippet<[error: string]>;
     /**
      * A function that should load more data. If not defined, the
      * virtual scroller does not implement infinite loading.
@@ -151,6 +151,19 @@
     if (!container || !heightTree) return;
     const containerRect = container.getBoundingClientRect();
     let containerTop = containerRect.y;
+    const containerBottom = containerRect.bottom;
+    // If the container is completely out of view, simply
+    // render the beginning/ending element.
+    if (containerBottom < 0) {
+      start = items.length - 1;
+      end = items.length - 1;
+      return;
+    }
+    if (containerTop > window.innerHeight) {
+      start = 0;
+      end = 0;
+      return;
+    }
     let tl = 0;
     let tr = items.length - 1;
     if (containerTop >= 0) {
@@ -240,7 +253,7 @@
 {#if !!loadMore && !hasReachedEnd}
   {#if errorMessage}
     {#if error}
-      {@render error()}
+      {@render error(errorMessage)}
     {:else}
       <p class="text-error-light dark:text-error-dark">Failed to load more: {errorMessage}</p>
     {/if}

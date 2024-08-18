@@ -67,7 +67,7 @@
     if (noMoreReplies || !comment.children || comment.children.length < BASE_COMMENTS_LENGTH) return;
     const lastSeen = comment.children[comment.children.length - 1];
     const data = await fetchBackend<Comment[]>(
-      `/comments/replies?comment_id=${comment.id}&${lastSeen}`
+      `/comments/replies?comment_id=${comment.id}&previous_last=${lastSeen.id}`
     );
     if (!data.ok) {
       return;
