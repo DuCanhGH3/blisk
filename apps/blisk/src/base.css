@@ -75,7 +75,7 @@
   }
 
   #nav-usermenu[open] > summary {
-    @apply dark:bg-wood-900 bg-wood-300;
+    @apply dark:bg-wood-800 bg-wood-300;
   }
 
   .book {

@@ -13,7 +13,7 @@
     as,
     interactive = true,
     hoverable = true,
-    customColors = clsx("dark:bg-wood-900 bg-wood-300", interactive && hoverable && "hover:bg-wood-200 dark:hover:bg-wood-800"),
+    customColors = clsx("dark:bg-wood-800 bg-wood-300", interactive && hoverable && "hover:bg-wood-200 dark:hover:bg-wood-750"),
     children,
     ...props
   }: CommentRendererButtonProps = $props();

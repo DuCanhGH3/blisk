@@ -61,20 +61,20 @@
     @apply hover:bg-wood-200 dark:hover:bg-wood-800 flex cursor-pointer items-center justify-center rounded-full bg-transparent p-3 duration-100;
   }
   .nav-button.active {
-    @apply dark:bg-wood-900 bg-wood-300;
+    @apply dark:bg-wood-800 bg-wood-300;
   }
   .datepicker + .label,
   .input:placeholder-shown:focus + .label,
   .input:not(:placeholder-shown) + .label,
   .textarea:placeholder-shown:focus + .label,
   .textarea:not(:placeholder-shown) + .label {
-    @apply top-0.5 translate-x-0 translate-y-0 text-xs text-neutral-700 dark:text-gray-300;
+    @apply top-0.5 translate-x-0 translate-y-0 text-xs text-wood-800 dark:text-wood-300;
   }
   .input:placeholder-shown:not(:focus) + .label {
-    @apply text-wood-900 top-1/2 -translate-y-1/2 translate-x-0 text-sm dark:text-white;
+    @apply text-wood-900 top-1/2 -translate-y-1/2 translate-x-0 text-sm dark:text-wood-200;
   }
   .textarea:placeholder-shown:not(:focus) + .label {
-    @apply text-wood-900 top-[12px] translate-x-0 text-sm dark:text-white;
+    @apply text-wood-900 top-[12px] translate-x-0 text-sm dark:text-wood-200;
   }
   .text-error {
     @apply text-[#a51a12] dark:text-red-400;

@@ -29,7 +29,7 @@
 <form
   method="POST"
   action="?/react"
-  class={clsx("dark:bg-wood-900 border-border-light dark:border-border-dark bg-wood-300 z-10 rounded-full border p-1 shadow-md", className)}
+  class={clsx("dark:bg-wood-800 border-border-light dark:border-border-dark bg-wood-300 z-10 rounded-full border p-1 shadow-md", className)}
   use:enhance={({ formData }) => {
     isProcessing = true;
     const reactionType = formData.get("reaction_type");

@@ -11,7 +11,7 @@
   const {
     as,
     hoverable = true,
-    customColors = clsx("dark:bg-wood-900 bg-wood-300", hoverable && "hover:bg-wood-200 dark:hover:bg-wood-800"),
+    customColors = clsx("dark:bg-wood-800 bg-wood-300", hoverable && "hover:bg-wood-200 dark:hover:bg-wood-750"),
     children,
     ...props
   }: PostRendererButtonProps = $props();

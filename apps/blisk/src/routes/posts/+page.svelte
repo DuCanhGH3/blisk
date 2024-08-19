@@ -32,7 +32,7 @@
         href="/posts/create"
         class={clsx(
           "text-comment flex h-10 w-full items-center rounded-[20px] border px-2.5 transition-colors duration-100",
-          "border-border-light dark:border-border-dark dark:bg-wood-900 bg-wood-300 hover:bg-wood-200 dark:hover:bg-wood-800"
+          "border-border-light dark:border-border-dark dark:bg-wood-800 bg-wood-300 hover:bg-wood-200 dark:hover:bg-wood-750"
         )}
       >
         Reviewing a book?
