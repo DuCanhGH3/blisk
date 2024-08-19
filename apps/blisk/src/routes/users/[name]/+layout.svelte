@@ -30,7 +30,7 @@
       </h1>
     </div>
   </div>
-  <div class="flex w-full flex-col gap-8 md:gap-14 lg:flex-row-reverse">
+  <div class="flex w-full flex-col gap-8 md:gap-14 lg:flex-row-reverse lg:px-10">
     <div class="flex h-fit basis-1/3 flex-col gap-4 lg:sticky lg:top-14">
       <h2>About {$page.params.name}</h2>
       <div class="box md">here comes a quote</div>
@@ -77,7 +77,7 @@
         <Link href={`${basePath}/likes`}>Likes</Link>
         <Link href={`${basePath}/dislikes`}>Dislikes</Link>
       </div>
-      <div>
+      <div class="w-full max-w-screen-md">
         {@render children()}
       </div>
     </article>

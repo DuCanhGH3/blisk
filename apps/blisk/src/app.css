@@ -29,7 +29,7 @@
     @apply cursor-pointer;
   }
   body {
-    @apply bg-wood-500 bg-wood dark:bg-dark-wood text-wood-900 dark:bg-wood-950 font-sans font-normal dark:text-wood-200;
+    @apply bg-wood-500 bg-wood dark:bg-dark-wood text-wood-900 dark:bg-wood-950 dark:text-wood-200 font-sans font-normal;
   }
   h1,
   h2,
@@ -256,7 +256,7 @@
     @apply rotate-90;
   }
   .box {
-    @apply dark:bg-neutral-925 border-border-light dark:border-border-dark w-full border bg-white;
+    @apply bg-wood-400 dark:bg-wood-915 border-border-light dark:border-border-dark w-full border;
   }
   .box.hover {
     @apply hover:bg-neutral-100 dark:hover:bg-neutral-800;

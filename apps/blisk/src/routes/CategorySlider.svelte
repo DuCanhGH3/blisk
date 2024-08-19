@@ -63,7 +63,7 @@
   <div
     class={clsx(
       "relative w-full border-[8px] border-t-0 border-t-transparent px-10 shadow-[inset_0_0_20px_5px_#000000]",
-      "border-x-wood-650 border-b-wood-700 dark:border-x-wood-925 dark:border-b-wood-1000"
+      "border-x-wood-650 border-b-wood-700 dark:border-x-wood-915 dark:border-b-wood-1000"
     )}
   >
     <a href="/books?category={category.id}">

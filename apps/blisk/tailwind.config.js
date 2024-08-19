@@ -207,7 +207,8 @@ export default {
           700: "#6b5330",
           800: "#3a2316",
           900: "#301a0e",
-          925: "#23150d",
+          915: "#23150d",
+          925: "#1d110b",
           950: "#170e09",
           1000: "#110a06",
           1050: "#0b0704",
@@ -225,11 +226,11 @@ export default {
           },
         },
         accent: {
-          light: "#1e40af",
+          light: "#0c205a",
           dark: "#7dd3fc",
         },
         border: {
-          light: "#e8cb9f",
+          light: "#e0b97f",
           dark: "#23150d",
         },
         yellow: {

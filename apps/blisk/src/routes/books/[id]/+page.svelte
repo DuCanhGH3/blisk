@@ -26,7 +26,7 @@
       width="192"
       height="288"
       alt=""
-      class="h-72 w-48 select-none"
+      class="h-72 w-48 select-none shadow-[5px_2px_20px_-1px_#000000]"
       style="view-transition-name:book{fromCategory ? `-${fromCategory}` : ""}-{data.book.name}"
     />
     <div

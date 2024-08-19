@@ -17,14 +17,14 @@
 
 <span
   class={clsx(
-    "flex w-full cursor-pointer flex-row justify-between rounded-md transition-colors-opacity duration-100 select-none",
-    isActive ? "bg-neutral-250 dark:bg-neutral-800" : "hover:bg-neutral-250 dark:hover:bg-neutral-800"
+    "transition-colors-opacity flex w-full cursor-pointer select-none flex-row justify-between rounded-md duration-100",
+    isActive ? "dark:bg-wood-900 bg-wood-300" : "hover:bg-wood-200 dark:hover:bg-wood-800"
   )}
 >
   <a
     {href}
     class={clsx(
-      "h-full w-full gap-2 break-words px-3 py-2 font-medium text-wood-900 dark:text-white",
+      "text-wood-900 h-full w-full gap-2 break-words px-3 py-2 font-medium dark:text-white",
       textCenter && "text-center",
       wideText ? "shrink-0 text-base uppercase tracking-widest" : "text-base md:text-sm"
     )}
