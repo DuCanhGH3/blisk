@@ -22,7 +22,7 @@
   import CommentIcon from "../icons/Comment.svelte";
   import Share from "../icons/Share.svelte";
   import ThumbUp from "../icons/ThumbUp.svelte";
-  import { getLoginUrl, getProfilePicture } from "$lib/utils";
+  import { getLoginUrl, getProfilePicture, getTotalReactionsDelta } from "$lib/utils";
 
   interface CommentProps {
     /**
@@ -80,6 +80,7 @@
   const updateReaction = (reaction: ReactionType | null) => {
     previousReaction = comment.user_reaction;
     comment.user_reaction = reaction;
+    comment.total_reactions += getTotalReactionsDelta(previousReaction, comment.user_reaction);
   };
 
   const openDeleteModal = () => {
@@ -129,6 +130,20 @@
     {#if !comment.is_editing}
       <MarkdownRenderer source={comment.content} startingHeading={4} />
       <div class="-m-1 mt-0 flex w-fit flex-row flex-wrap items-center gap-2">
+        {#if comment.total_reactions > 0}
+          <div class="order-last [&>div]:gap-1">
+            <CommentRendererButton as="div" interactive={false}>
+              {#each comment.top_reactions as reaction}
+                {@const mappedRender = reactionRender[reaction]}
+                {@const Icon = mappedRender.icon}
+                <Icon width={20} height={20} class="h-auto w-5" animatable={false} aria-hidden="true" tabindex={-1} />
+              {/each}
+              <span class="pl-1">
+                {comment.total_reactions} like{comment.total_reactions === 1 ? "" : "s"}
+              </span>
+            </CommentRendererButton>
+          </div>
+        {/if}
         {#if isLoggedIn}
           <details bind:this={reactionBar} class="relative">
             {#if !comment.user_reaction}
@@ -139,7 +154,7 @@
               {@const { icon: Icon, label, colors } = reactionRender[comment.user_reaction]}
               <CommentRendererButton customColors={colors} as="summary" aria-describedby="comment-{comment.id}-reaction-bar">
                 <Icon animatable={false} {...svgIconAttrs} />
-                <span class="select-none pr-1 text-wood-900 dark:text-white">{label}</span>
+                <span class="text-wood-900 select-none pr-1 dark:text-white">{label}</span>
               </CommentRendererButton>
             {/if}
             <ReactionBar

@@ -1,4 +1,4 @@
--- Add up migration script here=
+-- Add up migration script here
 CREATE OR REPLACE FUNCTION fetch_replies(
   request_uid BIGINT,
   request_pid BIGINT,
@@ -21,11 +21,15 @@ BEGIN
       u.id AS author_id,
       u.name AS author_name,
       u.picture AS author_picture,
+      coalesce(crt.total, 0) AS total_reactions,
+      coalesce(crt.greatest, '{}'::PREACT[]) AS top_reactions,
       ucr.type AS user_reaction,
       fetch_replies(request_uid, request_pid, rp.id, rp.path, current_level - 1) AS children
     FROM comments rp
     JOIN users_view u
     ON u.id = rp.author_id
+    LEFT JOIN comment_reactions_view crt
+    ON crt.comment_id = rp.id
     LEFT JOIN comment_reactions ucr
     ON ucr.comment_id = rp.id AND ucr.user_id = request_uid
     WHERE rp.post_id = request_pid AND rp.path = parent_path || TEXT2LTREE(parent_id::TEXT)
@@ -46,6 +50,8 @@ RETURNS TABLE (
   author_name TEXT,
   author_picture JSONB,
   reaction BREACT,
+  total_reactions BIGINT,
+  top_reactions PREACT[],
   user_reaction PREACT
 ) AS $$
   SELECT
@@ -56,10 +62,14 @@ RETURNS TABLE (
     rvu.name AS author_name,
     rvu.picture AS author_picture,
     rv.reaction,
+    coalesce(prt.total, 0) AS total_reactions,
+    coalesce(prt.greatest, '{}'::PREACT[]) AS top_reactions,
     upr.type AS user_reaction
   FROM posts rv
   JOIN users_view rvu
   ON rv.author_id = rvu.id
+  LEFT JOIN post_reactions_view prt
+  ON prt.post_id = rv.id
   LEFT JOIN post_reactions upr
   ON upr.post_id = rv.id AND upr.user_id = request_uid;
 $$
@@ -77,6 +87,8 @@ RETURNS TABLE (
   author_id BIGINT,
   author_name TEXT,
   author_picture JSONB,
+  total_reactions BIGINT,
+  top_reactions PREACT[],
   user_reaction PREACT,
   children JSONB
 ) AS $$
@@ -88,6 +100,8 @@ RETURNS TABLE (
     u.id AS author_id,
     u.name AS author_name,
     u.picture AS author_picture,
+    coalesce(crt.total, 0) AS total_reactions,
+    coalesce(crt.greatest, '{}'::PREACT[]) AS top_reactions,
     ucr.type AS user_reaction,
     fetch_replies(
       request_uid => request_uid,
@@ -99,8 +113,10 @@ RETURNS TABLE (
   FROM comments c
   JOIN users_view u
   ON c.author_id = u.id
+  LEFT JOIN comment_reactions_view crt
+  ON crt.comment_id = c.id
   LEFT JOIN comment_reactions ucr
-  ON ucr.comment_id = c.id AND ucr.user_id = request_uid;
+  ON ucr.comment_id = c.id AND ucr.user_id = request_uid
 $$
 LANGUAGE sql;
 

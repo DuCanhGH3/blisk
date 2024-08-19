@@ -40,6 +40,7 @@ export const actions: Actions = {
       cookies,
       fetch,
       setHeaders,
+      noSuccessContent: true,
       method: "POST",
       body: formData,
     });

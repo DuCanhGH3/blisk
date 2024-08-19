@@ -2,7 +2,7 @@
   // Component is (mostly) stateless so that it works with the virtual scroller.
   import { page } from "$app/stores";
   import type { Post, ReactionType } from "$lib/types";
-  import { getLoginUrl, getProfilePicture } from "$lib/utils";
+  import { getLoginUrl, getProfilePicture, getTotalReactionsDelta } from "$lib/utils";
   import Comment from "../icons/Comment.svelte";
   import Share from "../icons/Share.svelte";
   import ThumbUp from "../icons/ThumbUp.svelte";
@@ -32,6 +32,7 @@
   const updateReaction = (reaction: ReactionType | null) => {
     previousReaction = post.user_reaction;
     post.user_reaction = reaction;
+    post.total_reactions += getTotalReactionsDelta(previousReaction, post.user_reaction);
   };
 </script>
 
@@ -63,6 +64,19 @@
     </div>
   </div>
   <MarkdownRenderer source={post.content} startingHeading={4} />
+  {#if post.total_reactions > 0}
+    <div class="flex flex-row items-center gap-1" interactive={false}>
+      <!-- TODO: move top_reactions to client -->
+      {#each post.top_reactions as reaction}
+        {@const mappedRender = reactionRender[reaction]}
+        {@const Icon = mappedRender.icon}
+        <Icon width={20} height={20} class="h-auto w-5" animatable={false} aria-hidden="true" tabindex={-1} />
+      {/each}
+      <span class="pl-1">
+        {post.total_reactions} like{post.total_reactions === 1 ? "" : "s"}
+      </span>
+    </div>
+  {/if}
   <div class="order-1 -m-1 flex flex-row flex-wrap gap-3">
     {#if isLoggedIn}
       <details bind:this={reactionBar} class="relative flex-grow">
@@ -75,7 +89,7 @@
           {@const { icon: Icon, label, colors } = reactionRender[post.user_reaction]}
           <PostRendererButton customColors={colors} as="summary" aria-describedby="post-{post.id}-reaction-bar">
             <Icon animatable={false} {...svgIconAttrs} />
-            <span class="mb-[-1px] select-none text-wood-900 dark:text-white">{label}</span>
+            <span class="text-wood-900 mb-[-1px] select-none dark:text-white">{label}</span>
           </PostRendererButton>
         {/if}
         <ReactionBar

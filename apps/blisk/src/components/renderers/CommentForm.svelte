@@ -38,6 +38,8 @@
         content,
         author_name,
         author_picture,
+        total_reactions: 0,
+        top_reactions: ['like', 'love', 'laugh'],
         user_reaction: null,
         children: [],
         is_editing: false,

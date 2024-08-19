@@ -46,6 +46,8 @@ pub struct Post {
     pub author_name: String,
     pub author_picture: Option<sqlx::types::Json<AppImage>>,
     pub reaction: Reaction,
+    pub total_reactions: i64,
+    pub top_reactions: Vec<PostReaction>,
     pub user_reaction: Option<PostReaction>,
     pub comments: Option<sqlx::types::Json<Vec<Comment>>>,
 }
@@ -138,8 +140,10 @@ pub async fn read(
             p.author_name AS "author_name!",
             p.author_picture AS "author_picture?: _",
             p.reaction AS "reaction!: _",
+            p.total_reactions AS "total_reactions!",
+            p.top_reactions AS "top_reactions!: _",
             p.user_reaction AS "user_reaction!: _",
-            COALESCE(JSONB_AGG(c) FILTER (WHERE c.id IS NOT NULL), '[]'::JSONB) AS "comments!: _"
+            coalesce(jsonb_agg(c) FILTER (WHERE c.id IS NOT NULL), '[]'::JSONB) AS "comments!: _"
         FROM fetch_posts(request_uid => $1) p
         LEFT JOIN LATERAL (
             SELECT * FROM fetch_comments(request_uid => $1, replies_depth => 4) c
@@ -160,7 +164,8 @@ pub async fn read(
             WHEN $4::BIGINT IS NOT NULL AND p.id < $4::BIGINT THEN TRUE
             ELSE FALSE
         END
-        GROUP BY p.id, p.title, p.content, p.author_name, p.author_picture, p.reaction, p.user_reaction
+        GROUP BY p.id, p.title, p.content, p.author_name, p.author_picture,
+        p.reaction, p.total_reactions, p.top_reactions, p.user_reaction
         ORDER BY p.id DESC
         LIMIT 20"#,
         &uid as &_,
@@ -198,16 +203,14 @@ pub async fn read_slug(
             p.author_name AS "author_name!",
             p.author_picture AS "author_picture?: _",
             p.reaction AS "reaction!: _",
+            p.total_reactions AS "total_reactions!",
+            p.top_reactions AS "top_reactions!: _",
             p.user_reaction AS "user_reaction!: _",
             coalesce(jsonb_agg(c) FILTER (WHERE c.id IS NOT NULL), '[]'::JSONB) AS "comments!: _"
         FROM fetch_posts(request_uid => $2) p
         LEFT JOIN LATERAL (
-            SELECT * FROM fetch_comments(
-                request_uid => $2,
-                replies_depth => 4
-            ) c
-            WHERE
-            CASE
+            SELECT * FROM fetch_comments(request_uid => $2, replies_depth => 4) c
+            WHERE CASE
                 WHEN $3::BIGINT IS NULL AND c.post_id = p.id AND c.path = 'Top' THEN TRUE
                 WHEN $3::BIGINT IS NOT NULL AND c.post_id = p.id AND c.id = $3::BIGINT THEN TRUE
                 ELSE FALSE
@@ -216,7 +219,8 @@ pub async fn read_slug(
             LIMIT 20
         ) c ON TRUE
         WHERE p.id = $1
-        GROUP BY p.id, p.title, p.content, p.author_name, p.author_picture, p.reaction, p.user_reaction"#,
+        GROUP BY p.id, p.title, p.content, p.author_name, p.author_picture,
+        p.reaction, p.total_reactions, p.top_reactions, p.user_reaction"#,
         &post_id,
         &uid as &_,
         &comment_id as &_,
@@ -224,8 +228,8 @@ pub async fn read_slug(
     .fetch_one(&mut *transaction)
     .await
     .map_err(|e| match e {
-        sqlx::Error::RowNotFound => PostsError::PostNotFound(post_id),
-        _ => PostsError::Unexpected,
+        sqlx::Error::RowNotFound => AppError::from(PostsError::PostNotFound(post_id)),
+        _ => AppError::from(e),
     })?;
     transaction.commit().await?;
     Ok(response(StatusCode::OK, None, AppJson(post)))
@@ -262,8 +266,8 @@ pub async fn update(
     .fetch_one(&mut *transaction)
     .await
     .map_err(|err| match err {
-        sqlx::Error::RowNotFound => PostsError::UpdateUnauthorized(id),
-        _ => PostsError::Unexpected,
+        sqlx::Error::RowNotFound => AppError::from(PostsError::UpdateUnauthorized(id)),
+        _ => AppError::from(err),
     })?;
     let update_result = sqlx::query!(
         "UPDATE posts SET title = $3, content = $4, reaction = $5 WHERE id = $1 AND author_id = $2",

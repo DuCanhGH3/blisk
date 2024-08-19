@@ -2,7 +2,7 @@
   import { page } from "$app/stores";
   import { OPTIMISTIC_ID } from "$lib/constants.js";
   import type { Comment, Post, ReactionType, Ref, RequireFields } from "$lib/types.js";
-  import { getLoginUrl, getProfilePicture } from "$lib/utils.js";
+  import { getLoginUrl, getProfilePicture, getTotalReactionsDelta } from "$lib/utils.js";
   import ThumbUp from "$components/icons/ThumbUp.svelte";
   import CommentForm from "$components/renderers/CommentForm.svelte";
   import MarkdownRenderer from "$components/renderers/MarkdownRenderer.svelte";
@@ -43,6 +43,7 @@
   const updateReaction = (reaction: ReactionType | null) => {
     previousReaction = post.user_reaction;
     post.user_reaction = reaction;
+    post.total_reactions += getTotalReactionsDelta(previousReaction, post.user_reaction);
   };
 </script>
 
@@ -74,6 +75,20 @@
     </div>
     <MarkdownRenderer source={post.content} startingHeading={2} />
     <div class="order-1 -m-1 mt-0 flex w-fit flex-row flex-wrap gap-2">
+      {#if post.total_reactions > 0}
+        <div class="order-last [&>div]:gap-1">
+          <CommentRendererButton as="div" interactive={false}>
+            {#each post.top_reactions as reaction}
+              {@const mappedRender = reactionRender[reaction]}
+              {@const Icon = mappedRender.icon}
+              <Icon width={20} height={20} class="h-auto w-5" animatable={false} aria-hidden="true" tabindex={-1} />
+            {/each}
+            <span class="pl-1">
+              {post.total_reactions} like{post.total_reactions === 1 ? "" : "s"}
+            </span>
+          </CommentRendererButton>
+        </div>
+      {/if}
       {#if isLoggedIn}
         <details bind:this={reactionBar} class="relative">
           {#if !post.user_reaction}
@@ -84,7 +99,7 @@
             {@const { icon: Icon, label, colors } = reactionRender[post.user_reaction]}
             <CommentRendererButton customColors={colors} as="summary" aria-describedby="reaction-bar-{post.id}">
               <Icon animatable={false} {...svgIconAttrs} />
-              <span class="mb-[-1px] pr-1 text-wood-900 dark:text-white">{label}</span>
+              <span class="text-wood-900 mb-[-1px] pr-1 dark:text-white">{label}</span>
             </CommentRendererButton>
           {/if}
           <ReactionBar

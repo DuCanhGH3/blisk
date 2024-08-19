@@ -35,6 +35,8 @@ pub struct Comment {
     pub content: String,
     pub author_name: String,
     pub author_picture: Option<sqlx::types::Json<AppImage>>,
+    pub total_reactions: i64,
+    pub top_reactions: Vec<PostReaction>,
     #[sqlx(default)]
     pub user_reaction: Option<PostReaction>,
     #[sqlx(default)]
@@ -137,6 +139,8 @@ pub async fn read(
             c.content AS "content!",
             c.author_name AS "author_name!",
             c.author_picture AS "author_picture?: _",
+            c.total_reactions AS "total_reactions!",
+            c.top_reactions AS "top_reactions!: _",
             c.user_reaction AS "user_reaction!: _",
             children AS "children?: _"
         FROM fetch_comments(request_uid => $1, replies_depth => 4) c
@@ -199,6 +203,8 @@ pub async fn read_replies(
             c.content AS "content!",
             c.author_name AS "author_name!",
             c.author_picture AS "author_picture?: _",
+            c.total_reactions AS "total_reactions!",
+            c.top_reactions AS "top_reactions!: _",
             c.user_reaction AS "user_reaction!: _",
             children AS "children?: _"
         FROM fetch_comments(

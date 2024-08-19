@@ -25,6 +25,8 @@ export interface Post {
   author_name: string;
   author_picture: Image | null;
   reaction: BookReaction;
+  total_reactions: number;
+  top_reactions: ReactionType[];
   user_reaction: ReactionType | null;
   comments: Comment[] | null;
 }
@@ -35,6 +37,8 @@ export interface Comment {
   content: string;
   author_name: string;
   author_picture: Image | null;
+  total_reactions: number;
+  top_reactions: ReactionType[];
   user_reaction: ReactionType | null;
   children: Comment[] | null;
   // The following are states that will be attached

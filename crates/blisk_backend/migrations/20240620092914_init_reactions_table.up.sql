@@ -1,12 +1,12 @@
 -- Add up migration script here
-CREATE TYPE PREACT AS ENUM (
-    'like',
-    'love',
-    'laugh',
-    'wow',
-    'sad',
-    'angry'
-);
+-- CREATE TYPE PREACT AS ENUM (
+--     'like',
+--     'love',
+--     'laugh',
+--     'wow',
+--     'sad',
+--     'angry'
+-- );
 
 CREATE TABLE IF NOT EXISTS post_reactions (
     "type" PREACT NOT NULL,
@@ -27,25 +27,27 @@ CREATE TABLE IF NOT EXISTS comment_reactions (
 );
 
 CREATE TABLE IF NOT EXISTS post_reactions_tally (
-    "post_id" BIGINT NOT NULL REFERENCES posts ("id") ON DELETE CASCADE,
+    "post_id" BIGINT PRIMARY KEY NOT NULL,
     "total" BIGINT NOT NULL DEFAULT 0,
     "like" BIGINT NOT NULL DEFAULT 0,
     "love" BIGINT NOT NULL DEFAULT 0,
     "laugh" BIGINT NOT NULL DEFAULT 0,
     "wow" BIGINT NOT NULL DEFAULT 0,
     "sad" BIGINT NOT NULL DEFAULT 0,
-    "angry" BIGINT NOT NULL DEFAULT 0
+    "angry" BIGINT NOT NULL DEFAULT 0,
+    FOREIGN KEY ("post_id") REFERENCES posts ("id") ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS comment_reactions_tally (
-    "comment_id" BIGINT NOT NULL REFERENCES comments ("id") ON DELETE CASCADE,
+    "comment_id" BIGINT PRIMARY KEY NOT NULL,
     "total" BIGINT NOT NULL DEFAULT 0,
     "like" BIGINT NOT NULL DEFAULT 0,
     "love" BIGINT NOT NULL DEFAULT 0,
     "laugh" BIGINT NOT NULL DEFAULT 0,
     "wow" BIGINT NOT NULL DEFAULT 0,
     "sad" BIGINT NOT NULL DEFAULT 0,
-    "angry" BIGINT NOT NULL DEFAULT 0
+    "angry" BIGINT NOT NULL DEFAULT 0,
+    FOREIGN KEY ("comment_id") REFERENCES comments ("id") ON DELETE CASCADE
 );
 
 CREATE OR REPLACE FUNCTION calculate_reaction_delta(
@@ -105,6 +107,7 @@ BEGIN
     END IF;
     UPDATE comment_reactions_tally SET
     -- Increase total if OLD is NULL (INSERT) or decrease if NEW is null (DELETE)
+    "total" = "total" - CASE WHEN OLD IS NULL THEN -1 WHEN NEW IS NULL THEN 1 ELSE 0 END,
     "like" = "like" + calculate_reaction_delta(OLD, NEW, 'like'),
     "love" = "love" + calculate_reaction_delta(OLD, NEW, 'love'),
     "laugh" = "laugh" + calculate_reaction_delta(OLD, NEW, 'laugh'),

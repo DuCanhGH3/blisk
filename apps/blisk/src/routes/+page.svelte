@@ -29,7 +29,7 @@
   // };
 </script>
 
-<div class="flex w-full flex-col justify-center gap-10 self-stretch">
+<div class="flex w-full flex-col gap-10 self-stretch">
   <!-- <div class="relative h-full w-full">
     <button
       class={clsx(
@@ -74,7 +74,9 @@
   </div> -->
   <div class="bg-wood dark:bg-dark-wood bg-wood-500 dark:bg-wood-950 w-full">
     {#each data.categories as category}
-      <CategorySlider {category} />
+      {#if category.books.length > 0}
+        <CategorySlider {category} />
+      {/if}
     {/each}
   </div>
 </div>

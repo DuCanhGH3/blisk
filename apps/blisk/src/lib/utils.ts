@@ -1,7 +1,7 @@
 import { base } from "$app/paths";
 import { PUBLIC_BACKEND_URL } from "$env/static/public";
 import { VALID_REACTIONS } from "./constants";
-import type { Image } from "./types";
+import type { Image, ReactionType } from "./types";
 
 /**
  * Determines whether an array includes a certain element, returning true or false as appropriate.
@@ -148,4 +148,14 @@ export const convertFormData = (formData: FormData) => {
     object[key].push(value);
   });
   return object;
+};
+
+export const getTotalReactionsDelta = (oldReaction: ReactionType | null, newReaction: ReactionType | null) => {
+  if (oldReaction === null && newReaction !== null) {
+    return 1;
+  }
+  if (newReaction === null && oldReaction !== null) {
+    return -1;
+  }
+  return 0;
 };
