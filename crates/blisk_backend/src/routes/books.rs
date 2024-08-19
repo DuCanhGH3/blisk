@@ -317,8 +317,14 @@ pub async fn read_metadata(
     let metadata = sqlx::query_as!(
         BooksMetadata,
         r#"SELECT
-            (SELECT json_agg(ba) FROM (SELECT id, name FROM book_authors) ba) AS "authors!: _",
-            (SELECT json_agg(bc) FROM (SELECT id, name FROM book_categories) bc) AS "categories!: _"
+            (
+                SELECT coalesce(jsonb_agg(ba) FILTER (WHERE ba.id IS NOT NULL), '[]'::JSONB)
+                FROM (SELECT id, name FROM book_authors) ba
+            ) AS "authors!: _",
+            (
+                SELECT coalesce(jsonb_agg(bc) FILTER (WHERE bc.id IS NOT NULL), '[]'::JSONB)
+                FROM (SELECT id, name FROM book_categories) bc
+            ) AS "categories!: _"
         "#
     )
     .fetch_one(&mut *transaction)

@@ -1,7 +1,7 @@
 -- Add down migration script here
-DROP TRIGGER IF EXISTS after_link_category_to_book on book_to_category;
+DROP TRIGGER IF EXISTS after_link_category_to_book ON book_to_category;
 
-DROP TRIGGER IF EXISTS after_link_author_to_book on book_to_author;
+DROP TRIGGER IF EXISTS after_link_author_to_book ON book_to_author;
 
 DROP TRIGGER IF EXISTS after_update_books ON books;
 

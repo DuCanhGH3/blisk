@@ -14,7 +14,8 @@
   details[open] > summary > .details-chevron {
     @apply rotate-90;
   }
-  .box {
+  .box,
+  .container {
     @apply bg-wood-hor dark:bg-dark-wood-hor bg-wood-400 dark:bg-wood-915 border-border-light dark:border-border-dark w-full border;
   }
   .box.hover {
@@ -31,9 +32,6 @@
   }
   .box.xs {
     @apply rounded-lg p-2 shadow-md;
-  }
-  .container {
-    @apply border-border-light dark:border-border-dark bg-wood-400 dark:bg-wood-915 border;
   }
   .text-comment {
     @apply text-[#242424] dark:text-neutral-400;
