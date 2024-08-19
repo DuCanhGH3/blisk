@@ -66,7 +66,7 @@
       "border-x-wood-650 border-b-wood-700 dark:border-x-wood-915 dark:border-b-wood-1000"
     )}
   >
-    <a href="/books?category={category.id}">
+    <a class="link no-color" href="/books?category={category.id}">
       <h2 class="py-5"><span class="sr-only">Category: </span>{category.name}</h2>
     </a>
     <div

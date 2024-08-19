@@ -49,7 +49,7 @@
     class={clsx(
       "textarea block min-h-[128px] w-full overflow-hidden rounded-lg px-2.5 pb-2.5 pt-4 text-sm shadow-md transition-opacity disabled:opacity-50",
       "focus:border-accent-light dark:focus:border-accent-dark border-border-light dark:border-border-dark border focus:outline-none",
-      "dark:bg-neutral-915 bg-white text-wood-900 opacity-80 dark:text-white",
+      "bg-wood-300 dark:bg-wood-900 opacity-80",
       className
     )}
     aria-invalid={!!errorText}

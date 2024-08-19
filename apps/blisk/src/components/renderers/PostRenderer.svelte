@@ -35,7 +35,7 @@
   };
 </script>
 
-<article class="box flex flex-col gap-3 rounded-[31px] p-4 shadow-md">
+<article class="box flex flex-col gap-3 rounded-[31px] p-4 shadow-2xl">
   <h3 class="h1 -order-1 mb-4">{post.title}</h3>
   <div class="-order-2 flex flex-row flex-wrap gap-2 font-semibold leading-10 tracking-tight">
     <img

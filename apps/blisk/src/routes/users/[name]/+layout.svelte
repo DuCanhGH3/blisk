@@ -60,7 +60,7 @@
                 <tr class="h-10 md:h-[15px]">
                   <th class="relative" scope="row"><span class="absolute bottom-[-4px] left-0 font-normal">{days[day]}</span></th>
                   {#each Array.from({ length: 59 }) as _}
-                    <td class="w-10 rounded-md bg-green-400 md:w-[15px] md:rounded-sm"></td>
+                    <td class="w-10 rounded-md bg-green-800 dark:bg-green-400 md:w-[15px] md:rounded-sm"></td>
                   {/each}
                 </tr>
               {/each}

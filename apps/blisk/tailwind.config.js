@@ -191,7 +191,9 @@ export default {
       },
       backgroundImage: {
         wood: "url('/wood-pattern.png')",
+        "wood-hor": "url('/wood-pattern-hor.png')",
         "dark-wood": "url('/dark-wood-pattern.png')",
+        "dark-wood-hor": "url('/dark-wood-pattern-hor.png')",
       },
       colors: {
         wood: {
@@ -226,7 +228,7 @@ export default {
           },
         },
         accent: {
-          light: "#0c205a",
+          light: "#15224c",
           dark: "#7dd3fc",
         },
         border: {

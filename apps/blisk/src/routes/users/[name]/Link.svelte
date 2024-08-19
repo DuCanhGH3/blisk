@@ -15,7 +15,7 @@
   class={clsx(
     "transition-colors-opacity flex cursor-pointer select-none items-center justify-center rounded-md duration-100",
     "gap-2 break-words px-3 py-2 text-base font-medium text-wood-900 md:text-sm dark:text-white",
-    $page.url.pathname === href ? "bg-neutral-250 dark:bg-neutral-800" : "hover:bg-neutral-250 dark:hover:bg-neutral-800"
+    $page.url.pathname === href ? "dark:bg-wood-900 bg-wood-300" : "hover:bg-wood-200 dark:hover:bg-wood-800"
   )}
   {...props}
 >

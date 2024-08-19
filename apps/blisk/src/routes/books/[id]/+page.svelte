@@ -16,10 +16,10 @@
 
   $effect(() => {
     reviews = data.book.reviews;
-  })
+  });
 </script>
 
-<div class="mx-auto flex h-full w-full flex-col gap-8 p-4 md:p-10">
+<div class="mx-auto flex h-full w-full flex-col gap-8 p-4 md:py-10 md:px-20">
   <div class="flex w-full flex-col gap-4 lg:flex-row lg:gap-8">
     <img
       src={getImage(data.book.cover_image, "/test-cover.jpg")}
@@ -27,7 +27,7 @@
       height="288"
       alt=""
       class="h-72 w-48 select-none shadow-[5px_2px_20px_-1px_#000000]"
-      style="view-transition-name:book{fromCategory ? `-${fromCategory}` : ""}-{data.book.name}"
+      style="view-transition-name:book{fromCategory ? `-${fromCategory}` : ''}-{data.book.name}"
     />
     <div
       class={clsx(
@@ -42,7 +42,7 @@
         <span class="sr-only">Written by</span>
         {#each data.book.authors as author, idx}
           {@const last = idx === data.book.authors.length - 1}
-          <a class="link" href="/books/authors/{author.id}">{author.name}{last ? "" : ", "}</a>
+          <a class="link no-color" href="/books?author={author.id}">{author.name}{last ? "" : ", "}</a>
         {/each} • 1965
       </p>
       <div class="max-h-72 overflow-y-auto">
@@ -94,19 +94,21 @@
         <p>Overwhelmingly Positive</p>
       </div>
     </section>
-    <section id="reviews" class="flex basis-2/3 flex-col gap-4">
-      <h2>Reviews</h2>
-      {#if reviews.length > 0}
-        <VirtualScroller bind:items={reviews}>
-          {#snippet renderer(post: Ref<Post>)}
-            <div class="pb-6">
-              <PostRenderer bind:post={post.ref} />
-            </div>
-          {/snippet}
-        </VirtualScroller>
-      {:else}
-        <p class="text-lg font-semibold leading-3 tracking-tight">There's no review yet!</p>
-      {/if}
+    <section id="reviews" class="basis-2/3">
+      <div class="flex w-full max-w-screen-md flex-col gap-4">
+        <h2>Reviews</h2>
+        {#if reviews.length > 0}
+          <VirtualScroller bind:items={reviews}>
+            {#snippet renderer(post: Ref<Post>)}
+              <div class="pb-6">
+                <PostRenderer bind:post={post.ref} />
+              </div>
+            {/snippet}
+          </VirtualScroller>
+        {:else}
+          <p class="text-lg font-semibold leading-3 tracking-tight">There's no review yet!</p>
+        {/if}
+      </div>
     </section>
   </div>
 </div>
