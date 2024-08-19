@@ -9,7 +9,7 @@
   {href}
   class={clsx(
     "select-none rounded-md px-2 transition-colors duration-100",
-    "dark:hover:bg-accent-dark bg-neutral-250 hover:bg-accent-light hover:text-white dark:bg-neutral-800 dark:hover:text-wood-950"
+    "dark:hover:bg-accent-dark bg-neutral-250 hover:bg-accent-light hover:text-white dark:bg-neutral-800 dark:hover:text-wood-900"
   )}
   {...props}
 >

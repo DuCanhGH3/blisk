@@ -9,7 +9,7 @@
 
 <dialog
   bind:this={dialog.element}
-  class={clsx("box md flex w-[90dvw] max-w-[500px] flex-col gap-8 !p-8 text-wood-950 dark:text-white", className)}
+  class={clsx("box md flex w-[90dvw] max-w-[500px] flex-col gap-8 !p-8 text-wood-900 dark:text-white", className)}
   {...props}
 >
   {#if dialog.state}

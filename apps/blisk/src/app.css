@@ -28,11 +28,8 @@
   button {
     @apply cursor-pointer;
   }
-  html {
-    @apply scroll-smooth;
-  }
   body {
-    @apply bg-wood-500 bg-wood text-wood-950 font-sans font-normal dark:bg-wood-900 dark:text-white;
+    @apply bg-wood-500 bg-wood dark:bg-dark-wood text-wood-900 dark:bg-wood-950 font-sans font-normal dark:text-wood-200;
   }
   h1,
   h2,
@@ -291,7 +288,7 @@
     @apply !underline-offset-4;
   }
   .list {
-    @apply marker:text-wood-950 list-inside list-disc break-words pl-4 dark:marker:text-white;
+    @apply marker:text-wood-900 list-inside list-disc break-words pl-4 dark:marker:text-white;
   }
   .list > li {
     @apply mb-2;
@@ -313,10 +310,10 @@
     @apply top-0.5 translate-x-0 translate-y-0 text-xs text-neutral-700 dark:text-gray-300;
   }
   .input:placeholder-shown:not(:focus) + .label {
-    @apply text-wood-950 top-1/2 -translate-y-1/2 translate-x-0 text-sm dark:text-white;
+    @apply text-wood-900 top-1/2 -translate-y-1/2 translate-x-0 text-sm dark:text-white;
   }
   .textarea:placeholder-shown:not(:focus) + .label {
-    @apply text-wood-950 top-[12px] translate-x-0 text-sm dark:text-white;
+    @apply text-wood-900 top-[12px] translate-x-0 text-sm dark:text-white;
   }
   .text-error {
     @apply text-[#a51a12] dark:text-red-400;

@@ -14,7 +14,7 @@
     switch (variant) {
       case "normal":
         return clsx(
-          "bg-accent-light text-white dark:bg-accent-dark dark:text-wood-950",
+          "bg-accent-light text-white dark:bg-accent-dark dark:text-wood-900",
           "[&:not(:disabled)]:hover:bg-accent-light/80 dark:[&:not(:disabled)]:hover:bg-accent-dark/80",
           "disabled:bg-gray-100 disabled:text-neutral-700 dark:disabled:bg-neutral-900 dark:disabled:text-neutral-400"
         );
@@ -26,7 +26,7 @@
         );
       case "error":
         return clsx(
-          "bg-error-light dark:bg-error-dark text-white dark:text-wood-950",
+          "bg-error-light dark:bg-error-dark text-white dark:text-wood-900",
           "[&:not(:disabled)]:hover:bg-error-hover-light dark:[&:not(:disabled)]:hover:bg-error-hover-dark",
           "disabled:bg-error-disabled-light disabled:text-gray-100 dark:disabled:bg-error-disabled-dark dark:disabled:text-neutral-800"
         );

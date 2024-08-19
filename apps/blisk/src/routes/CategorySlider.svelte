@@ -61,7 +61,10 @@
     </button>
   </div>
   <div
-    class="relative w-full border-[8px] border-t-0 border-x-[#856940] border-b-[#6b5330] border-t-transparent px-10 shadow-[inset_0_0_20px_5px_#000000]"
+    class={clsx(
+      "relative w-full border-[8px] border-t-0 border-t-transparent px-10 shadow-[inset_0_0_20px_5px_#000000]",
+      "border-x-wood-650 border-b-wood-700 dark:border-x-wood-925 dark:border-b-wood-1000"
+    )}
   >
     <a href="/books?category={category.id}">
       <h2 class="py-5"><span class="sr-only">Category: </span>{category.name}</h2>
@@ -73,12 +76,22 @@
     >
       <div class="flex w-full flex-row">
         {#each category.books as book}
-          <a href="/books/{book.name}" class="book-container z-[3] mr-10 shrink-0 select-none shadow-[5px_2px_20px_-1px_#000000] hover:z-[4]">
-            <img src={getImage(book.cover_image, "/test-cover.jpg")} width="192" height="288" alt="Book: {book.title}" class="h-auto w-48" />
+          <a
+            href="/books/{book.name}?from-category={category.name}"
+            class="book-container z-[3] mr-10 shrink-0 select-none shadow-[5px_2px_20px_-1px_#000000] hover:z-[4]"
+          >
+            <img
+              src={getImage(book.cover_image, "/test-cover.jpg")}
+              width="192"
+              height="288"
+              alt="Book: {book.title}"
+              class="h-auto w-48"
+              style="view-transition-name:book-{category.name}-{book.name}"
+            />
           </a>
         {/each}
       </div>
     </div>
   </div>
 </div>
-<div class="bg-wood h-[20px] bg-[#d8a85f] last:hidden" aria-hidden="true"></div>
+<div class="bg-wood bg-wood-500 dark:bg-wood-950 dark:bg-dark-wood h-[20px] last:hidden" aria-hidden="true"></div>

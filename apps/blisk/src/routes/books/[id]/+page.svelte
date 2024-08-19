@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { page } from "$app/stores";
   import MarkdownRenderer from "$components/renderers/MarkdownRenderer.svelte";
   import PostRenderer from "$components/renderers/PostRenderer.svelte";
   import VirtualScroller from "$components/renderers/VirtualScroller.svelte";
@@ -10,6 +11,8 @@
   const { data } = $props();
 
   let reviews = $state(data.book.reviews);
+
+  const fromCategory = $derived($page.url.searchParams.get("from-category"));
 
   $effect(() => {
     reviews = data.book.reviews;
@@ -24,7 +27,7 @@
       height="288"
       alt=""
       class="h-72 w-48 select-none"
-      style="view-transition-name:book-{data.book.name}"
+      style="view-transition-name:book{fromCategory ? `-${fromCategory}` : ""}-{data.book.name}"
     />
     <div
       class={clsx(

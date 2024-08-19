@@ -191,6 +191,7 @@ export default {
       },
       backgroundImage: {
         wood: "url('/wood-pattern.png')",
+        "dark-wood": "url('/dark-wood-pattern.png')",
       },
       colors: {
         wood: {
@@ -200,11 +201,16 @@ export default {
           300: "#e8cb9f",
           400: "#e0b97f",
           500: "#d8a85f",
-          600: "#ad864c",
-          700: "#826539",
-          800: "#564326",
-          900: "#2b2213",
-          950: "#301a0e",
+          550: "#ad864c",
+          600: "#826539",
+          650: "#856940",
+          700: "#6b5330",
+          800: "#3a2316",
+          900: "#301a0e",
+          925: "#23150d",
+          950: "#170e09",
+          1000: "#110a06",
+          1050: "#0b0704",
         },
         error: {
           light: "#a51a12",
@@ -223,8 +229,8 @@ export default {
           dark: "#7dd3fc",
         },
         border: {
-          light: "#d4d4d4",
-          dark: "#262626",
+          light: "#e8cb9f",
+          dark: "#23150d",
         },
         yellow: {
           75: "#FFF4CE",

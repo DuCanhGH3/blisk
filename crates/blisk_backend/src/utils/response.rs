@@ -29,7 +29,10 @@ pub fn empty(headers: Option<Vec<(HeaderName, HeaderValue)>>) -> Response {
 
 pub fn created(location: String) -> Response {
     let mut res = StatusCode::CREATED.into_response();
-    res.headers_mut().insert(header::LOCATION, header::HeaderValue::from_str(&location).unwrap());
+    res.headers_mut().insert(
+        header::LOCATION,
+        header::HeaderValue::from_str(&location).unwrap(),
+    );
     res
 }
 

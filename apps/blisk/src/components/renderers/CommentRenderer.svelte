@@ -139,7 +139,7 @@
               {@const { icon: Icon, label, colors } = reactionRender[comment.user_reaction]}
               <CommentRendererButton customColors={colors} as="summary" aria-describedby="comment-{comment.id}-reaction-bar">
                 <Icon animatable={false} {...svgIconAttrs} />
-                <span class="select-none pr-1 text-wood-950 dark:text-white">{label}</span>
+                <span class="select-none pr-1 text-wood-900 dark:text-white">{label}</span>
               </CommentRendererButton>
             {/if}
             <ReactionBar

@@ -22,7 +22,7 @@
             "select-none rounded-md px-2 py-1 transition-colors duration-100",
             "bg-neutral-250 cursor-pointer dark:bg-neutral-800",
             "peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-white peer-focus:ring-offset-2 peer-focus:ring-offset-gray-800",
-            "peer-checked:bg-accent-light dark:peer-checked:bg-accent-dark peer-checked:text-white dark:peer-checked:text-wood-950"
+            "peer-checked:bg-accent-light dark:peer-checked:bg-accent-dark peer-checked:text-white dark:peer-checked:text-wood-900"
           )}
           for="{id}-{option.id}"
         >

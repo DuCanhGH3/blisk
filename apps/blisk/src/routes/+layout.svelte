@@ -75,7 +75,7 @@
   <meta name="theme-color" content={isDark ? "#000000" : "#FFFFFF"} />
 </svelte:head>
 
-<a class="absolute -top-full z-[100] text-wood-950 underline focus:top-0 dark:text-white" href="#main-content">Skip to main content</a>
+<a class="absolute -top-full z-[100] text-wood-900 underline focus:top-0 dark:text-white" href="#main-content">Skip to main content</a>
 <GlobalSvgDefs />
 <Dialog />
 <div class="flex flex-1 flex-col md:flex-row">
