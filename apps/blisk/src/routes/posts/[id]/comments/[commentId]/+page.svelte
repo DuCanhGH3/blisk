@@ -1,5 +1,5 @@
 <script lang="ts">
-  import LargePostRenderer from "../../LargePostRenderer.svelte";
+  import LargePostRenderer from "$components/renderers/LargePostRenderer.svelte";
 
   const { data } = $props();
 

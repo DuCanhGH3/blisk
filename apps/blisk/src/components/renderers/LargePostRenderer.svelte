@@ -2,7 +2,7 @@
   import { page } from "$app/stores";
   import { OPTIMISTIC_ID } from "$lib/constants.js";
   import type { Comment, Post, ReactionType, Ref, RequireFields } from "$lib/types.js";
-  import { getLoginUrl, getProfilePicture, getTotalReactionsDelta } from "$lib/utils.js";
+  import { getLoginUrl, getProfilePicture, getTopReactions, updateReactionMetadata } from "$lib/utils.js";
   import ThumbUp from "$components/icons/ThumbUp.svelte";
   import CommentForm from "$components/renderers/CommentForm.svelte";
   import MarkdownRenderer from "$components/renderers/MarkdownRenderer.svelte";
@@ -43,7 +43,7 @@
   const updateReaction = (reaction: ReactionType | null) => {
     previousReaction = post.user_reaction;
     post.user_reaction = reaction;
-    post.total_reactions += getTotalReactionsDelta(previousReaction, post.user_reaction);
+    updateReactionMetadata(post.reactions, previousReaction, post.user_reaction);
   };
 </script>
 
@@ -63,7 +63,7 @@
           <TooltipHover tooltipId="post-{post.id}-timestamp-tooltip" content="Just now">Just now</TooltipHover>
         </div>
         <div class="flex flex-row flex-wrap gap-1 text-lg">
-          {#if post.reaction === "like"}
+          {#if post.book_reaction === "like"}
             <ThumbUpFilled width={24} height={24} class="fill-accent-light dark:fill-accent-dark h-auto w-6" aria-hidden tabindex={-1} />
             <span class="text-accent-light dark:text-accent-dark">Recommended</span>
           {:else}
@@ -75,16 +75,16 @@
     </div>
     <MarkdownRenderer source={post.content} startingHeading={2} />
     <div class="order-1 -m-1 mt-0 flex w-fit flex-row flex-wrap gap-2">
-      {#if post.total_reactions > 0}
+      {#if post.reactions.total > 0}
         <div class="order-last [&>div]:gap-1">
           <CommentRendererButton as="div" interactive={false}>
-            {#each post.top_reactions as reaction}
+            {#each getTopReactions(post.reactions) as reaction}
               {@const mappedRender = reactionRender[reaction]}
               {@const Icon = mappedRender.icon}
-              <Icon width={20} height={20} class="h-auto w-5" animatable={false} aria-hidden="true" tabindex={-1} />
+              <Icon {...svgIconAttrs} animatable={false} />
             {/each}
-            <span class="pl-1">
-              {post.total_reactions} like{post.total_reactions === 1 ? "" : "s"}
+            <span class="px-1">
+              {post.reactions.total} <span class="sr-only">reaction{post.reactions.total === 1 ? "" : "s"}</span>
             </span>
           </CommentRendererButton>
         </div>

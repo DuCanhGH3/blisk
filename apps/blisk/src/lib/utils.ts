@@ -1,7 +1,7 @@
 import { base } from "$app/paths";
 import { PUBLIC_BACKEND_URL } from "$env/static/public";
 import { VALID_REACTIONS } from "./constants";
-import type { Image, ReactionType } from "./types";
+import type { Image, ReactionMetadata, ReactionType } from "./types";
 
 /**
  * Determines whether an array includes a certain element, returning true or false as appropriate.
@@ -159,3 +159,33 @@ export const getTotalReactionsDelta = (oldReaction: ReactionType | null, newReac
   }
   return 0;
 };
+
+export const getReactionDelta = (oldReaction: ReactionType | null, newReaction: ReactionType | null, reactionType: ReactionType) => {
+  if (oldReaction === null && newReaction === reactionType) {
+    return 1;
+  }
+  if (newReaction === null && oldReaction === reactionType) {
+    return -1;
+  }
+  if (oldReaction === reactionType && newReaction !== reactionType) {
+    return -1;
+  }
+  if (oldReaction !== reactionType && newReaction === reactionType) {
+    return 1;
+  }
+  return 0;
+};
+
+export const updateReactionMetadata = (metadata: ReactionMetadata, oldReaction: ReactionType | null, newReaction: ReactionType | null) => {
+  metadata.total += getTotalReactionsDelta(oldReaction, newReaction);
+  for (const reactionType of VALID_REACTIONS) {
+    metadata[reactionType] += getReactionDelta(oldReaction, newReaction, reactionType);
+  }
+};
+
+export const getTopReactions = (postOrComment: Record<ReactionType, number>): ReactionType[] =>
+  VALID_REACTIONS.map((reaction) => [reaction, postOrComment[reaction]] satisfies [type: ReactionType, count: number])
+    .filter(([, count]) => count !== 0)
+    .sort(([, countA], [, countB]) => countB - countA)
+    .slice(0, 3)
+    .map(([type]) => type);

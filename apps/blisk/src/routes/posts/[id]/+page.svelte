@@ -1,7 +1,7 @@
 <script lang="ts">
+  import LargePostRenderer from "$components/renderers/LargePostRenderer.svelte";
   import { fetchBackend } from "$lib/backend.client.js";
   import type { Comment } from "$lib/types.js";
-  import LargePostRenderer from "./LargePostRenderer.svelte";
 
   const { data } = $props();
 

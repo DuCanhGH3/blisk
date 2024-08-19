@@ -8,7 +8,6 @@ use axum::{
     http::StatusCode,
     response::{IntoResponse, Response},
 };
-use sqlx::postgres::{PgHasArrayType, PgTypeInfo};
 use tracing::instrument;
 use validator::Validate;
 
@@ -24,10 +23,15 @@ pub enum PostReaction {
     Angry,
 }
 
-impl PgHasArrayType for PostReaction {
-    fn array_type_info() -> PgTypeInfo {
-        PgTypeInfo::with_name("_preact")
-    }
+#[derive(serde::Serialize, serde::Deserialize)]
+pub struct PostReactionMetadata {
+    total: i64,
+    like: i64,
+    love: i64,
+    laugh: i64,
+    wow: i64,
+    sad: i64,
+    angry: i64,
 }
 
 #[derive(Debug, serde::Deserialize)]

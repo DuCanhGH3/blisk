@@ -2,7 +2,7 @@
   // Component is (mostly) stateless so that it works with the virtual scroller.
   import { page } from "$app/stores";
   import type { Post, ReactionType } from "$lib/types";
-  import { getLoginUrl, getProfilePicture, getTotalReactionsDelta } from "$lib/utils";
+  import { getLoginUrl, getProfilePicture, getTopReactions, updateReactionMetadata } from "$lib/utils";
   import Comment from "../icons/Comment.svelte";
   import Share from "../icons/Share.svelte";
   import ThumbUp from "../icons/ThumbUp.svelte";
@@ -32,7 +32,7 @@
   const updateReaction = (reaction: ReactionType | null) => {
     previousReaction = post.user_reaction;
     post.user_reaction = reaction;
-    post.total_reactions += getTotalReactionsDelta(previousReaction, post.user_reaction);
+    updateReactionMetadata(post.reactions, previousReaction, post.user_reaction);
   };
 </script>
 
@@ -53,7 +53,7 @@
         <TooltipHover tooltipId="post-{post.id}-timestamp-tooltip" content="Just now">Just now</TooltipHover>
       </div>
       <div class="flex flex-row flex-wrap items-center gap-1 text-base">
-        {#if post.reaction === "like"}
+        {#if post.book_reaction === "like"}
           <ThumbUpFilled width={20} height={20} class="fill-accent-light dark:fill-accent-dark h-auto w-5" aria-hidden tabindex={-1} />
           <span class="text-accent-light dark:text-accent-dark">Recommended</span>
         {:else}
@@ -64,16 +64,16 @@
     </div>
   </div>
   <MarkdownRenderer source={post.content} startingHeading={4} />
-  {#if post.total_reactions > 0}
+  {#if post.reactions.total > 0}
     <div class="flex flex-row items-center gap-1" interactive={false}>
       <!-- TODO: move top_reactions to client -->
-      {#each post.top_reactions as reaction}
+      {#each getTopReactions(post.reactions) as reaction}
         {@const mappedRender = reactionRender[reaction]}
         {@const Icon = mappedRender.icon}
-        <Icon width={20} height={20} class="h-auto w-5" animatable={false} aria-hidden="true" tabindex={-1} />
+        <Icon {...svgIconAttrs} animatable={false} />
       {/each}
-      <span class="pl-1">
-        {post.total_reactions} like{post.total_reactions === 1 ? "" : "s"}
+      <span class="px-1">
+        {post.reactions.total} <span class="sr-only">reaction{post.reactions.total === 1 ? "" : "s"}</span>
       </span>
     </div>
   {/if}

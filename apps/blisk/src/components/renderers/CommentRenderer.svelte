@@ -22,7 +22,7 @@
   import CommentIcon from "../icons/Comment.svelte";
   import Share from "../icons/Share.svelte";
   import ThumbUp from "../icons/ThumbUp.svelte";
-  import { getLoginUrl, getProfilePicture, getTotalReactionsDelta } from "$lib/utils";
+  import { getLoginUrl, getProfilePicture, getTopReactions, updateReactionMetadata } from "$lib/utils";
 
   interface CommentProps {
     /**
@@ -80,7 +80,7 @@
   const updateReaction = (reaction: ReactionType | null) => {
     previousReaction = comment.user_reaction;
     comment.user_reaction = reaction;
-    comment.total_reactions += getTotalReactionsDelta(previousReaction, comment.user_reaction);
+    updateReactionMetadata(comment.reactions, previousReaction, comment.user_reaction);
   };
 
   const openDeleteModal = () => {
@@ -130,16 +130,16 @@
     {#if !comment.is_editing}
       <MarkdownRenderer source={comment.content} startingHeading={4} />
       <div class="-m-1 mt-0 flex w-fit flex-row flex-wrap items-center gap-2">
-        {#if comment.total_reactions > 0}
+        {#if comment.reactions.total > 0}
           <div class="order-last [&>div]:gap-1">
             <CommentRendererButton as="div" interactive={false}>
-              {#each comment.top_reactions as reaction}
+              {#each getTopReactions(comment.reactions) as reaction}
                 {@const mappedRender = reactionRender[reaction]}
                 {@const Icon = mappedRender.icon}
-                <Icon width={20} height={20} class="h-auto w-5" animatable={false} aria-hidden="true" tabindex={-1} />
+                <Icon {...svgIconAttrs} animatable={false} />
               {/each}
-              <span class="pl-1">
-                {comment.total_reactions} like{comment.total_reactions === 1 ? "" : "s"}
+              <span class="px-1">
+                {comment.reactions.total} <span class="sr-only">reaction{comment.reactions.total === 1 ? "" : "s"}</span>
               </span>
             </CommentRendererButton>
           </div>

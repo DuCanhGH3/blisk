@@ -18,15 +18,20 @@ export interface User {
 
 export type BookReaction = "like" | "dislike";
 
+export type ReactionFor = (typeof VALID_REACTION_FOR)[number];
+
+export type ReactionType = (typeof VALID_REACTIONS)[number];
+
+export type ReactionMetadata = Record<"total" | ReactionType, number>;
+
 export interface Post {
   id: number;
   title: string;
   content: string;
   author_name: string;
   author_picture: Image | null;
-  reaction: BookReaction;
-  total_reactions: number;
-  top_reactions: ReactionType[];
+  book_reaction: BookReaction;
+  reactions: ReactionMetadata;
   user_reaction: ReactionType | null;
   comments: Comment[] | null;
 }
@@ -37,8 +42,7 @@ export interface Comment {
   content: string;
   author_name: string;
   author_picture: Image | null;
-  total_reactions: number;
-  top_reactions: ReactionType[];
+  reactions: ReactionMetadata;
   user_reaction: ReactionType | null;
   children: Comment[] | null;
   // The following are states that will be attached
@@ -74,10 +78,6 @@ export interface Book {
 export interface BookCategoryWithBooks extends BookCategory {
   books: Pick<Book, "title" | "name" | "cover_image" | "spine_image">[];
 }
-
-export type ReactionFor = (typeof VALID_REACTION_FOR)[number];
-
-export type ReactionType = (typeof VALID_REACTIONS)[number];
 
 export type SetHeaders = (headers: Record<string, string>) => void;
 

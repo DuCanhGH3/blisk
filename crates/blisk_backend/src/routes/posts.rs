@@ -2,7 +2,7 @@ use super::{
     auth::{OptionalUserClaims, UserClaims},
     books::BooksError,
     comments::Comment,
-    reactions::PostReaction,
+    reactions::{PostReaction, PostReactionMetadata},
 };
 use crate::{
     app::AppState,
@@ -45,9 +45,8 @@ pub struct Post {
     pub content: String,
     pub author_name: String,
     pub author_picture: Option<sqlx::types::Json<AppImage>>,
-    pub reaction: Reaction,
-    pub total_reactions: i64,
-    pub top_reactions: Vec<PostReaction>,
+    pub book_reaction: Reaction,
+    pub reactions: Option<sqlx::types::Json<PostReactionMetadata>>,
     pub user_reaction: Option<PostReaction>,
     pub comments: Option<sqlx::types::Json<Vec<Comment>>>,
 }
@@ -139,9 +138,8 @@ pub async fn read(
             p.content AS "content!", 
             p.author_name AS "author_name!",
             p.author_picture AS "author_picture?: _",
-            p.reaction AS "reaction!: _",
-            p.total_reactions AS "total_reactions!",
-            p.top_reactions AS "top_reactions!: _",
+            p.book_reaction AS "book_reaction!: _",
+            p.reactions AS "reactions?: _",
             p.user_reaction AS "user_reaction!: _",
             coalesce(jsonb_agg(c) FILTER (WHERE c.id IS NOT NULL), '[]'::JSONB) AS "comments!: _"
         FROM fetch_posts(request_uid => $1) p
@@ -164,8 +162,7 @@ pub async fn read(
             WHEN $4::BIGINT IS NOT NULL AND p.id < $4::BIGINT THEN TRUE
             ELSE FALSE
         END
-        GROUP BY p.id, p.title, p.content, p.author_name, p.author_picture,
-        p.reaction, p.total_reactions, p.top_reactions, p.user_reaction
+        GROUP BY p.id, p.title, p.content, p.author_name, p.author_picture, p.book_reaction, p.reactions, p.user_reaction
         ORDER BY p.id DESC
         LIMIT 20"#,
         &uid as &_,
@@ -202,9 +199,8 @@ pub async fn read_slug(
             p.content AS "content!", 
             p.author_name AS "author_name!",
             p.author_picture AS "author_picture?: _",
-            p.reaction AS "reaction!: _",
-            p.total_reactions AS "total_reactions!",
-            p.top_reactions AS "top_reactions!: _",
+            p.book_reaction AS "book_reaction!: _",
+            p.reactions AS "reactions?: _",
             p.user_reaction AS "user_reaction!: _",
             coalesce(jsonb_agg(c) FILTER (WHERE c.id IS NOT NULL), '[]'::JSONB) AS "comments!: _"
         FROM fetch_posts(request_uid => $2) p
@@ -219,8 +215,7 @@ pub async fn read_slug(
             LIMIT 20
         ) c ON TRUE
         WHERE p.id = $1
-        GROUP BY p.id, p.title, p.content, p.author_name, p.author_picture,
-        p.reaction, p.total_reactions, p.top_reactions, p.user_reaction"#,
+        GROUP BY p.id, p.title, p.content, p.author_name, p.author_picture, p.book_reaction, p.reactions, p.user_reaction"#,
         &post_id,
         &uid as &_,
         &comment_id as &_,
