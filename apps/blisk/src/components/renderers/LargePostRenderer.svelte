@@ -1,6 +1,6 @@
 <script lang="ts">
   import { page } from "$app/stores";
-  import { OPTIMISTIC_ID } from "$lib/constants.js";
+  import { INITIAL_REACTION_METADATA, OPTIMISTIC_ID } from "$lib/constants.js";
   import type { Comment, Post, ReactionType, Ref, RequireFields } from "$lib/types.js";
   import { getLoginUrl, getProfilePicture, getTopReactions, updateReactionMetadata } from "$lib/utils.js";
   import ThumbUp from "$components/icons/ThumbUp.svelte";
@@ -43,6 +43,7 @@
   const updateReaction = (reaction: ReactionType | null) => {
     previousReaction = post.user_reaction;
     post.user_reaction = reaction;
+    if (!post.reactions) post.reactions = INITIAL_REACTION_METADATA;
     updateReactionMetadata(post.reactions, previousReaction, post.user_reaction);
   };
 </script>
@@ -75,7 +76,7 @@
     </div>
     <MarkdownRenderer source={post.content} startingHeading={2} />
     <div class="order-1 -m-1 mt-0 flex w-fit flex-row flex-wrap gap-2">
-      {#if post.reactions.total > 0}
+      {#if post.reactions && post.reactions.total > 0}
         <div class="order-last [&>div]:gap-1">
           <CommentRendererButton as="div" interactive={false}>
             {#each getTopReactions(post.reactions) as reaction}

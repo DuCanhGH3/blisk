@@ -108,6 +108,7 @@ impl Application {
             .route("/auth/confirm", post(routes::auth::confirm))
             .route("/auth/register", post(routes::auth::register))
             .route("/auth/login", post(routes::auth::login))
+            .route("/users/:name/metadata", get(routes::users::read_metadata))
             .route("/assets/upload", post(routes::files::upload))
             .nest_service("/assets", ServeDir::new(UPLOADS_DIRECTORY))
             .with_state(app_state)

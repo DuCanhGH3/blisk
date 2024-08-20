@@ -123,27 +123,27 @@ pub async fn create(
 }
 
 #[derive(serde::Serialize, serde::Deserialize)]
-struct BookAuthor {
+pub struct BookAuthor {
     id: i64,
     name: String,
 }
 
 #[derive(serde::Serialize, serde::Deserialize)]
-struct BookCategory {
-    id: i64,
-    name: String,
+pub struct BookCategory {
+    pub id: i64,
+    pub name: String,
 }
 
-#[derive(serde::Serialize, sqlx::FromRow)]
-struct Book {
-    title: String,
-    name: String,
-    summary: String,
-    cover_image: sqlx::types::Json<AppImage>,
-    spine_image: sqlx::types::Json<AppImage>,
-    authors: sqlx::types::Json<Vec<BookAuthor>>,
-    categories: sqlx::types::Json<Vec<BookCategory>>,
-    reviews: Option<sqlx::types::Json<Vec<Post>>>,
+#[derive(serde::Serialize, serde::Deserialize, sqlx::FromRow)]
+pub struct Book {
+    pub title: String,
+    pub name: String,
+    pub summary: String,
+    pub cover_image: sqlx::types::Json<AppImage>,
+    pub spine_image: sqlx::types::Json<AppImage>,
+    pub authors: sqlx::types::Json<Vec<BookAuthor>>,
+    pub categories: sqlx::types::Json<Vec<BookCategory>>,
+    pub reviews: Option<sqlx::types::Json<Vec<Post>>>,
 }
 
 #[derive(serde::Deserialize, Validate)]

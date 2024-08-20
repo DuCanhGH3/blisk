@@ -5,7 +5,7 @@
   import type { Comment, ReactionType } from "$lib/types";
   import { dialog } from "$lib/stores/dialog.svelte";
   import { hotkeys } from "$lib/hotkeys.svelte";
-  import { BASE_COMMENTS_LENGTH, OPTIMISTIC_ID } from "$lib/constants";
+  import { BASE_COMMENTS_LENGTH, INITIAL_REACTION_METADATA, OPTIMISTIC_ID } from "$lib/constants";
   import { fetchBackend } from "$lib/backend.client";
   import CommentForm from "./CommentForm.svelte";
   import { svgIconAttrs, reactionRender } from "./renderer-constants";
@@ -80,6 +80,7 @@
   const updateReaction = (reaction: ReactionType | null) => {
     previousReaction = comment.user_reaction;
     comment.user_reaction = reaction;
+    if (!comment.reactions) comment.reactions = INITIAL_REACTION_METADATA;
     updateReactionMetadata(comment.reactions, previousReaction, comment.user_reaction);
   };
 
@@ -130,7 +131,7 @@
     {#if !comment.is_editing}
       <MarkdownRenderer source={comment.content} startingHeading={4} />
       <div class="-m-1 mt-0 flex w-fit flex-row flex-wrap items-center gap-2">
-        {#if comment.reactions.total > 0}
+        {#if comment.reactions && comment.reactions.total > 0}
           <div class="order-last [&>div]:gap-1">
             <CommentRendererButton as="div" interactive={false}>
               {#each getTopReactions(comment.reactions) as reaction}

@@ -12,6 +12,7 @@
   import ReactionBar from "./ReactionBar.svelte";
   import { svgIconAttrs, reactionRender } from "./renderer-constants";
   import TooltipHover from "../TooltipHover.svelte";
+  import { INITIAL_REACTION_METADATA } from "$lib/constants";
 
   interface PostRendererProps {
     /**
@@ -32,6 +33,7 @@
   const updateReaction = (reaction: ReactionType | null) => {
     previousReaction = post.user_reaction;
     post.user_reaction = reaction;
+    if (!post.reactions) post.reactions = INITIAL_REACTION_METADATA;
     updateReactionMetadata(post.reactions, previousReaction, post.user_reaction);
   };
 </script>
@@ -64,7 +66,7 @@
     </div>
   </div>
   <MarkdownRenderer source={post.content} startingHeading={4} />
-  {#if post.reactions.total > 0}
+  {#if post.reactions && post.reactions.total > 0}
     <div class="flex flex-row items-center gap-1" interactive={false}>
       <!-- TODO: move top_reactions to client -->
       {#each getTopReactions(post.reactions) as reaction}
@@ -73,7 +75,7 @@
         <Icon {...svgIconAttrs} animatable={false} />
       {/each}
       <span class="px-1">
-        {post.reactions.total} <span class="sr-only">reaction{post.reactions.total === 1 ? "" : "s"}</span>
+        {post.reactions.total}<span class="sr-only"> reaction{post.reactions.total === 1 ? "" : "s"}</span>
       </span>
     </div>
   {/if}

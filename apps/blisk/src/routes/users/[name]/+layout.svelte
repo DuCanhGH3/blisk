@@ -1,9 +1,10 @@
 <script lang="ts">
   import { base } from "$app/paths";
   import { page } from "$app/stores";
+  import { getProfilePicture } from "$lib/utils";
   import Link from "./Link.svelte";
 
-  const { children } = $props();
+  const { data, children } = $props();
 
   const days = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 
@@ -20,8 +21,10 @@
     />
     <div class="flex flex-row items-center gap-8 px-8">
       <img
-        src="/no-avatar.webp"
-        class="border-border-light dark:border-border-dark -mt-8 h-auto w-[150px] select-none rounded-full border shadow-lg"
+        src={getProfilePicture(data.data.picture)}
+        class="border-border-light dark:border-border-dark -mt-8 h-[150px] w-[150px] select-none rounded-full border shadow-lg"
+        width={150}
+        height={150}
         alt=""
       />
       <h1>
@@ -60,7 +63,7 @@
                 <tr class="h-10 md:h-[15px]">
                   <th class="relative" scope="row"><span class="absolute bottom-[-4px] left-0 font-normal">{days[day]}</span></th>
                   {#each Array.from({ length: 59 }) as _}
-                    <td class="w-10 rounded-md bg-green-800 dark:bg-green-400 md:w-[15px] md:rounded-sm"></td>
+                    <td class="w-10 rounded-md bg-green-800 md:w-[15px] md:rounded-sm dark:bg-green-400"></td>
                   {/each}
                 </tr>
               {/each}

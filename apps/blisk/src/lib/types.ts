@@ -4,6 +4,12 @@ export type RequireFields<T, K extends keyof T> = Omit<T, K> & {
   [P in keyof Pick<T, K>]-?: NonNullable<T[P]>;
 };
 
+export interface UserMetadata {
+  name: string;
+  picture: Image | null;
+  books: Book[];
+}
+
 export type ColorScheme = (typeof COLOR_SCHEMES)[number];
 
 export type UserRole = "user" | "admin";
@@ -31,7 +37,7 @@ export interface Post {
   author_name: string;
   author_picture: Image | null;
   book_reaction: BookReaction;
-  reactions: ReactionMetadata;
+  reactions: ReactionMetadata | null;
   user_reaction: ReactionType | null;
   comments: Comment[] | null;
 }
@@ -42,7 +48,7 @@ export interface Comment {
   content: string;
   author_name: string;
   author_picture: Image | null;
-  reactions: ReactionMetadata;
+  reactions: ReactionMetadata | null;
   user_reaction: ReactionType | null;
   children: Comment[] | null;
   // The following are states that will be attached

@@ -13,9 +13,10 @@
     id: string;
     errorTextId?: string;
     errorText?: string | string[];
+    roundedFull?: boolean;
   }
 
-  let { self = $bindable(), actions, label, id, errorTextId, errorText, ...rest }: InputProps = $props();
+  let { self = $bindable(), actions, label, id, errorTextId, errorText, roundedFull = false, ...rest }: InputProps = $props();
 </script>
 
 <div class="relative w-full">
@@ -23,9 +24,10 @@
     bind:this={self}
     {id}
     class={clsx(
-      "input block h-[44px] w-full rounded-lg px-2.5 pt-2.5 text-sm shadow-md transition-opacity disabled:opacity-50",
+      "input block h-[44px] w-full text-sm shadow-md transition-opacity disabled:opacity-50",
       "focus:border-accent-light dark:focus:border-accent-dark border-border-light dark:border-border-dark border focus:outline-none",
-      "bg-wood-300 dark:bg-wood-800 opacity-80"
+      "bg-wood-300 dark:bg-wood-800 opacity-80",
+      roundedFull ? "rounded-full px-4 pt-2.5" : "rounded-lg px-2.5 pt-2.5"
     )}
     aria-invalid={!!errorText}
     aria-describedby={errorText ? errorTextId : undefined}
@@ -33,7 +35,13 @@
     use:combineActions={actions}
     {...rest}
   />
-  <label class="label absolute left-2.5 flex select-none flex-row items-center gap-2 font-medium transition-all duration-100 ease-in" for={id}>
+  <label
+    class={clsx(
+      "label absolute flex select-none flex-row items-center gap-2 font-medium transition-all duration-100 ease-in",
+      roundedFull ? "left-4" : "left-2.5"
+    )}
+    for={id}
+  >
     {#if typeof label === "string"}
       {label}
     {:else}

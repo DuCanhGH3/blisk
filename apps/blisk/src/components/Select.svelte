@@ -12,7 +12,7 @@
 </script>
 
 <fieldset {id} {...props}>
-  <legend class="mb-2 text-sm font-medium">Categories</legend>
+  <legend class="mb-2 text-sm font-medium">{label}</legend>
   <div class="flex flex-row gap-2">
     {#each options as option}
       <div role="presentation">

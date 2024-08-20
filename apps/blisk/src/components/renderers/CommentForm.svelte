@@ -1,7 +1,7 @@
 <script lang="ts">
   import { enhance } from "$app/forms";
   import type { Comment } from "$lib/types";
-  import { OPTIMISTIC_ID } from "$lib/constants";
+  import { INITIAL_REACTION_METADATA, OPTIMISTIC_ID } from "$lib/constants";
   import { page } from "$app/stores";
   import CommentIcon from "../icons/Comment.svelte";
   import Textarea from "../Textarea.svelte";
@@ -38,15 +38,7 @@
         content,
         author_name,
         author_picture,
-        reactions: {
-          total: 0,
-          like: 0,
-          love: 0,
-          laugh: 0,
-          wow: 0,
-          sad: 0,
-          angry: 0,
-        },
+        reactions: INITIAL_REACTION_METADATA,
         user_reaction: null,
         children: [],
         is_editing: false,

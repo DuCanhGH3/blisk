@@ -1,9 +1,10 @@
 import { z } from "zod";
-import type { Actions, PageServerLoad } from "./$types";
-import { fail, redirect } from "@sveltejs/kit";
+import type { Actions } from "./$types";
+import { error, fail, redirect } from "@sveltejs/kit";
 import { fetchBackend } from "$lib/backend";
 import { base } from "$app/paths";
 import { convertFormData, safeRedirect } from "$lib/utils";
+import type { UserMetadata } from "$lib/types";
 
 const postSchema = z.object({
   title: z.string().min(1, "Title must not be empty!").max(500, "Title is too long!"),
@@ -36,6 +37,21 @@ export const actions: Actions = {
   },
 };
 
-export const load: PageServerLoad = () => ({
-  title: "Post",
-});
+export const load = async ({ cookies, fetch, locals, setHeaders, url }) => {
+  if (!locals.user) {
+    redirect(307, safeRedirect(url.searchParams.get("redirectTo"), `${base}/`));
+  }
+  const metadata = await fetchBackend<UserMetadata>(`/users/${locals.user.name}/metadata`, {
+    authz: "optional",
+    cookies,
+    fetch,
+    setHeaders,
+  });
+  if (!metadata.ok) {
+    error(metadata.status, metadata.error);
+  }
+  return {
+    title: "Create a Post",
+    books: metadata.data.books,
+  };
+};
