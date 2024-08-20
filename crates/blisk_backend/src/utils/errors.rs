@@ -124,12 +124,18 @@ impl IntoResponse for AppError {
             },
             AppError::PostsError(error) => {
                 match error {
-                    PostsError::PostNotFound(_) => {
-                        (StatusCode::NOT_FOUND, "Post not found.".to_owned())
-                    }
-                    PostsError::UpdateUnauthorized(id) => {
-                        (StatusCode::UNAUTHORIZED, format!("Post {id} is either not yours or not found."))
-                    }
+                    PostsError::BookNotCompleted(book) => (
+                        StatusCode::CONFLICT,
+                        format!("You must finish reading \"{book}\" before reviewing!")
+                    ),
+                    PostsError::PostNotFound(_) => (
+                        StatusCode::NOT_FOUND,
+                        "Post not found.".to_owned()
+                    ),
+                    PostsError::UpdateUnauthorized(id) => (
+                        StatusCode::UNAUTHORIZED,
+                        format!("Post {id} is either not yours or not found.")
+                    ),
                     PostsError::Unexpected => (
                         StatusCode::INTERNAL_SERVER_ERROR,
                         "Internal Server Error".to_owned(),

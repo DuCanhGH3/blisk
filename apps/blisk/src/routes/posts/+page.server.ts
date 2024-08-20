@@ -18,5 +18,5 @@ export const load = async ({ cookies, fetch, setHeaders }) => {
   if (!data.ok) {
     error(data.status, data.error);
   }
-  return { posts: data.data };
+  return { title: "Posts", posts: data.data };
 };

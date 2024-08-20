@@ -22,6 +22,8 @@ use validator::Validate;
 
 #[derive(Debug, thiserror::Error)]
 pub enum PostsError {
+    #[error("user has not finished reading book {0} before posting")]
+    BookNotCompleted(String),
     #[error("post {0} cannot be found")]
     PostNotFound(i64),
     #[error("post {0} was non-existent, or an unauthorized personnel tried to update it")]
@@ -78,6 +80,19 @@ pub async fn create(
     }): AppJson<CreatePayload>,
 ) -> Result<Response, AppError> {
     let mut transaction = pool.begin().await?;
+    let user_record = sqlx::query!(
+        "WITH book AS (SELECT b.id, b.title FROM books b WHERE b.name = $1)
+        SELECT b.title AS book_title, ub.completed
+        FROM users_books ub, book b
+        WHERE ub.book_id = b.id AND ub.user_id = $2",
+        &book,
+        &claims.sub
+    )
+    .fetch_one(&mut *transaction)
+    .await?;
+    if !user_record.completed {
+        return Err(PostsError::BookNotCompleted(user_record.book_title))?;
+    }
     let pid: i64 = sqlx::query_scalar!(
         "INSERT INTO posts (author_id, book_id, title, content, reaction)
         VALUES ($1, (SELECT id FROM books WHERE name = $2), $3, $4, $5)

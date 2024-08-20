@@ -79,6 +79,7 @@
         <Link href={`${basePath}/comments`}>Comments</Link>
         <Link href={`${basePath}/likes`}>Likes</Link>
         <Link href={`${basePath}/dislikes`}>Dislikes</Link>
+        <Link href={`${basePath}/books`}>Books</Link>
       </div>
       <div class="w-full max-w-screen-md">
         {@render children()}
