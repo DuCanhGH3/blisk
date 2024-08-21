@@ -48,10 +48,12 @@ pub async fn read_metadata(
                 b.title,
                 b.name,
                 b.summary,
+                b.lang AS language,
                 b.cover_image,
                 b.spine_image,
                 b.authors,
-                b.categories
+                b.categories,
+                b.reactions
             FROM users_books ub
             JOIN books_view b
             ON ub.book_id = b.id

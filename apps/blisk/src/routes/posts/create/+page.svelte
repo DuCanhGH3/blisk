@@ -3,6 +3,7 @@
   import Button from "$components/Button.svelte";
   import FilePicker from "$components/FilePicker.svelte";
   import Input from "$components/Input.svelte";
+  import Select from "$components/Select.svelte";
   import SelectNative from "$components/SelectNative.svelte";
   import Textarea from "$components/Textarea.svelte";
 
@@ -37,6 +38,20 @@
     />
     <!-- TODO: implement searching -->
     <SelectNative name="book" id="create-post-book" label="Book" values={data.books.map(({ name, title }) => [name, title])} />
+    <Select
+      id="create-post-book-reaction"
+      multiple={false}
+      legends={[
+        {
+          name: "reaction",
+          label: "How do you feel about the book?",
+          options: [
+            { id: "like", name: "Positive" },
+            { id: "dislike", name: "Negative" },
+          ],
+        },
+      ]}
+    />
     <Textarea
       name="content"
       id="create-post-content"

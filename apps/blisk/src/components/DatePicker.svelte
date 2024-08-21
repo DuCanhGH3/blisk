@@ -21,13 +21,13 @@
     class={clsx(
       "datepicker block h-[44px] w-full rounded-lg px-2.5 pb-2.5 pt-4 text-sm shadow-md transition-opacity disabled:opacity-50",
       "focus:border-accent-light dark:focus:border-accent-dark border-border-light dark:border-border-dark border focus:outline-none",
-      "dark:bg-neutral-915 bg-white text-wood-900 opacity-80 dark:text-white"
+      "bg-wood-300 dark:bg-wood-800 opacity-80"
     )}
   >
     <input
       {id}
       type="date"
-      class="dark:bg-neutral-915 bg-white text-wood-900 opacity-80 dark:text-white"
+      class="bg-wood-300 dark:bg-wood-800 opacity-80"
       aria-invalid={!!errorText}
       aria-describedby={errorText ? errorTextId : undefined}
       placeholder=" "

@@ -1,67 +1,19 @@
 <script lang="ts">
-  import type { Action } from "svelte/action";
   import { enhance } from "$app/forms";
-  import NavLink from "$components/layouts/NavLink.svelte";
   import DatePicker from "$components/DatePicker.svelte";
   import Button from "$components/Button.svelte";
+  import SelectNative from "$components/SelectNative.svelte";
 
   const { data, form } = $props();
 
   let isLoading = $state(false);
-  let observer = $state<IntersectionObserver | null>(null);
-  let activeId = $state<string | null>(null);
-
-  $effect(() => {
-    observer = new IntersectionObserver(
-      (entries) => {
-        if (entries.length > 0) {
-          activeId = `#${entries[0].target.id}`;
-        } else {
-          activeId = null;
-        }
-      },
-      {
-        rootMargin: "0% 0% 0% 0%",
-      }
-    );
-
-    return () => {
-      observer?.disconnect();
-      observer = null;
-    };
-  });
-
-  const trackActive: Action<HTMLElement, IntersectionObserver | null> = (node, initialObserver) => {
-    let observer = initialObserver;
-    observer?.observe(node);
-    return {
-      update(newObserver) {
-        observer?.unobserve(node);
-        (observer = newObserver)?.observe(node);
-      },
-      destroy() {
-        observer?.unobserve(node);
-      },
-    };
-  };
-
-  const links = [
-    ["#read-book-starting", "Starting date"],
-    ["#read-book-ending", "Ending date"],
-  ] as const;
 </script>
 
-<div class="h-full w-full p-2 md:py-8">
-  <h1 class="h2 mb-8" use:trackActive={observer}>Read a book</h1>
-  <div class="relative flex w-full flex-col gap-4 xl:flex-row xl:justify-between">
-    <nav class="top-0 flex shrink-0 flex-col gap-[5px] xl:sticky xl:max-h-dvh xl:w-[200px] print:hidden" aria-label="Table of contents">
-      {#each links as [href, title]}
-        <NavLink {href} isActive={activeId === href} textCenter={false}>{title}</NavLink>
-      {/each}
-    </nav>
+<div class="flex w-full items-center justify-center self-stretch p-4">
+  <div class="container flex w-[90dvw] max-w-[500px] flex-col items-center gap-6 rounded-lg p-8 shadow-xl">
     <form
       method="POST"
-      class="flex flex-1 flex-col gap-3"
+      class="flex w-full flex-col gap-3"
       use:enhance={() => {
         isLoading = true;
         return async ({ update }) => {
@@ -70,8 +22,10 @@
         };
       }}
     >
+      <h1 class="h2">Start reading</h1>
+      <SelectNative name="book" id="read-book-name" label="Book" values={data.books.map(({ name, title }) => [name, title])} />
       <DatePicker
-        name="startingDate"
+        name="starting_date"
         label="Starting date"
         id="read-book-starting"
         required
@@ -80,10 +34,9 @@
         max={data.oneYearLater}
         errorTextId="read-book-starting-error"
         errorText={form?.validationError?.startingDate}
-        actions={[[trackActive, observer]]}
       />
       <DatePicker
-        name="endingDate"
+        name="ending_date"
         label="Ending date"
         id="read-book-ending"
         required
@@ -92,11 +45,10 @@
         max={data.oneYearLater}
         errorTextId="read-book-ending-error"
         errorText={form?.validationError?.endingDate}
-        actions={[[trackActive, observer]]}
       />
-      <div class="flex w-full flex-row-reverse items-center gap-4">
-        <Button as="button" class="!px-20 !py-3" type="submit" disabled={isLoading}>Start reading</Button>
-        <Button as="a" variant="light" class="!px-20 !py-3" href="/books">Cancel</Button>
+      <div class="flex w-full flex-row-reverse flex-wrap items-center gap-4">
+        <Button as="button" type="submit" disabled={isLoading}>Start reading</Button>
+        <Button as="a" variant="light" href="/books">Cancel</Button>
         {#if !!form?.error}
           {#if typeof form.error === "string"}
             <p class="text-error-light dark:text-error-dark" role="alert">{form.error}</p>

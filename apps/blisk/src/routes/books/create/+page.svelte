@@ -128,7 +128,7 @@
         errorTextId="create-book-spine-error"
         fileType="image"
       />
-      <Select id="create-book-category" label="Categories" options={data.categories} />
+      <Select id="create-book-category" legends={[{ name: "categories", label: "Categories", options: data.categories }]} />
       <div class="flex w-full flex-row-reverse items-center gap-4">
         <Button as="button" class="!px-20 !py-3" type="submit" disabled={isLoading}>Create</Button>
         <Button as="a" class="!px-20 !py-3" variant="light" href="/books">Cancel</Button>

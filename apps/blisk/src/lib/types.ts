@@ -24,6 +24,8 @@ export interface User {
 
 export type BookReaction = "like" | "dislike";
 
+export type BookReactionMetadata = Record<"total" | BookReaction, number>;
+
 export type ReactionFor = (typeof VALID_REACTION_FOR)[number];
 
 export type ReactionType = (typeof VALID_REACTIONS)[number];
@@ -74,10 +76,12 @@ export interface Book {
   title: string;
   name: string;
   summary: string;
+  language: string;
   cover_image: Image | null;
   spine_image: Image | null;
   authors: BookAuthor[];
   categories: BookCategory[];
+  reactions: BookReactionMetadata | null;
   reviews: Post[];
 }
 
@@ -104,3 +108,12 @@ export interface Image {
   ext: string;
   owner: number;
 }
+
+export type BookRating =
+  | "Overwhelmingly Positive"
+  | "Very Positive"
+  | "Positive"
+  | "Mixed"
+  | "Negative"
+  | "Very Negative"
+  | "Overwhelmingly Negative";

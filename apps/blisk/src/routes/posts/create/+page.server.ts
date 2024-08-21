@@ -10,6 +10,7 @@ const postSchema = z.object({
   title: z.string().min(1, "Title must not be empty!").max(500, "Title is too long!"),
   content: z.string().min(1, "Content must not be empty!"),
   book: z.string().min(1, "You must point to a book!"),
+  reaction: z.union([z.literal("like"), z.literal("dislike")], { message: "Reaction is not valid!" }),
   images: z.array(z.instanceof(File, { message: "One of the images is not valid!" })),
 });
 
@@ -25,10 +26,7 @@ export const actions: Actions = {
       fetch,
       setHeaders,
       method: "POST",
-      body: JSON.stringify({
-        ...data.data,
-        reaction: "like",
-      }),
+      body: JSON.stringify(data.data),
     });
     if (!backendResponse.ok) {
       return fail(backendResponse.status, { error: backendResponse.error });

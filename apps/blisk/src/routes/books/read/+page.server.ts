@@ -1,8 +1,9 @@
 import dayjs from "dayjs";
 import { z } from "zod";
-import type { Actions, PageServerLoad } from "./$types";
-import { fail } from "@sveltejs/kit";
+import { error, fail } from "@sveltejs/kit";
 import { convertFormData } from "$lib/utils";
+import { fetchBackend } from "$lib/backend";
+import type { Book } from "$lib/types";
 
 const readSchema = z
   .object({
@@ -22,7 +23,7 @@ const readSchema = z
     return z.NEVER;
   });
 
-export const actions: Actions = {
+export const actions = {
   async default({ request }) {
     const data = await readSchema.spa(convertFormData(await request.formData()));
 
@@ -33,9 +34,20 @@ export const actions: Actions = {
   },
 };
 
-export const load: PageServerLoad = () => {
+export const load = async ({ cookies, fetch, setHeaders }) => {
+  const books = await fetchBackend<Omit<Book, "reviews">[]>("/books?include_reviews=false", {
+    authz: false,
+    cookies,
+    fetch,
+    setHeaders,
+  });
+  if (!books.ok) {
+    error(books.status, books.error);
+  }
   const now = dayjs();
   return {
+    title: "Read",
+    books: books.data,
     now: now.format("YYYY-MM-DD"),
     oneWeekLater: now.add(1, "week").format("YYYY-MM-DD"),
     oneMonthLater: now.add(1, "month").format("YYYY-MM-DD"),

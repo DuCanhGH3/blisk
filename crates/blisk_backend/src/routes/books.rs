@@ -29,6 +29,13 @@ pub struct BooksMetadata {
     categories: sqlx::types::Json<Vec<BookCategory>>,
 }
 
+#[derive(serde::Serialize, serde::Deserialize)]
+pub struct BookReactionMetadata {
+    total: i64,
+    like: i64,
+    dislike: i64,
+}
+
 #[derive(Debug, thiserror::Error)]
 pub enum BooksError {
     #[error("duplicate slug {0}")]
@@ -139,10 +146,12 @@ pub struct Book {
     pub title: String,
     pub name: String,
     pub summary: String,
+    pub language: String,
     pub cover_image: sqlx::types::Json<AppImage>,
     pub spine_image: sqlx::types::Json<AppImage>,
     pub authors: sqlx::types::Json<Vec<BookAuthor>>,
     pub categories: sqlx::types::Json<Vec<BookCategory>>,
+    pub reactions: Option<sqlx::types::Json<BookReactionMetadata>>,
     pub reviews: Option<sqlx::types::Json<Vec<Post>>>,
 }
 
@@ -179,10 +188,12 @@ pub async fn read(
             b.title AS "title!",
             b.name AS "name!",
             b.summary AS "summary!",
+            b.lang AS "language!",
             b.cover_image AS "cover_image!: _",
             b.spine_image AS "spine_image!: _",
             b.authors AS "authors!: _",
             b.categories AS "categories!: _",
+            b.reactions AS "reactions?: _",
             CASE $5::BOOLEAN
                 WHEN TRUE THEN coalesce(jsonb_agg(rv) FILTER (WHERE rv.id IS NOT NULL), '[]'::JSONB)
                 ELSE NULL
@@ -209,7 +220,7 @@ pub async fn read(
             WHEN $4 IS NOT NULL AND b.authors_raw @> $4 THEN TRUE
             ELSE FALSE
         END
-        GROUP BY b.title, b.name, b.summary, b.cover_image, b.spine_image, b.authors, b.categories, rank.rank
+        GROUP BY b.title, b.name, b.summary, b.lang, b.cover_image, b.spine_image, b.authors, b.categories, b.reactions, rank.rank
         ORDER BY rank DESC"#,
         &uid as &_,
         &q as &_,
@@ -234,10 +245,12 @@ pub async fn read_slug(
             b.title AS "title!",
             b.name AS "name!",
             b.summary AS "summary!",
+            b.lang AS "language!",
             b.cover_image AS "cover_image!: _",
             b.spine_image AS "spine_image!: _",
             b.authors AS "authors!: _",
             b.categories AS "categories!: _",
+            b.reactions AS "reactions?: _",
             coalesce(jsonb_agg(rv) FILTER (WHERE rv.id IS NOT NULL), '[]'::JSONB) AS "reviews!: sqlx::types::Json<Vec<Post>>"
         FROM books_view b
         LEFT JOIN LATERAL (
@@ -249,7 +262,7 @@ pub async fn read_slug(
             OFFSET 0
         ) rv ON TRUE
         WHERE b.name = $1
-        GROUP BY b.title, b.name, b.summary, b.cover_image, b.spine_image, b.authors, b.categories"#,
+        GROUP BY b.title, b.name, b.summary, b.lang, b.cover_image, b.spine_image, b.authors, b.categories, b.reactions"#,
         &slug,
         &uid as &_
     )
@@ -332,3 +345,15 @@ pub async fn read_metadata(
     transaction.commit().await?;
     Ok(response(StatusCode::OK, None, AppJson(metadata)))
 }
+
+// #[derive(serde::Deserialize, Validate)]
+// pub struct StartReadingPayload {
+
+// }
+
+// pub async fn start_reading(
+//     State(AppState { pool, .. }): State<AppState>,
+//     AppForm(StartReadingPayload {}): AppForm<StartReadingPayload>,
+// ) -> Result<Response, AppError> {
+//     Ok(created(format!("/users/")))
+// }

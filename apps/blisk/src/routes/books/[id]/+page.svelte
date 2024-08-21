@@ -3,9 +3,10 @@
   import MarkdownRenderer from "$components/renderers/MarkdownRenderer.svelte";
   import PostRenderer from "$components/renderers/PostRenderer.svelte";
   import VirtualScroller from "$components/renderers/VirtualScroller.svelte";
+  import TooltipHover from "$components/TooltipHover.svelte";
   import { clsx } from "$lib/clsx";
   import type { Post, Ref } from "$lib/types";
-  import { getImage } from "$lib/utils";
+  import { getImage, percentageToBookRating } from "$lib/utils";
   import LinkButton from "./LinkButton.svelte";
 
   const { data } = $props();
@@ -19,7 +20,7 @@
   });
 </script>
 
-<div class="mx-auto flex h-full w-full flex-col gap-8 p-4 md:py-10 md:px-20">
+<div class="mx-auto flex h-full w-full flex-col gap-8 p-4 md:px-20 md:py-10">
   <div class="flex w-full flex-col gap-4 lg:flex-row lg:gap-8">
     <img
       src={getImage(data.book.cover_image, "/test-cover.jpg")}
@@ -55,7 +56,7 @@
       id="statistics"
       class={clsx(
         "flex h-fit w-fit basis-1/3 flex-col gap-6 overflow-x-auto lg:sticky lg:top-14",
-        "[&>div>h3]:mb-3 [&>div>h3]:text-lg [&>div>h3]:font-semibold [&>div>h3]:leading-3 [&>div>h3]:tracking-tight"
+        "[&>div>h3]:mb-3 [&>div>h3]:text-lg [&>div>h3]:font-bold [&>div>h3]:leading-3 [&>div>h3]:tracking-tight"
       )}
     >
       <h2>About {data.book.title}</h2>
@@ -69,7 +70,7 @@
       </div>
       <div>
         <h3>Language</h3>
-        <p>English</p>
+        <p>{data.book.language}</p>
       </div>
       <div>
         <h3>Series</h3>
@@ -85,13 +86,37 @@
           {/each}
         </div>
       </div>
-      <div>
-        <h3>Recent reviews</h3>
-        <p>Overwhelmingly Positive</p>
-      </div>
-      <div>
-        <h3>All reviews</h3>
-        <p>Overwhelmingly Positive</p>
+      <div class="[&_p]:w-fit [&_p]:font-semibold">
+        <h3>Reviews</h3>
+        {#if !data.book.reactions}
+          <p class="w-fit font-semibold">Not Available</p>
+        {:else}
+          {@const percentage = Math.round((data.book.reactions.like / data.book.reactions.total) * 100)}
+          {@const bookRating = percentageToBookRating(percentage)}
+          {@const isPositive = bookRating === "Overwhelmingly Positive" || bookRating === "Very Positive" || bookRating === "Positive"}
+          {@const isMixed = bookRating === "Mixed"}
+          {@const isNegative = !isPositive && !isMixed}
+          <TooltipHover
+            tooltipId="book-rating-tooltip"
+            content={isNegative
+              ? `${data.book.reactions.dislike} (${100 - percentage}%) out of ${data.book.reactions.total} reviews were negative`
+              : `${data.book.reactions.like} (${percentage}%) out of ${data.book.reactions.total} reviews were positive`}
+          >
+            <p
+              class={clsx(
+                "w-fit font-semibold",
+                isNegative ? "text-error-light dark:text-error-dark" : isPositive ? "text-accent-light dark:text-accent-dark" : ""
+              )}
+            >
+              {bookRating}
+              {#if isNegative}
+                ({data.book.reactions.dislike} negative review{data.book.reactions.dislike !== 1 ? "s" : ""})
+              {:else}
+                ({data.book.reactions.like} positive review{data.book.reactions.like !== 1 ? "s" : ""})
+              {/if}
+            </p>
+          </TooltipHover>
+        {/if}
       </div>
     </section>
     <section id="reviews" class="basis-2/3">

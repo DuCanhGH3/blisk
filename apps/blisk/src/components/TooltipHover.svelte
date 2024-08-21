@@ -23,7 +23,7 @@
       let right = false;
       let y = Math.max(0, viewportRect.bottom - rect.y);
       let bottom = true;
-
+      console.log(window.innerWidth, x, window.scrollX, rect.left, rect.right);
       if (window.innerWidth - x < 200) {
         x = Math.max(0, window.innerWidth - rect.right);
         right = true;

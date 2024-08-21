@@ -1,4 +1,12 @@
 -- Add up migration script here
+CREATE OR REPLACE FUNCTION construct_book_reaction_object(rt ANYELEMENT)
+RETURNS JSONB LANGUAGE sql IMMUTABLE AS $$
+  SELECT CASE
+    WHEN rt IS NOT NULL THEN jsonb_build_object('total', rt.total, 'like', rt.like, 'dislike', rt.dislike)
+    ELSE NULL
+  END;
+$$;
+
 CREATE OR REPLACE VIEW books_view AS (
   SELECT
     b.id,
@@ -14,7 +22,8 @@ CREATE OR REPLACE VIEW books_view AS (
     bc.bc_json AS categories,
     bc.bc_raw AS categories_raw,
     ba.ba_json AS authors,
-    ba.ba_raw AS authors_raw
+    ba.ba_raw AS authors_raw,
+    construct_book_reaction_object(brt) AS reactions
   FROM books b
   JOIN book_languages bl ON b.language = bl.code
   LEFT JOIN LATERAL (
@@ -49,6 +58,7 @@ CREATE OR REPLACE VIEW books_view AS (
       WHERE bta.book_id = b.id 
     ) ba
   ) ba ON TRUE
-  GROUP BY b.id, bl.name, bl.code, ci.id, ci.ext, ci.owner_id, si.id,
-  si.ext, si.owner_id, bc.bc_json, bc.bc_raw, ba.ba_json, ba.ba_raw
+  LEFT JOIN book_reactions_tally brt ON brt."book_id" = b."id"
+  GROUP BY b.id, bl.name, bl.code, ci.id, ci.ext, ci.owner_id, si.id, si.ext,
+  si.owner_id, bc.bc_json, bc.bc_raw, ba.ba_json, ba.ba_raw, brt
 );

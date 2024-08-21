@@ -217,8 +217,8 @@ export default {
           1050: "#0b0704",
         },
         error: {
-          light: "#a51a12",
-          dark: "#f87171",
+          light: "#520000",
+          dark: "#f99090",
           hover: {
             light: "#8e1610",
             dark: "#f98b8b",

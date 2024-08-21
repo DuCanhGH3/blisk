@@ -1,7 +1,7 @@
 import { base } from "$app/paths";
 import { PUBLIC_BACKEND_URL } from "$env/static/public";
 import { VALID_REACTIONS } from "./constants";
-import type { Image, ReactionMetadata, ReactionType } from "./types";
+import type { BookRating, Image, ReactionMetadata, ReactionType } from "./types";
 
 /**
  * Determines whether an array includes a certain element, returning true or false as appropriate.
@@ -189,3 +189,25 @@ export const getTopReactions = (postOrComment: Record<ReactionType, number>): Re
     .sort(([, countA], [, countB]) => countB - countA)
     .slice(0, 3)
     .map(([type]) => type);
+
+export const percentageToBookRating = (percentage: number): BookRating => {
+  if (percentage >= 90) {
+    return "Overwhelmingly Positive";
+  }
+  if (percentage >= 80) {
+    return "Very Positive";
+  }
+  if (percentage >= 70) {
+    return "Positive";
+  }
+  if (percentage >= 40) {
+    return "Mixed";
+  }
+  if (percentage >= 25) {
+    return "Negative";
+  }
+  if (percentage >= 15) {
+    return "Very Negative";
+  }
+  return "Overwhelmingly Negative";
+};
