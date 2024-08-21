@@ -4,18 +4,36 @@
   import { dialog } from "$lib/stores/dialog.svelte";
   import type { HTMLDialogAttributes } from "svelte/elements";
 
-  let { class: className, ...props }: HTMLDialogAttributes = $props();
+  const { class: className, ...props }: HTMLDialogAttributes = $props();
+
+  let dialogElement = $state<HTMLDialogElement | null>(null);
+
+  let scroll = 0;
+
+  $effect(() => {
+    if (dialog.state) {
+      scroll = document.documentElement.scrollTop;
+      document.documentElement.style.overflowY = "hidden";
+      dialogElement?.showModal();
+    } else {
+      dialogElement?.close();
+      document.documentElement.style.overflowY = "";
+      document.documentElement.scrollTo({ top: scroll, behavior: "instant" });
+    }
+  });
 </script>
 
-<dialog
-  bind:this={dialog.element}
-  class={clsx("box md flex w-[90dvw] max-w-[500px] flex-col gap-8 !p-8 text-wood-900 dark:text-white", className)}
-  {...props}
->
-  {#if dialog.state}
+{#if dialog.state}
+  <dialog
+    bind:this={dialogElement}
+    class={clsx("box md text-wood-900 flex w-[90dvw] max-w-[500px] flex-col gap-6 !p-8 dark:text-white", className)}
+    aria-labelledby="dialog-title"
+    aria-describedby="dialog-desc"
+    {...props}
+  >
     <div>
-      <h1 class="h4 mb-4">{dialog.state.title}</h1>
-      <h2 class="h5">{dialog.state.description}</h2>
+      <h1 class="h4 mb-4" id="dialog-title">{dialog.state.title}</h1>
+      <p class="h5" id="dialog-desc">{dialog.state.description}</p>
     </div>
     <div class="flex flex-row flex-wrap gap-4">
       {#if dialog.state.type === "action"}
@@ -31,5 +49,5 @@
         </Button>
       {/if}
     </div>
-  {/if}
-</dialog>
+  </dialog>
+{/if}

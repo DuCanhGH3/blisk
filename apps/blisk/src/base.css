@@ -40,15 +40,15 @@
   }
   h4,
   .h4 {
-    @apply text-2xl font-medium leading-10 tracking-tight;
+    @apply text-2xl font-medium leading-5 tracking-tight;
   }
   h5,
   .h5 {
-    @apply text-xl font-medium leading-10 tracking-tight;
+    @apply text-xl font-medium leading-5 tracking-tight;
   }
   h6,
   .h6 {
-    @apply text-lg font-normal leading-10 tracking-tight;
+    @apply text-lg font-normal leading-5 tracking-tight;
   }
   details > summary {
     @apply cursor-pointer select-none list-none;

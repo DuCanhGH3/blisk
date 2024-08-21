@@ -31,7 +31,8 @@
 
 <div class="flex w-full flex-col gap-10 self-stretch">
   <h1 class="sr-only">Home</h1>
-  <div class="relative h-full w-full">
+  <section id="book-of-the-day" class="relative h-full w-full">
+    <h2 class="sr-only">Books of the day</h2>
     <button
       class={clsx(
         "absolute left-4 top-1/2 z-10 flex -translate-y-1/2 active:!bg-neutral-400 dark:active:!bg-neutral-700",
@@ -40,7 +41,8 @@
       )}
       onclick={emblaPrev}
     >
-      <ChevronLeft width={24} height={24} class="transition-all duration-100" />
+      <ChevronLeft width={24} height={24} class="transition-all duration-100" aria-hidden="true" tabindex={-1} />
+      <span class="sr-only">Go to previous page</span>
     </button>
     <button
       class={clsx(
@@ -50,11 +52,12 @@
       )}
       onclick={emblaNext}
     >
-      <ChevronRight width={24} height={24} class="transition-all duration-100" />
+      <ChevronRight width={24} height={24} class="transition-all duration-100" aria-hidden="true" tabindex={-1} />
+      <span class="sr-only">Go to next page</span>
     </button>
     <div
       class={clsx(
-        "relative overflow-hidden w-full border-[8px] border-t-0 border-t-transparent shadow-[inset_0_0_20px_5px_#000000]",
+        "relative w-full overflow-hidden border-[8px] border-t-0 border-t-transparent shadow-[inset_0_0_20px_5px_#000000]",
         "border-x-wood-650 border-b-wood-700 dark:border-x-wood-915 dark:border-b-wood-1000"
       )}
       use:emblaCarouselSvelte={{ options: { containScroll: false, dragFree: true, loop: true }, plugins: [emblaAutoplay()] }}
@@ -64,20 +67,21 @@
         {#each Array.from({ length: 3 }) as _}
           <a href="/" class="flex w-full min-w-0 flex-[0_0_100%] select-none flex-col gap-4 p-4">
             <span class="p-2">
-              <h2 class="text-comment text-2xl font-semibold">book of the day</h2>
-              <h3 class="line-clamp-1 text-4xl font-semibold">Lorem ipsum</h3>
+              <span class="text-comment text-2xl font-semibold" aria-hidden="true">book of the day</span>
+              <h3 class="line-clamp-1 text-4xl font-semibold"><span class="sr-only">Book: </span>Lorem ipsum</h3>
             </span>
             <img width={900} height={400} class="h-96 w-full rounded-md object-cover opacity-75 md:h-[600px]" src="/AGI2.webp" alt="" />
           </a>
         {/each}
       </div>
     </div>
-  </div>
-  <div class="bg-wood dark:bg-dark-wood bg-wood-500 dark:bg-wood-950 w-full">
+  </section>
+  <section id="book-recommendations" class="bg-wood dark:bg-dark-wood bg-wood-500 dark:bg-wood-950 w-full">
+    <h2 class="sr-only">Recommended for you</h2>
     {#each data.categories as category}
       {#if category.books.length > 0}
         <CategorySlider {category} />
       {/if}
     {/each}
-  </div>
+  </section>
 </div>

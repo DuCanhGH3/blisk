@@ -36,7 +36,8 @@
 </script>
 
 <div class="w-full">
-  <div class="absolute h-full w-full py-4">
+  <h2 class="sr-only py-5">Category: {category.name}</h2>
+  <div class="absolute h-full w-full py-4" role="presentation">
     <button
       class={clsx(
         "absolute left-4 top-1/2 z-10 flex -translate-y-1/2 active:!bg-neutral-400 dark:active:!bg-neutral-700",
@@ -45,7 +46,7 @@
       )}
       onclick={emblaPrev}
     >
-      <ChevronLeft width={24} height={24} class="transition-all duration-100" />
+      <ChevronLeft width={24} height={24} class="transition-all duration-100" aria-hidden="true" tabindex={-1} />
       <span class="sr-only">Go to previous page of category: {category.name}</span>
     </button>
     <button
@@ -56,7 +57,7 @@
       )}
       onclick={emblaNext}
     >
-      <ChevronRight width={24} height={24} class="transition-all duration-100" />
+      <ChevronRight width={24} height={24} class="transition-all duration-100" aria-hidden="true" tabindex={-1} />
       <span class="sr-only">Go to next page of category: {category.name}</span>
     </button>
   </div>
@@ -66,9 +67,7 @@
       "border-x-wood-650 border-b-wood-700 dark:border-x-wood-915 dark:border-b-wood-1000"
     )}
   >
-    <a class="link no-color" href="/books?category={category.id}">
-      <h2 class="py-5"><span class="sr-only">Category: </span>{category.name}</h2>
-    </a>
+    <span class="h2 block py-5" aria-hidden="true">{category.name}</span>
     <div
       class="mx-[-4px] mb-[-4px] overflow-x-hidden"
       use:emblaCarousel={{ options: { align: "start", containScroll: false, dragFree: true, loop: true }, plugins: [] }}
