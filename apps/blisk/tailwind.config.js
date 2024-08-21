@@ -218,7 +218,7 @@ export default {
         },
         error: {
           light: "#520000",
-          dark: "#f99090",
+          dark: "#f9a4a4",
           hover: {
             light: "#8e1610",
             dark: "#f98b8b",

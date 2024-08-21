@@ -31,9 +31,10 @@
           <label
             class={clsx(
               "select-none rounded-md px-2 py-1 transition-colors duration-100",
+              "bg-wood-300 dark:bg-wood-800 cursor-pointer",
               "bg-neutral-250 cursor-pointer dark:bg-neutral-800",
               "peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-white peer-focus:ring-offset-2 peer-focus:ring-offset-gray-800",
-              "peer-checked:bg-accent-light dark:peer-checked:bg-accent-dark dark:peer-checked:text-wood-900 peer-checked:text-white"
+              "peer-checked:bg-wood-950 dark:peer-checked:bg-wood-500 dark:peer-checked:text-wood-900 peer-checked:text-wood-200"
             )}
             for="{id}-{legend.name}-{option.id}"
           >

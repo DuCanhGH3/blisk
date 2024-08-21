@@ -72,10 +72,10 @@
         <h3>Language</h3>
         <p>{data.book.language}</p>
       </div>
-      <div>
+      <!-- <div>
         <h3>Series</h3>
         <p>Dune series</p>
-      </div>
+      </div> -->
       <div>
         <h3>Genre</h3>
         <div class="flex flex-row flex-wrap gap-2">

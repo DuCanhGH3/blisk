@@ -40,8 +40,8 @@
     role="tooltip"
     class={clsx(
       "absolute z-50 inline-flex select-none flex-col overflow-auto rounded-md border",
-      "border-border-light dark:border-border-dark dark:bg-neutral-915 bg-white text-left",
-      "text-inherit shadow-[rgb(0_0_0/0.08)_0px_1px_4px] duration-100",
+      "border-border-light dark:border-border-dark dark:bg-wood-800 bg-wood-300 text-left",
+      "shadow-[rgb(0_0_0/0.08)_0px_1px_4px] duration-100",
       "translate-x-[--offset] px-2 py-1.5 hover:select-auto"
     )}
     style="{right ? 'right' : 'left'}:{x}px;{bottom ? 'bottom' : 'top'}:{y}px"
