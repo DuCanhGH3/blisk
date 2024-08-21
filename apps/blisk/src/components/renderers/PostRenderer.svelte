@@ -91,7 +91,7 @@
           {@const { icon: Icon, label, colors } = reactionRender[post.user_reaction]}
           <PostRendererButton customColors={colors} as="summary" aria-describedby="post-{post.id}-reaction-bar">
             <Icon animatable={false} {...svgIconAttrs} />
-            <span class="text-wood-900 mb-[-1px] select-none dark:text-white">{label}</span>
+            <span class="mb-[-1px] select-none">{label}</span>
           </PostRendererButton>
         {/if}
         <ReactionBar

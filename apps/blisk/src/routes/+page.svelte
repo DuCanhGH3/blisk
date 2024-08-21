@@ -1,36 +1,37 @@
 <script lang="ts">
-  // import ChevronLeft from "$components/icons/ChevronLeft.svelte";
-  // import ChevronRight from "$components/icons/ChevronRight.svelte";
-  // import { clsx } from "$lib/clsx";
-  // import type { EmblaCarouselType } from "embla-carousel";
-  // import emblaAutoplay from "embla-carousel-autoplay";
-  // import emblaCarouselSvelte from "embla-carousel-svelte";
+  import ChevronLeft from "$components/icons/ChevronLeft.svelte";
+  import ChevronRight from "$components/icons/ChevronRight.svelte";
+  import { clsx } from "$lib/clsx";
+  import type { EmblaCarouselType } from "embla-carousel";
+  import emblaAutoplay from "embla-carousel-autoplay";
+  import emblaCarouselSvelte from "embla-carousel-svelte";
   import CategorySlider from "./CategorySlider.svelte";
 
   const { data } = $props();
 
-  // let emblaApi = $state<EmblaCarouselType | null>(null);
+  let emblaApi = $state<EmblaCarouselType | null>(null);
 
-  // const onEmbiaInit = (event: CustomEvent<EmblaCarouselType>) => {
-  //   emblaApi = event.detail;
-  //   emblaApi.on("pointerUp", (emblaApi) => {
-  //     const { scrollTo, target, location } = emblaApi.internalEngine();
-  //     const diffToTarget = target.get() - location.get();
-  //     scrollTo.distance(diffToTarget * 0.1, true);
-  //   });
-  // };
+  const onEmbiaInit = (event: CustomEvent<EmblaCarouselType>) => {
+    emblaApi = event.detail;
+    emblaApi.on("pointerUp", (emblaApi) => {
+      const { scrollTo, target, location } = emblaApi.internalEngine();
+      const diffToTarget = target.get() - location.get();
+      scrollTo.distance(diffToTarget * 0.1, true);
+    });
+  };
 
-  // const emblaPrev = () => {
-  //   emblaApi?.scrollPrev();
-  // };
+  const emblaPrev = () => {
+    emblaApi?.scrollPrev();
+  };
 
-  // const emblaNext = () => {
-  //   emblaApi?.scrollNext();
-  // };
+  const emblaNext = () => {
+    emblaApi?.scrollNext();
+  };
 </script>
 
 <div class="flex w-full flex-col gap-10 self-stretch">
-  <!-- <div class="relative h-full w-full">
+  <h1 class="sr-only">Home</h1>
+  <div class="relative h-full w-full">
     <button
       class={clsx(
         "absolute left-4 top-1/2 z-10 flex -translate-y-1/2 active:!bg-neutral-400 dark:active:!bg-neutral-700",
@@ -53,8 +54,8 @@
     </button>
     <div
       class={clsx(
-        "flex h-full w-full overflow-hidden rounded-[21px] border transition-colors duration-100 shadow-inner",
-        "border-border-light dark:border-border-dark dark:bg-wood-800 dark:bg-dark-wood bg-white hover:bg-neutral-100 dark:hover:bg-neutral-800"
+        "relative overflow-hidden w-full border-[8px] border-t-0 border-t-transparent shadow-[inset_0_0_20px_5px_#000000]",
+        "border-x-wood-650 border-b-wood-700 dark:border-x-wood-915 dark:border-b-wood-1000"
       )}
       use:emblaCarouselSvelte={{ options: { containScroll: false, dragFree: true, loop: true }, plugins: [emblaAutoplay()] }}
       onemblaInit={onEmbiaInit}
@@ -71,7 +72,7 @@
         {/each}
       </div>
     </div>
-  </div> -->
+  </div>
   <div class="bg-wood dark:bg-dark-wood bg-wood-500 dark:bg-wood-950 w-full">
     {#each data.categories as category}
       {#if category.books.length > 0}

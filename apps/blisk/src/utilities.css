@@ -19,7 +19,7 @@
     @apply bg-wood-hor dark:bg-dark-wood-hor bg-wood-400 dark:bg-wood-915 border-border-light dark:border-border-dark w-full border;
   }
   .box.hover {
-    @apply hover:bg-neutral-100 dark:hover:bg-neutral-800;
+    @apply hover:bg-wood-300 dark:hover:bg-wood-800;
   }
   .box.lg {
     @apply rounded-3xl p-8 shadow-lg;
@@ -34,7 +34,7 @@
     @apply rounded-lg p-2 shadow-md;
   }
   .text-comment {
-    @apply text-[#242424] dark:text-neutral-400;
+    @apply text-[#242424] dark:text-[#bababa];
   }
   .link:not(.no-color),
   .link:not(.no-color) > * {
@@ -75,9 +75,6 @@
   }
   .textarea:placeholder-shown:not(:focus) + .label {
     @apply text-wood-900 top-[12px] translate-x-0 text-sm dark:text-wood-200;
-  }
-  .text-error {
-    @apply text-[#a51a12] dark:text-red-400;
   }
   .react-button {
     @apply relative size-9 max-w-24 transition-all duration-200;
