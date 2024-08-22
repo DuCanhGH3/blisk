@@ -38,6 +38,11 @@ export interface Post {
   content: string;
   author_name: string;
   author_picture: Image | null;
+  book_title: string | null;
+  book_name: string | null;
+  book_synopsis: string | null;
+  book_cover: Image | null;
+  book_spine: Image | null;
   book_reaction: BookReaction;
   reactions: ReactionMetadata | null;
   user_reaction: ReactionType | null;
@@ -91,7 +96,7 @@ export interface BookCategoryWithBooks extends BookCategory {
 
 export type SetHeaders = (headers: Record<string, string>) => void;
 
-export type HeadingLevel = 1 | 2 | 3 | 4 | 5 | 6;
+export type HeadingLevel = 1 | 2 | 3 | 4 | 5 | 6 | 7;
 
 export type Ref<T> = { ref: T };
 

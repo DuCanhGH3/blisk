@@ -39,7 +39,7 @@
     onmouseleave={closeTooltip}
     role="tooltip"
     class={clsx(
-      "absolute z-50 inline-flex select-none flex-col overflow-auto rounded-md border",
+      "absolute z-50 inline-flex select-none flex-col overflow-auto rounded-xl border bg-wood-hor dark:bg-dark-wood-hor",
       "border-border-light dark:border-border-dark dark:bg-wood-800 bg-wood-300 text-left",
       "shadow-[rgb(0_0_0/0.08)_0px_1px_4px] duration-100",
       "translate-x-[--offset] px-2 py-1.5 hover:select-auto"

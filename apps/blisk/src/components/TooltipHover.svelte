@@ -28,7 +28,7 @@
         x = Math.max(0, window.innerWidth - rect.right);
         right = true;
       }
-      if (viewportRect.bottom - y < 200) {
+      if (viewportRect.bottom - y < 300) {
         y = rect.top + window.scrollY + 24;
         bottom = false;
       }

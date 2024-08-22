@@ -2,11 +2,10 @@
   import { getContext } from "svelte";
   import { clsx } from "$lib/clsx";
   import type { HeadingLevel } from "$lib/types";
-  import Paragraph from "./Paragraph.svelte";
   import Parser from "./Parser.svelte";
   import type { RendererProps, Tokens } from "./types";
 
-  const { raw, text, depth, tokens }: RendererProps<Tokens.Heading> = $props();
+  const { depth, tokens }: RendererProps<Tokens.Heading> = $props();
 
   const startingHeading = getContext<HeadingLevel>("startingHeading");
 

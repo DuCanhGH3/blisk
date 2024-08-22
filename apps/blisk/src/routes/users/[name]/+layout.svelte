@@ -19,7 +19,7 @@
       height={384}
       class="h-48 w-full select-none rounded-3xl object-cover shadow-lg transition-all duration-150 md:h-60 lg:h-96"
     />
-    <div class="flex flex-row items-center gap-8 px-8">
+    <div class="flex flex-row flex-wrap items-center gap-8 px-8">
       <img
         src={getProfilePicture(data.data.picture)}
         class="border-border-light dark:border-border-dark -mt-8 h-[150px] w-[150px] select-none rounded-full border shadow-lg"

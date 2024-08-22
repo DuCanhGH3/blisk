@@ -2,7 +2,7 @@
   // Component is (mostly) stateless so that it works with the virtual scroller.
   import { page } from "$app/stores";
   import type { Post, ReactionType } from "$lib/types";
-  import { getLoginUrl, getProfilePicture, getTopReactions, updateReactionMetadata } from "$lib/utils";
+  import { getImage, getLoginUrl, getProfilePicture, getTopReactions, updateReactionMetadata } from "$lib/utils";
   import Comment from "../icons/Comment.svelte";
   import Share from "../icons/Share.svelte";
   import ThumbUp from "../icons/ThumbUp.svelte";
@@ -52,15 +52,59 @@
       <div class="text-comment flex flex-row flex-wrap items-center gap-1 text-sm">
         <a href="/users/{post.author_name}" class="link sm">{post.author_name}</a>
         <span>•</span>
-        <TooltipHover tooltipId="post-{post.id}-timestamp-tooltip" content="Just now">Just now</TooltipHover>
+        <span class="mb-[-1px]">
+          <TooltipHover tooltipId="post-{post.id}-timestamp-tooltip" content="Just now">Just now</TooltipHover>
+        </span>
       </div>
       <div class="flex flex-row flex-wrap items-center gap-1 text-base">
+        {#snippet showBookTitle(name: string | null, title: string, summary: string)}
+          <TooltipHover tooltipId="post-{post.id}-book-tooltip">
+            {#snippet content()}
+              <div class="flex flex-col gap-4 overflow-y-auto p-2">
+                <img src={getImage(post.book_cover, "/test-cover.jpg")} class="h-48 w-32 select-none rounded-[5px]" alt="" width={128} height={192} />
+                <div class="flex flex-col gap-2">
+                  <span class="h3">{title}</span>
+                  <MarkdownRenderer source={summary} startingHeading={7} />
+                </div>
+              </div>
+            {/snippet}
+            {#if name}
+              <a href="/books/{name}" class="link no-color sm"><span class="sr-only">Book: </span><i>{title}</i></a>
+            {:else}
+              <i><span class="sr-only">Book: </span>{title}</i>
+            {/if}
+          </TooltipHover>
+        {/snippet}
         {#if post.book_reaction === "like"}
-          <ThumbUpFilled width={20} height={20} class="fill-accent-light dark:fill-accent-dark h-auto w-5" aria-hidden tabindex={-1} />
-          <span class="text-accent-light dark:text-accent-dark">Recommended</span>
+          <ThumbUpFilled
+            width={20}
+            height={20}
+            class="fill-accent-light dark:fill-accent-dark hidden h-auto w-5 md:block"
+            aria-hidden
+            tabindex={-1}
+          />
+          <span class="text-accent-light dark:text-accent-dark">
+            {#if post.book_title && post.book_synopsis}
+              Recommends {@render showBookTitle(post.book_name, post.book_title, post.book_synopsis)}
+            {:else}
+              Recommended
+            {/if}
+          </span>
         {:else}
-          <ThumbUpFilled width={20} height={20} class="fill-error-light dark:fill-error-dark h-auto w-5 -scale-y-100" aria-hidden tabindex={-1} />
-          <span class="text-error-light dark:text-error-dark">Not recommended</span>
+          <ThumbUpFilled
+            width={20}
+            height={20}
+            class="fill-error-light dark:fill-error-dark hidden h-auto w-5 -scale-y-100 md:block"
+            aria-hidden
+            tabindex={-1}
+          />
+          <span class="text-error-light dark:text-error-dark">
+            {#if post.book_title && post.book_synopsis}
+              Does not recommend {@render showBookTitle(post.book_name, post.book_title, post.book_synopsis)}
+            {:else}
+              Not recommended
+            {/if}
+          </span>
         {/if}
       </div>
     </div>

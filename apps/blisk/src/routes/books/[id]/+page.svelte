@@ -14,6 +14,7 @@
   let reviews = $state(data.book.reviews);
 
   const fromCategory = $derived($page.url.searchParams.get("from-category"));
+  const fromPost = $derived($page.url.searchParams.get("from-post"));
 
   $effect(() => {
     reviews = data.book.reviews;
@@ -28,7 +29,7 @@
       height="288"
       alt=""
       class="h-72 w-48 select-none shadow-[5px_2px_20px_-1px_#000000]"
-      style="view-transition-name:book{fromCategory ? `-${fromCategory}` : ''}-{data.book.name}"
+      style="view-transition-name:book{fromCategory ? `-${fromCategory}` : ''}{fromPost ? `-${fromPost}` : ''}-{data.book.name}"
     />
     <div
       class={clsx(
