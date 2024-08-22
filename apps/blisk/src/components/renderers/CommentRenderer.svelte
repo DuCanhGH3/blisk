@@ -210,7 +210,7 @@
             </CommentRendererButton>
             <Menu
               id="comment-{comment.id}-menu-bar"
-              class="animate-fly dark:bg-neutral-915 bottom-full z-10 w-32 -translate-y-1 bg-white"
+              class="animate-fly bottom-full z-10 w-32 -translate-y-1"
               style="--fly-translate-y:1rem"
             >
               <div>

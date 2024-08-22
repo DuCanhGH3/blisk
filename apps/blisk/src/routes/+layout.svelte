@@ -17,6 +17,9 @@
   import Tooltip from "$components/layouts/Tooltip.svelte";
 
   const { children } = $props();
+
+  let navbarHeight = $state(65);
+
   const isDark = $derived($colorScheme === "dark");
   const title = $derived($page.data.title ? `${$page.data.title} - blisk` : "blisk");
   const ogImage = $derived($page.data.ogImage);
@@ -75,12 +78,12 @@
   <meta name="theme-color" content={isDark ? "#000000" : "#FFFFFF"} />
 </svelte:head>
 
-<a class="absolute -top-full z-[100] text-wood-900 underline focus:top-0 dark:text-white" href="#main-content">Skip to main content</a>
+<a class="text-wood-900 absolute -top-full z-[100] underline focus:top-0 dark:text-white" href="#main-content">Skip to main content</a>
 <GlobalSvgDefs />
 <Dialog />
 <div class="flex flex-1 flex-col md:flex-row">
-  <VerticalNavbar />
-  <div class="flex w-full flex-col xl:flex-row xl:justify-between">
+  <VerticalNavbar bind:height={navbarHeight} />
+  <div class="flex w-full flex-1 flex-col pb-[--nav-height] md:pb-0 xl:flex-row xl:justify-between" style="--nav-height:{navbarHeight}px">
     <!-- <aside class="top-0 shrink-0 px-4 pt-4 transition-all duration-100 xl:sticky xl:order-last xl:max-h-dvh print:hidden"> -->
     <!-- </aside> -->
     <main id="main-content" class="flex w-full flex-1 px-4 py-4">

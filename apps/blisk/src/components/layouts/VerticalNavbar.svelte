@@ -10,6 +10,8 @@
   import NavUsermenu from "./NavUsermenu.svelte";
   import SearchBar from "./SearchBar.svelte";
 
+  let { height = $bindable(0) }: { height?: number } = $props();
+
   let menuCheckbox = $state<HTMLInputElement | null>(null);
 
   $effect(() => {
@@ -42,66 +44,40 @@
 </script>
 
 <header
+  bind:offsetHeight={height}
   id="sidebar-wrapper"
   class={clsx(
     "z-10 max-h-dvh w-full md:w-64 md:shrink-0 md:self-start xl:w-80 print:hidden",
-    "sticky top-0 transform-gpu transition-all duration-150 ease-out",
-    "flex flex-col bg-white p-2 md:bg-transparent md:px-4 dark:bg-black dark:md:bg-transparent",
+    "fixed bottom-0 transform-gpu transition-all duration-150 ease-out md:sticky md:top-0",
+    "bg-wood-hor dark:bg-dark-wood-hor flex flex-col p-2 md:px-4 md:![background-image:initial]",
+    "dark:bg-wood-915 bg-wood-400 md:bg-transparent dark:md:bg-transparent",
     "border-border-light dark:border-border-dark border-b md:border-b-0"
   )}
 >
-  <nav class="transition-colors-opacity z-[50] h-fit duration-100">
-    <div class="relative mx-auto flex flex-row justify-between overflow-x-clip md:flex-col">
-      <div class="flex items-center gap-2 md:block md:items-start md:py-2">
-        <a class="shrink-0 select-none px-3 py-2 font-mono text-base" href="/" aria-label="Go to home">blisk</a>
-      </div>
-      <div class="flex flex-row gap-[5px] md:flex-col-reverse">
-        <div class="hidden h-full pr-2 md:flex md:pr-0">
-          <div class="overflow-x-overlay hidden h-full grow flex-row gap-[5px] overflow-x-auto md:flex">
-            <ul class="flex max-h-[50dvh] w-full flex-col gap-[inherit] overflow-y-auto">
-              {#each links as { label, link, isActive }}
-                <li class="w-full">
-                  <NavLink href={link} textCenter={false} {isActive}>
-                    {label}
-                  </NavLink>
-                </li>
-              {/each}
-            </ul>
-          </div>
-        </div>
-        <SearchBar />
-        <div class="flex flex-row-reverse items-center gap-[5px] md:flex-row">
-          <details bind:this={mobileMenu} class="details-anim relative ml-3 md:hidden" id="nav-mobile-menu">
-            <summary
-              class={clsx(
-                "flex h-[2rem] w-[2rem] cursor-pointer flex-col justify-center gap-[0.5rem]",
-                "[&>span]:bg-black [&>span]:transition-all [&>span]:dark:bg-white",
-                "[&>span]:h-[0.2rem] [&>span]:w-full [&>span]:rounded-md"
-              )}
-              aria-label="Toggle navbar menu"
-            >
-              <span class="origin-center duration-300"></span>
-              <span class="duration-200 ease-out"></span>
-              <span class="origin-center duration-300"></span>
-            </summary>
-            <div class="absolute right-0 w-[150px] md:hidden">
-              <ul
-                class="border-border-light dark:border-border-dark relative top-2 max-h-[60dvh] space-y-1 overflow-y-auto rounded-[14px] border bg-white p-2 dark:bg-black"
-              >
-                {#each links as { label, link, isActive }}
-                  <li>
-                    <NavLink href={link} textCenter={false} {isActive}>
-                      {label}
-                    </NavLink>
-                  </li>
-                {/each}
-              </ul>
-            </div>
-          </details>
-          <NavUsermenu leftSided summaryIcon />
-          <NavToggleScheme />
-        </div>
-      </div>
+  <nav class="transition-colors-opacity z-[50] flex h-fit w-full items-center gap-[5px] duration-100 md:flex-col md:items-start">
+    <div class="flex items-center gap-2 md:block md:items-start md:py-2">
+      <a class="shrink-0 select-none px-3 py-2 font-mono text-base" href="/" aria-label="Go to home">blisk</a>
     </div>
+    <div class="w-fit min-w-0 grow basis-0 overflow-x-auto pr-2 md:order-last md:w-full md:flex-1 md:pr-0">
+      <ul class="ml-auto flex w-max items-center gap-[5px] md:max-h-[50dvh] md:w-full md:grow md:flex-col md:items-start md:overflow-y-auto">
+        {#each links as { label, link, isActive }}
+          <li class="w-max md:w-full">
+            <NavLink href={link} textCenter={false} {isActive}>
+              {label}
+            </NavLink>
+          </li>
+        {/each}
+        <!-- <li class="w-max md:w-full">
+          <NavLink href="/search" textCenter={false} isActive={isLinkActive("/books", $page.url.pathname)}>
+            search
+          </NavLink>
+        </li> -->
+      </ul>
+    </div>
+    <div class="flex flex-row-reverse items-center gap-[5px] md:flex-row">
+      <NavUsermenu leftSided summaryIcon />
+      <NavToggleScheme />
+    </div>
+    <SearchBar />
   </nav>
 </header>

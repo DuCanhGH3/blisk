@@ -14,7 +14,7 @@
   this={as}
   class={clsx(
     "group flex w-full select-none items-center rounded-md p-2 text-sm transition-colors duration-100",
-    "hover:bg-gray-200  hover:dark:bg-neutral-800",
+    "hover:bg-wood-200 dark:hover:bg-wood-750",
     customColors,
     className
   )}

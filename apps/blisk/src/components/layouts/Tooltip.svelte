@@ -1,10 +1,11 @@
 <script lang="ts">
-  import { tick } from "svelte";
+  import { tick, untrack } from "svelte";
   import { hotkeys } from "$lib/hotkeys.svelte";
   import { tooltip } from "$lib/stores/tooltip.svelte";
   import { fade } from "svelte/transition";
   import { quintOut } from "svelte/easing";
   import { clsx } from "$lib/clsx";
+  import { page } from "$app/stores";
 
   const id = $derived(tooltip.state.id);
   const content = $derived(tooltip.state.content);
@@ -29,6 +30,13 @@
   });
 
   hotkeys([["Escape", () => content && closeTooltip()]]);
+
+  $effect(() => {
+    $page.url.pathname;
+    if (untrack(() => content)) {
+      closeTooltip();
+    }
+  });
 </script>
 
 {#if content}
@@ -39,7 +47,7 @@
     onmouseleave={closeTooltip}
     role="tooltip"
     class={clsx(
-      "absolute z-50 inline-flex select-none flex-col overflow-auto rounded-xl border bg-wood-hor dark:bg-dark-wood-hor",
+      "bg-wood-hor dark:bg-dark-wood-hor absolute z-50 inline-flex select-none flex-col overflow-auto rounded-xl border",
       "border-border-light dark:border-border-dark dark:bg-wood-800 bg-wood-300 text-left",
       "shadow-[rgb(0_0_0/0.08)_0px_1px_4px] duration-100",
       "translate-x-[--offset] px-2 py-1.5 hover:select-auto"

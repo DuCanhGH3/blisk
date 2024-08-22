@@ -28,13 +28,18 @@
 </script>
 
 {#if user}
-  <details bind:this={navUsermenu} id="nav-usermenu" class="details-anim relative inline-block text-left">
+  <details bind:this={navUsermenu} id="nav-usermenu" class="relative inline-block text-left">
     <summary class="nav-button flex-shrink-0" id="navbar-usermenu-button">
       <img alt="Your avatar" width={24} height={24} class="h-6 w-6 rounded-full text-transparent" src={getProfilePicture(user.picture)} />
     </summary>
     <Menu
       id="navbar-usermenu"
-      class={clsx("w-52 origin-top-right bg-white dark:bg-black", leftSided ? "right-0 md:left-0" : "right-0")}
+      class={clsx(
+        "animate-fly-up md:animate-fly w-52 origin-top-right",
+        "bottom-full -translate-y-4 md:bottom-[initial] md:translate-y-0",
+        leftSided ? "right-0 md:left-0" : "right-0"
+      )}
+      style="--fly-translate-y-up: 1rem;"
       aria-labelledby="navbar-usermenu-button"
     >
       <div>

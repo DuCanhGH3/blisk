@@ -26,9 +26,9 @@
   const loadDataDebounced = debounce(loadData, 500);
 </script>
 
-<svelte:document bind:activeElement={activeElement} />
+<svelte:document bind:activeElement />
 
-<form action="/books" class="relative w-fit md:w-full">
+<form action="/books" class="relative hidden md:block md:w-full">
   <Input
     bind:self={input}
     id="search-bar-input"

@@ -24,5 +24,5 @@ export const load: PageServerLoad = async ({ cookies, fetch, setHeaders, url }) 
   if (!res.ok) {
     error(res.status, res.error);
   }
-  return { books: res.data };
+  return { title: q ? `${q} - Books search` : "Books", books: res.data };
 };

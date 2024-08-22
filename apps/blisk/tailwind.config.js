@@ -64,6 +64,12 @@ export default {
             transform: "translateY(var(--fly-translate-y, -1rem))",
           },
         },
+        "fly-up": {
+          from: {
+            opacity: "0",
+            transform: "translateY(var(--fly-translate-y-up, 1rem))",
+          },
+        },
         "thumbs-up": {
           "0%": {
             transform: "translateX(0px) translateY(0px) rotate(0deg) scale(1)",
@@ -180,6 +186,7 @@ export default {
       },
       animation: {
         fly: "fly 100ms ease-out",
+        "fly-up": "fly-up 100ms ease-out",
         like: "thumbs-up 1.5s ease-out 0.5s infinite",
         love: "heart 1.5s ease-out 0.5s infinite",
         "haha-eyes": "laughing-eyes 2.5s ease-out 0s infinite",
@@ -218,7 +225,7 @@ export default {
         },
         error: {
           light: "#520000",
-          dark: "#f9a4a4",
+          dark: "#f9bdbd",
           hover: {
             light: "#8e1610",
             dark: "#f98b8b",
