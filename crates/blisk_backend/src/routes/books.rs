@@ -223,25 +223,22 @@ pub async fn read(
         ) query ON TRUE
         JOIN LATERAL (
             SELECT CASE
-                WHEN query.query IS NOT NULL THEN ts_rank(b.text_search, query.query)
-                ELSE 0
+                WHEN query.query IS NULL THEN 0
+                ELSE ts_rank(b.text_search, query.query)
             END + CASE
-                WHEN bbr IS NOT NULL THEN bbr.rating
-                ELSE 0
+                WHEN bbr IS NULL THEN 0
+                ELSE bbr.rating
             END AS rank
         ) rank ON TRUE
         WHERE CASE
-            WHEN $2::TEXT IS NULL THEN TRUE
-            WHEN $2 IS NOT NULL AND b.text_search @@ query.query THEN TRUE
-            ELSE FALSE
+            WHEN query.query IS NULL THEN TRUE
+            ELSE b.text_search @@ query.query
         END AND CASE
             WHEN $3::BIGINT[] IS NULL THEN TRUE
-            WHEN $3 IS NOT NULL AND b.categories_raw @> $3 THEN TRUE
-            ELSE FALSE
+            ELSE b.categories_raw @> $3
         END AND CASE
             WHEN $4::BIGINT[] IS NULL THEN TRUE
-            WHEN $4 IS NOT NULL AND b.authors_raw @> $4 THEN TRUE
-            ELSE FALSE
+            ELSE b.authors_raw @> $4
         END
         GROUP BY b.title, b.name, b.summary, b.lang, b.cover_image,
         b.spine_image, b.authors, b.categories, b.reactions, rank.rank
