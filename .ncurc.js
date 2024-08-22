@@ -5,12 +5,9 @@ module.exports = {
   filter(dependencyName) {
     return !filteredDependencies.includes(dependencyName);
   },
-  target(dependencyName) {
-    if (dependencyName === "svelte") {
+  target(dep) {
+    if (dep === "svelte" || dep === "@sveltejs/vite-plugin-svelte") {
       return "@next";
-    }
-    if (dependencyName === "typescript-eslint") {
-      return "@rc-v8";
     }
     return "latest";
   },

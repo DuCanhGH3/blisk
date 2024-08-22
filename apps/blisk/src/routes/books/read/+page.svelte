@@ -23,9 +23,9 @@
       }}
     >
       <h1 class="h2">Start reading</h1>
-      <SelectNative name="book" id="read-book-name" label="Book" values={data.books.map(({ name, title }) => [name, title])} />
+      <SelectNative name="book_name" id="read-book-name" label="Book" values={data.books.map(({ name, title }) => [name, title])} />
       <DatePicker
-        name="starting_date"
+        name="starts_at"
         label="Starting date"
         id="read-book-starting"
         required
@@ -33,10 +33,10 @@
         min={data.now}
         max={data.oneYearLater}
         errorTextId="read-book-starting-error"
-        errorText={form?.validationError?.startingDate}
+        errorText={form?.validationError?.starts_at}
       />
       <DatePicker
-        name="ending_date"
+        name="ends_at"
         label="Ending date"
         id="read-book-ending"
         required
@@ -44,7 +44,7 @@
         min={data.now}
         max={data.oneYearLater}
         errorTextId="read-book-ending-error"
-        errorText={form?.validationError?.endingDate}
+        errorText={form?.validationError?.ends_at}
       />
       <div class="flex w-full flex-row-reverse flex-wrap items-center gap-4">
         <Button as="button" type="submit" disabled={isLoading}>Start reading</Button>

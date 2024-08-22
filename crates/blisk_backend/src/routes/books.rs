@@ -9,7 +9,7 @@ use crate::{
         constants::SLUG_REGEX,
         errors::AppError,
         response::{created, response},
-        structs::{AppImage, AppJson, AppMultipart, AppQuery},
+        structs::{AppForm, AppImage, AppJson, AppMultipart, AppQuery},
         uploads::upload_file,
     },
 };
@@ -20,8 +20,9 @@ use axum::{
     response::Response,
 };
 use axum_typed_multipart::{FieldData, TryFromMultipart};
+use chrono::NaiveDate;
 use tracing::instrument;
-use validator::Validate;
+use validator::{Validate, ValidationError};
 
 #[derive(serde::Serialize)]
 pub struct BooksMetadata {
@@ -44,6 +45,8 @@ pub enum BooksError {
     LanguageInvalid(String),
     #[error("book {0} cannot be found")]
     BookNotFound(String),
+    #[error("user is already tracking book {0}")]
+    AlreadyTracking(String),
     #[error("this error is not expected")]
     Unexpected,
 }
@@ -198,7 +201,7 @@ pub async fn read(
                 WHEN TRUE THEN coalesce(jsonb_agg(rv) FILTER (WHERE rv.id IS NOT NULL), '[]'::JSONB)
                 ELSE NULL
             END AS "reviews?: _"
-        FROM books_view b, websearch_to_tsquery(coalesce($2, '')) query, ts_rank(b.text_search, query) rank
+        FROM books_view b
         LEFT JOIN LATERAL (
             SELECT *
             FROM fetch_posts(request_uid => $1) rv
@@ -207,9 +210,29 @@ pub async fn read(
             LIMIT 5
             OFFSET 0
         ) rv ON TRUE
+        LEFT JOIN LATERAL (
+            SELECT books_boost_rating(brt) AS rating
+            FROM book_reactions_tally brt
+            WHERE brt.book_id = b.id
+        ) bbr ON TRUE
+        JOIN LATERAL (
+            SELECT CASE
+                WHEN $2::TEXT IS NOT NULL THEN websearch_to_tsquery(coalesce($2, ''))
+                ELSE NULL
+            END AS query
+        ) query ON TRUE
+        JOIN LATERAL (
+            SELECT CASE
+                WHEN query.query IS NOT NULL THEN ts_rank(b.text_search, query.query)
+                ELSE 0
+            END + CASE
+                WHEN bbr IS NOT NULL THEN bbr.rating
+                ELSE 0
+            END AS rank
+        ) rank ON TRUE
         WHERE CASE
             WHEN $2::TEXT IS NULL THEN TRUE
-            WHEN $2 IS NOT NULL AND b.text_search @@ query THEN TRUE
+            WHEN $2 IS NOT NULL AND b.text_search @@ query.query THEN TRUE
             ELSE FALSE
         END AND CASE
             WHEN $3::BIGINT[] IS NULL THEN TRUE
@@ -220,8 +243,9 @@ pub async fn read(
             WHEN $4 IS NOT NULL AND b.authors_raw @> $4 THEN TRUE
             ELSE FALSE
         END
-        GROUP BY b.title, b.name, b.summary, b.lang, b.cover_image, b.spine_image, b.authors, b.categories, b.reactions, rank.rank
-        ORDER BY rank DESC"#,
+        GROUP BY b.title, b.name, b.summary, b.lang, b.cover_image,
+        b.spine_image, b.authors, b.categories, b.reactions, rank.rank
+        ORDER BY rank.rank DESC"#,
         &uid as &_,
         &q as &_,
         &categories as &_,
@@ -302,15 +326,20 @@ pub async fn read_categories(
             b.books AS "books!: _"
         FROM book_categories bc
         LEFT JOIN LATERAL (
-            SELECT coalesce(jsonb_agg(b) FILTER (WHERE b.name IS NOT NULL), '[]'::JSONB) AS books
+            SELECT coalesce(jsonb_agg(b ORDER BY b.rank DESC) FILTER (WHERE b.name IS NOT NULL), '[]'::JSONB) AS books
             FROM (
                 SELECT btc.book_id
                 FROM book_to_category btc
                 WHERE btc.category_id = bc.id
             ) btc
             LEFT JOIN LATERAL (
-                SELECT b.title, b.name, b.cover_image, b.spine_image
+                SELECT b.title, b.name, b.cover_image, b.spine_image, brt.rank
                 FROM books_view b
+                LEFT JOIN LATERAL (
+                    SELECT books_boost_rating(brt) AS rank
+                    FROM book_reactions_tally brt
+                    WHERE brt.book_id = b.id
+                ) brt ON TRUE
                 WHERE b.id = btc.book_id
             ) b ON TRUE
         ) b ON TRUE
@@ -333,11 +362,13 @@ pub async fn read_metadata(
             (
                 SELECT coalesce(jsonb_agg(ba) FILTER (WHERE ba.id IS NOT NULL), '[]'::JSONB)
                 FROM (SELECT id, name FROM book_authors) ba
-            ) AS "authors!: _",
+            )
+            AS "authors!: _",
             (
                 SELECT coalesce(jsonb_agg(bc) FILTER (WHERE bc.id IS NOT NULL), '[]'::JSONB)
                 FROM (SELECT id, name FROM book_categories) bc
-            ) AS "categories!: _"
+            )
+            AS "categories!: _"
         "#
     )
     .fetch_one(&mut *transaction)
@@ -346,14 +377,69 @@ pub async fn read_metadata(
     Ok(response(StatusCode::OK, None, AppJson(metadata)))
 }
 
-// #[derive(serde::Deserialize, Validate)]
-// pub struct StartReadingPayload {
+#[derive(serde::Deserialize, Validate)]
+#[validate(schema(function = "validate_create_tracker_payload"))]
+pub struct CreateTrackerPayload {
+    #[validate(length(min = 0, message = "`book_name` must point to a valid book!"))]
+    book_name: String,
+    starts_at: NaiveDate,
+    ends_at: NaiveDate,
+}
 
-// }
+fn validate_create_tracker_payload(payload: &CreateTrackerPayload) -> Result<(), ValidationError> {
+    if payload.starts_at > payload.ends_at {
+        return Err(ValidationError::new(
+            "You cannot begin reading after finishing...",
+        ));
+    }
+    if (payload.ends_at - payload.starts_at).num_days() > 365 {
+        return Err(ValidationError::new(
+            "Isn't that too much time to read a book?",
+        ));
+    }
+    Ok(())
+}
 
-// pub async fn start_reading(
-//     State(AppState { pool, .. }): State<AppState>,
-//     AppForm(StartReadingPayload {}): AppForm<StartReadingPayload>,
-// ) -> Result<Response, AppError> {
-//     Ok(created(format!("/users/")))
-// }
+#[instrument(name = "Adding a reading tracker for user", skip(pool, claims), fields(uid = %claims.sub))]
+pub async fn create_tracker(
+    State(AppState { pool, .. }): State<AppState>,
+    claims: UserClaims,
+    AppForm(CreateTrackerPayload {
+        book_name,
+        starts_at,
+        ends_at,
+    }): AppForm<CreateTrackerPayload>,
+) -> Result<Response, AppError> {
+    let mut tx = pool.begin().await?;
+    let book = sqlx::query!("SELECT id, title FROM books WHERE name = $1", &book_name)
+        .fetch_one(&mut *tx)
+        .await
+        .map_err(|e| match e {
+            sqlx::Error::RowNotFound => AppError::from(BooksError::BookNotFound(book_name.clone())),
+            err => AppError::from(err),
+        })?;
+    sqlx::query!(
+        "INSERT INTO users_books (user_id, book_id, starts_at, ends_at) VALUES ($1, $2, $3, $4)",
+        &claims.sub,
+        &book.id,
+        &starts_at,
+        &ends_at
+    )
+    .execute(&mut *tx)
+    .await
+    .map_err(|e| match e {
+        sqlx::Error::Database(ref err) => {
+            if err.is_unique_violation() {
+                AppError::from(BooksError::AlreadyTracking(book.title))
+            } else {
+                AppError::from(e)
+            }
+        }
+        err => AppError::from(err),
+    })?;
+    tx.commit().await?;
+    Ok(created(format!(
+        "{}/books/tracking/{}",
+        SETTINGS.frontend.url, book_name
+    )))
+}

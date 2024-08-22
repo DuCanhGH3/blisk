@@ -156,6 +156,10 @@ impl IntoResponse for AppError {
                         StatusCode::NOT_FOUND,
                         format!("Book not found.")
                     ),
+                    BooksError::AlreadyTracking(name) => (
+                        StatusCode::CONFLICT,
+                        format!("You are already reading book {}.", name)
+                    ),
                     BooksError::Unexpected => (
                         StatusCode::INTERNAL_SERVER_ERROR,
                         "Internal Server Error".to_owned()

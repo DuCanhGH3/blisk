@@ -52,3 +52,7 @@ CREATE OR REPLACE TRIGGER recalculate_books_reactions
 AFTER INSERT OR UPDATE OF "reaction" OR DELETE
 ON posts FOR EACH ROW 
 EXECUTE FUNCTION recalculate_books_reactions();
+
+CREATE OR REPLACE FUNCTION books_boost_rating(brt book_reactions_tally)
+RETURNS DECIMAL LANGUAGE sql IMMUTABLE AS
+$$SELECT CASE WHEN brt.total != 0 THEN (brt.like::decimal / brt.total::decimal) * 0.1 + log(brt.total) * 0.01 ELSE 0 END;$$;
