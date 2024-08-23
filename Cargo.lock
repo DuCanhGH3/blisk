@@ -320,6 +320,7 @@ dependencies = [
  "chrono",
  "config",
  "dotenv",
+ "errno",
  "futures",
  "jsonwebtoken",
  "lettre",

@@ -2,6 +2,7 @@ pub mod constants;
 pub mod emails;
 pub mod errors;
 pub mod futures;
+pub mod os;
 pub mod password;
 pub mod response;
 pub mod structs;

@@ -52,7 +52,9 @@ impl Application {
         let redis_client = redis::Client::open(SETTINGS.redis.uri.as_str())
             .expect("Failed to create a Redis client");
 
-        let hdfs = Arc::new(AppHdfs::new("hdfs://localhost:9000", "ducanh"));
+        let hdfs = Arc::new(
+            AppHdfs::new("hdfs://localhost:9000", "ducanh").expect("Failed to initiate HDFS"),
+        );
 
         let app_state = AppState {
             pool,
