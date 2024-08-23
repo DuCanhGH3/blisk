@@ -1,50 +1,8 @@
-use std::ffi::{CStr, CString};
-
-use crate::utils::os::clear_errno;
-
+mod file;
 use super::bindgen;
-
-pub struct FileInfo {
-    pub kind: u32,
-    pub name: String,
-    pub last_mod: i64,
-    pub size: i64,
-    pub replication: i16,
-    pub block_size: i64,
-    pub owner: String,
-    pub group: String,
-    pub permissions: i16,
-    pub last_access: i64,
-}
-
-impl From<bindgen::hdfsFileInfo> for FileInfo {
-    fn from(value: bindgen::hdfsFileInfo) -> Self {
-        let c_name = unsafe { CStr::from_ptr(value.mName) };
-        let c_owner = unsafe { CStr::from_ptr(value.mOwner) };
-        let c_group = unsafe { CStr::from_ptr(value.mGroup) };
-        FileInfo {
-            kind: value.mKind,
-            name: c_name
-                .to_str()
-                .expect("Filename is not valid UTF-8!")
-                .to_owned(),
-            last_mod: value.mLastMod,
-            size: value.mSize,
-            replication: value.mReplication,
-            block_size: value.mBlockSize,
-            owner: c_owner
-                .to_str()
-                .expect("Owner is not valid UTF-8!")
-                .to_owned(),
-            group: c_group
-                .to_str()
-                .expect("Group is not valid UTF-8!")
-                .to_owned(),
-            permissions: value.mPermissions,
-            last_access: value.mLastAccess,
-        }
-    }
-}
+use crate::utils::os::clear_errno;
+use file::{File, FileInfo};
+use std::ffi::CString;
 
 pub struct AppHdfs {
     fs: bindgen::hdfsFS,
@@ -74,6 +32,39 @@ impl AppHdfs {
             return Err(std::io::Error::last_os_error());
         }
         Ok(AppHdfs { fs })
+    }
+    pub fn open(
+        &self,
+        path: &str,
+        flags: i32,
+        buffer_size: Option<i32>,
+        replication: Option<i16>,
+    ) -> std::io::Result<File> {
+        let file = unsafe {
+            let path = CString::new(path)?;
+
+            let builder = bindgen::hdfsStreamBuilderAlloc(self.fs, path.as_ptr(), flags);
+
+            if let Some(buffer_size) = buffer_size {
+                bindgen::hdfsStreamBuilderSetBufferSize(builder, buffer_size);
+            }
+
+            if let Some(replication) = replication {
+                bindgen::hdfsStreamBuilderSetReplication(builder, replication);
+            }
+
+            bindgen::hdfsStreamBuilderBuild(builder)
+        };
+
+        if file.is_null() {
+            return Err(std::io::Error::last_os_error());
+        }
+
+        Ok(File {
+            hdfs: &self,
+            file,
+            path: path.to_owned(),
+        })
     }
     pub fn read(&self, path: &str) -> std::io::Result<FileInfo> {
         let path = CString::new(path)?;
