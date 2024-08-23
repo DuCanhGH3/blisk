@@ -17,6 +17,7 @@ dotenv = "0.15.0"
 futures = "0.3.30"
 jsonwebtoken = "9.3.0"
 lettre = { version = "0.11.7", features = ["tokio1-native-tls"] }
+libc = "0.2.158"
 minijinja = { version = "2.0.1", features = ["loader"] }
 rand = "0.8.5"
 redis = { version = "0.25.3", features = ["tokio-comp"] }
@@ -33,3 +34,6 @@ tracing = "0.1.40"
 tracing-subscriber = { version = "0.3.18", features = ["fmt", "std", "env-filter", "registry", "json", "tracing-log"] }
 uuid = { version = "1.9.1", features = ["v4", "fast-rng", "macro-diagnostics"] }
 validator = { version = "0.18.1", features = ["derive"] }
+
+[build-dependencies]
+bindgen = "0.70.1"

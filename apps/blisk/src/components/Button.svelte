@@ -39,7 +39,7 @@
   class={clsx(
     "transition-colors-opacity min-w-max rounded-md px-5 py-2.5 text-center text-sm font-medium duration-100",
     "focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-gray-800",
-    "border-border-light dark:border-border-dark border shadow-md  select-none",
+    "border-border-light dark:border-border-dark border shadow-md  select-none flex flex-row gap-1",
     colorClass,
     className
   )}

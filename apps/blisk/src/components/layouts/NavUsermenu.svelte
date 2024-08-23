@@ -35,7 +35,7 @@
     <Menu
       id="navbar-usermenu"
       class={clsx(
-        "animate-fly-up md:animate-fly w-52 origin-top-right",
+        "animate-fly-up md:animate-fly w-52 origin-top-right z-50",
         "bottom-full -translate-y-4 md:bottom-[initial] md:translate-y-0",
         leftSided ? "right-0 md:left-0" : "right-0"
       )}

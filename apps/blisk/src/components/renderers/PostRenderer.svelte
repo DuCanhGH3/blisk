@@ -123,19 +123,19 @@
       </span>
     </div>
   {/if}
-  <div class="order-1 -m-1 flex flex-row flex-wrap gap-3">
+  <div class="order-1 -m-1 flex flex-row flex-wrap gap-1 md:gap-3">
     {#if isLoggedIn}
       <details bind:this={reactionBar} class="relative flex-grow">
         {#if !post.user_reaction}
           <PostRendererButton as="summary" aria-describedby="post-{post.id}-reaction-bar">
-            <ThumbUp {...svgIconAttrs} />
-            <span class="mb-[-1px] select-none">Like</span>
+            <ThumbUp {...svgIconAttrs} class="h-5 w-auto md:h-6" />
+            <span class="md:mb-[-1px] select-none">Like</span>
           </PostRendererButton>
         {:else}
           {@const { icon: Icon, label, colors } = reactionRender[post.user_reaction]}
           <PostRendererButton customColors={colors} as="summary" aria-describedby="post-{post.id}-reaction-bar">
-            <Icon animatable={false} {...svgIconAttrs} />
-            <span class="mb-[-1px] select-none">{label}</span>
+            <Icon animatable={false} {...svgIconAttrs} class="h-5 w-auto md:h-6" />
+            <span class="md:mb-[-1px] select-none">{label}</span>
           </PostRendererButton>
         {/if}
         <ReactionBar
@@ -159,17 +159,17 @@
       </details>
     {:else}
       <PostRendererButton as="a" href={loginUrl}>
-        <ThumbUp {...svgIconAttrs} />
-        <span class="mb-[-1px] select-none">Like</span>
+        <ThumbUp {...svgIconAttrs} class="h-5 w-auto md:h-6" />
+        <span class="md:mb-[-1px] select-none">Like</span>
       </PostRendererButton>
     {/if}
     <PostRendererButton as="a" href="/posts/{post.id}#comments">
-      <Comment {...svgIconAttrs} />
-      <span class="mb-[-1px]">Comment</span>
+      <Comment {...svgIconAttrs} class="h-5 w-auto md:h-6" />
+      <span class="md:mb-[-1px]">Comment</span>
     </PostRendererButton>
     <PostRendererButton as="div">
-      <Share {...svgIconAttrs} />
-      <span class="mb-[-1px]">Share</span>
+      <Share {...svgIconAttrs} class="h-5 w-auto md:h-6" />
+      <span class="md:mb-[-1px]">Share</span>
     </PostRendererButton>
   </div>
 </article>

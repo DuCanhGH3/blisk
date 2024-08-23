@@ -7,7 +7,7 @@
     customColors?: string;
   };
 
-  const { as, customColors = "text-wood-900 dark:text-white", class: className, children, ...props }: MenuItemProps = $props();
+  const { as, customColors = "text-wood-900 dark:text-wood-200", class: className, children, ...props }: MenuItemProps = $props();
 </script>
 
 <svelte:element

@@ -23,7 +23,7 @@
 <form
   method="POST"
   action="?/comment{!isParentComment ? `&parentId=${parentId}` : ''}"
-  class="flex flex-row gap-2"
+  class="flex flex-col gap-2"
   use:enhance={({ formData }) => {
     isProcessing = true;
     const content = formData.get("content");
@@ -68,8 +68,8 @@
     errorText={$page.form?.validationError?.content}
     errorTextId="{idPrefix}-content-error-text"
   />
-  <Button as="button" class="absolute bottom-1 right-1 !rounded-full !p-2" disabled={isParentOptimistic || isProcessing}>
+  <Button as="button" class="self-end" disabled={isParentOptimistic || isProcessing}>
     <CommentIcon width={20} height={20} class="h-auto w-5" aria-hidden="true" tabindex={-1} />
-    <span class="sr-only">{isParentComment ? "Comment" : "Reply"}</span>
+    {isParentComment ? "Comment" : "Reply"}
   </Button>
 </form>

@@ -5,6 +5,13 @@
   import { clsx } from "$lib/clsx";
   import type { RequireFields } from "$lib/types";
   import type { Snippet } from "svelte";
+  import TextareaFn from "./TextareaFn.svelte";
+  import Heading from "./icons/textarea/Heading.svelte";
+  import Bold from "./icons/textarea/Bold.svelte";
+  import Italics from "./icons/textarea/Italics.svelte";
+  import Quote from "./icons/textarea/Quote.svelte";
+  import Code from "./icons/textarea/Code.svelte";
+  import Link from "./icons/textarea/Link.svelte";
 
   interface TextareaProps extends RequireFields<Omit<HTMLTextareaAttributes, "placeholder">, "name"> {
     self?: HTMLTextAreaElement | null;
@@ -41,26 +48,51 @@
   });
 </script>
 
-<div class="relative w-full">
-  <textarea
-    {id}
-    bind:this={thisRef}
-    bind:value
-    class={clsx(
-      "textarea block min-h-[128px] w-full overflow-hidden rounded-lg px-2.5 pb-2.5 pt-4 text-sm shadow-md transition-opacity disabled:opacity-50",
-      "focus:border-accent-light dark:focus:border-accent-dark border-border-light dark:border-border-dark border focus:outline-none",
-      "bg-wood-300 dark:bg-wood-800 opacity-80",
-      className
-    )}
-    aria-invalid={!!errorText}
-    aria-describedby={errorText ? errorTextId : undefined}
-    placeholder=" "
-    use:combineActions={actions}
-    {...rest}
-  ></textarea>
-  <label class="label absolute left-2.5 block select-none font-medium transition-all duration-100 ease-in" for={id}>
-    {label}
-  </label>
+<div class="box w-full rounded-[15px] p-2 pt-0">
+  <div class="flex w-full flex-row flex-wrap items-center justify-between p-1">
+    <span>blisk</span>
+    <div class="flex flex-row flex-wrap justify-end gap-2">
+      <TextareaFn label="Insert heading">
+        <Heading width={24} height={24} aria-hidden="true" tabindex={-1} />
+      </TextareaFn>
+      <TextareaFn label="Insert bold">
+        <Bold width={24} height={24} aria-hidden="true" tabindex={-1} />
+      </TextareaFn>
+      <TextareaFn label="Insert italics">
+        <Italics width={24} height={24} aria-hidden="true" tabindex={-1} />
+      </TextareaFn>
+      <TextareaFn label="Insert quote">
+        <Quote width={24} height={24} aria-hidden="true" tabindex={-1} />
+      </TextareaFn>
+      <TextareaFn label="Insert code">
+        <Code width={24} height={24} aria-hidden="true" tabindex={-1} />
+      </TextareaFn>
+      <TextareaFn label="Insert link">
+        <Link width={24} height={24} aria-hidden="true" tabindex={-1} />
+      </TextareaFn>
+    </div>
+  </div>
+  <div class="relative w-full">
+    <textarea
+      {id}
+      bind:this={thisRef}
+      bind:value
+      class={clsx(
+        "textarea block min-h-[128px] w-full overflow-hidden rounded-lg px-2.5 pb-2.5 pt-4 text-sm shadow-md transition-opacity disabled:opacity-50",
+        "focus:border-accent-light dark:focus:border-accent-dark border-border-light dark:border-border-dark border focus:outline-none",
+        "bg-wood-300 dark:bg-wood-800 opacity-80",
+        className
+      )}
+      aria-invalid={!!errorText}
+      aria-describedby={errorText ? errorTextId : undefined}
+      placeholder=" "
+      use:combineActions={actions}
+      {...rest}
+    ></textarea>
+    <label class="label absolute left-2.5 block select-none font-medium transition-all duration-100 ease-in" for={id}>
+      {label}
+    </label>
+  </div>
 </div>
 {#if !!errorText && errorTextId}
   {#if errorRenderer}

@@ -1,6 +1,6 @@
-use std::str::FromStr;
+use std::{str::FromStr, sync::Arc};
 
-use crate::{routes, settings::SETTINGS, utils::constants::UPLOADS_DIRECTORY};
+use crate::{hdfs::AppHdfs, routes, settings::SETTINGS, utils::constants::UPLOADS_DIRECTORY};
 use axum::{
     extract::DefaultBodyLimit,
     http::{header, HeaderName, HeaderValue, Method},
@@ -19,6 +19,7 @@ use tower_http::{cors::CorsLayer, services::ServeDir, set_header::SetResponseHea
 pub struct AppState {
     pub pool: Pool<Postgres>,
     pub redis_client: redis::Client,
+    pub hdfs: Arc<AppHdfs>,
 }
 
 pub struct Application {
@@ -51,7 +52,14 @@ impl Application {
         let redis_client = redis::Client::open(SETTINGS.redis.uri.as_str())
             .expect("Failed to create a Redis client");
 
-        let app_state = AppState { pool, redis_client };
+        let hdfs = Arc::new(AppHdfs::new("hdfs://localhost:9000", "ducanh"));
+
+        let app_state = AppState {
+            pool,
+            redis_client,
+            hdfs,
+        };
+
         let listener = tokio::net::TcpListener::bind(&address).await?;
         let port = listener.local_addr().unwrap().port();
         let cors = CorsLayer::new()
