@@ -73,9 +73,9 @@ pub struct CreatePayload {
     spine_image: FieldData<Bytes>,
 }
 
-#[instrument(name = "Creating a new book...", skip(pool, claims, cover_image, spine_image), fields(uid = %claims.sub))]
+#[instrument(name = "Creating a new book...", skip(pool, hdfs, claims, cover_image, spine_image), fields(uid = %claims.sub))]
 pub async fn create(
-    State(AppState { pool, .. }): State<AppState>,
+    State(AppState { pool, hdfs, .. }): State<AppState>,
     claims: UserClaims,
     AppMultipart(CreatePayload {
         title,
@@ -90,8 +90,8 @@ pub async fn create(
     }): AppMultipart<CreatePayload>,
 ) -> Result<Response, AppError> {
     let mut transaction = pool.begin().await?;
-    let cover_id = upload_file(&mut transaction, claims.sub, None, cover_image).await?;
-    let spine_id = upload_file(&mut transaction, claims.sub, None, spine_image).await?;
+    let cover_id = upload_file(&mut transaction, &hdfs, claims.sub, None, cover_image).await?;
+    let spine_id = upload_file(&mut transaction, &hdfs, claims.sub, None, spine_image).await?;
     let bid: i64 = sqlx::query_scalar!(
         "INSERT INTO books (is_approved, title, name, pages, language, summary, cover_id, spine_id)
         VALUES (FALSE, $1, $2, $3, $4, $5, $6, $7)
@@ -248,7 +248,9 @@ pub async fn read(
         &categories as &_,
         &authors as &_,
         &include_reviews,
-    ).fetch_all(&mut *transaction).await?;
+    )
+    .fetch_all(&mut *transaction)
+    .await?;
     transaction.commit().await?;
     Ok(response(StatusCode::OK, None, AppJson(books_list)))
 }

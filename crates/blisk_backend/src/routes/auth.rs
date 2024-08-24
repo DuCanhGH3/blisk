@@ -413,11 +413,14 @@ pub struct RegisterPayload {
 
 #[instrument(
     name = "Registering a new user",
-    skip(pool, redis_client, email, password, username, picture)
+    skip(pool, hdfs, redis_client, email, password, username, picture)
 )]
 pub async fn register(
     State(AppState {
-        pool, redis_client, ..
+        pool,
+        hdfs,
+        redis_client,
+        ..
     }): State<AppState>,
     AppMultipart(RegisterPayload {
         email,
@@ -448,7 +451,7 @@ pub async fn register(
             return Err(AppError::from(err));
         }
     };
-    let picture_id = upload_file(&mut transaction, uid, None, picture).await?;
+    let picture_id = upload_file(&mut transaction, &hdfs, uid, None, picture).await?;
     sqlx::query!(
         "UPDATE users SET picture_id = $1 WHERE id = $2",
         &picture_id,

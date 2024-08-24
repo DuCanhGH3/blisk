@@ -13,7 +13,7 @@ use sqlx::{
     Pool, Postgres,
 };
 use tower::ServiceBuilder;
-use tower_http::{cors::CorsLayer, services::ServeDir, set_header::SetResponseHeaderLayer};
+use tower_http::{cors::CorsLayer, set_header::SetResponseHeaderLayer};
 
 #[derive(Clone)]
 pub struct AppState {
@@ -121,7 +121,7 @@ impl Application {
             .route("/auth/login", post(routes::auth::login))
             .route("/users/:name/metadata", get(routes::users::read_metadata))
             .route("/assets/upload", post(routes::files::upload))
-            .nest_service("/assets", ServeDir::new(UPLOADS_DIRECTORY))
+            .route("/assets/*path", get(routes::files::load))
             .with_state(app_state)
             .layer(ServiceBuilder::new().layer(cors).layer(robots))
             .layer(DefaultBodyLimit::max(10_000_000));

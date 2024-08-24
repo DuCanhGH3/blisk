@@ -1,6 +1,10 @@
-use crate::utils::{constants::UPLOADS_DIRECTORY, errors::AppError, validators::path_is_valid};
+use crate::{
+    hdfs::AppHdfs,
+    utils::{constants::UPLOADS_DIRECTORY, errors::AppError, validators::path_is_valid},
+};
 use axum::body::Bytes;
 use axum_typed_multipart::FieldData;
+use libc::{O_CLOEXEC, O_CREAT, O_WRONLY};
 use sqlx::Postgres;
 use std::{ffi::OsStr, path::Path};
 
@@ -24,6 +28,7 @@ fn validate_file_name<'a>(file_path: impl ToString) -> Result<String, UploadsErr
 
 pub async fn upload_file<'c>(
     transaction: &mut sqlx::Transaction<'c, Postgres>,
+    hdfs: &AppHdfs,
     user_id: i64,
     parent_id: Option<i64>,
     file: FieldData<Bytes>,
@@ -70,11 +75,19 @@ pub async fn upload_file<'c>(
     async {
         let dir = path.parent().ok_or(UploadsError::Unexpected)?;
 
-        tokio::fs::create_dir_all(dir).await?;
+        hdfs.mkdir(dir.to_str().ok_or(UploadsError::Unexpected)?)?;
 
-        let mut file_stream = tokio::io::BufWriter::new(tokio::fs::File::create(path).await?);
+        let mut file_stream = std::io::BufWriter::new(
+            hdfs.open(
+                path.as_path().to_str().unwrap(),
+                O_CLOEXEC | O_WRONLY | O_CREAT,
+                None,
+                None,
+            )
+            .map_err(|_| UploadsError::Unexpected)?,
+        );
 
-        tokio::io::copy(&mut file.contents.as_ref(), &mut file_stream).await?;
+        std::io::copy(&mut file.contents.as_ref(), &mut file_stream)?;
 
         Ok::<_, UploadsError>(())
     }

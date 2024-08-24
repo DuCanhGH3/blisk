@@ -36,7 +36,7 @@
             width="192"
             height="288"
             alt=""
-            class="-mx-1 -mb-1 h-auto w-48 shadow-[5px_2px_20px_-1px_#000]"
+            class="-mx-1 -mb-1 h-72 w-48 object-fill shadow-[5px_2px_20px_-1px_#000]"
             style="view-transition-name:book-{book.name}"
           />
           <span class="sr-only">Book {book.title}</span>

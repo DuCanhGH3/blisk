@@ -84,7 +84,7 @@
               width="192"
               height="288"
               alt="Book: {book.title}"
-              class="h-auto w-48"
+              class="h-72 w-48 object-fill"
               style="view-transition-name:book-{category.name}-{book.name}"
             />
           </a>
