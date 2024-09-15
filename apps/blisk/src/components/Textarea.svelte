@@ -48,7 +48,7 @@
   });
 </script>
 
-<div class="box w-full rounded-[15px] p-2 pt-0">
+<div class="box w-full rounded-[15px] p-2 pt-0 shadow-md">
   <div class="flex w-full flex-row flex-wrap items-center justify-between p-1">
     <span>blisk</span>
     <div class="flex flex-row flex-wrap justify-end gap-2">
@@ -78,7 +78,7 @@
       bind:this={thisRef}
       bind:value
       class={clsx(
-        "textarea block min-h-[128px] w-full overflow-hidden rounded-lg px-2.5 pb-2.5 pt-4 text-sm shadow-md transition-opacity disabled:opacity-50",
+        "textarea block min-h-[128px] w-full overflow-hidden rounded-lg px-2.5 pb-2.5 pt-4 text-sm shadow-sm transition-opacity disabled:opacity-50",
         "focus:border-accent-light dark:focus:border-accent-dark border-border-light dark:border-border-dark border focus:outline-none",
         "bg-wood-300 dark:bg-wood-800 opacity-80",
         className

@@ -77,6 +77,7 @@ pub async fn upload_file<'c>(
 
         hdfs.mkdir(dir.to_str().ok_or(UploadsError::Unexpected)?)?;
 
+        // TODO: Implement AsyncWrite for File.
         let mut file_stream = std::io::BufWriter::new(
             hdfs.open(
                 path.as_path().to_str().unwrap(),

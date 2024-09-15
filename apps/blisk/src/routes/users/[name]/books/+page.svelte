@@ -4,7 +4,7 @@
   const { data } = $props();
 </script>
 
-{#if data.data.books.length === 0}
+{#if data.data.books.length > 0}
   <Bookshelf books={data.data.books} />
 {:else}
   <div class="flex flex-col gap-4">

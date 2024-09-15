@@ -94,6 +94,16 @@ export interface BookCategoryWithBooks extends BookCategory {
   books: Pick<Book, "title" | "name" | "cover_image" | "spine_image">[];
 }
 
+export interface ReadingTracker {
+  book_title: string;
+  book_cover: Image | null;
+  book_spine: Image | null;
+  starts_at: string;
+  ends_at: string;
+  pages_read: number;
+  completed: boolean;
+}
+
 export type SetHeaders = (headers: Record<string, string>) => void;
 
 export type HeadingLevel = 1 | 2 | 3 | 4 | 5 | 6 | 7;

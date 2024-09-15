@@ -442,3 +442,51 @@ pub async fn create_tracker(
         SETTINGS.frontend.url, book_name
     )))
 }
+
+#[derive(serde::Serialize)]
+pub struct ReadingTracker {
+    book_title: String,
+    book_cover: Option<sqlx::types::Json<AppImage>>,
+    book_spine: Option<sqlx::types::Json<AppImage>>,
+    starts_at: NaiveDate,
+    ends_at: NaiveDate,
+    pages_read: i64,
+    completed: bool,
+}
+
+#[instrument(name = "Fetching tracker...", skip(pool, claims), fields(uid = %claims.sub))]
+pub async fn fetch_tracker(
+    State(AppState { pool, .. }): State<AppState>,
+    claims: UserClaims,
+    Path(book): Path<String>,
+) -> Result<Response, AppError> {
+    let mut tx = pool.begin().await?;
+
+    let tracker = sqlx::query_as!(
+        ReadingTracker,
+        r#"SELECT
+            b.title AS "book_title!",
+            b.cover_image AS "book_cover?: _",
+            b.spine_image AS "book_spine?: _",
+            ub.starts_at,
+            ub.ends_at,
+            ub.pages_read,
+            ub.completed
+        FROM users_books ub
+        JOIN books_view b ON ub.book_id = b.id
+        WHERE
+            user_id = $1 AND
+            b.name = $2 AND
+            completed = FALSE"#,
+        &claims.sub,
+        &book
+    )
+    .fetch_one(&mut *tx)
+    .await?;
+
+    Ok(response(
+        StatusCode::OK,
+        None,
+        AppJson(tracker),
+    ))
+}

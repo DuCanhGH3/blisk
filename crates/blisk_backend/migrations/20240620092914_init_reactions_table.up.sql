@@ -1,12 +1,12 @@
 -- Add up migration script here
--- CREATE TYPE PREACT AS ENUM (
---     'like',
---     'love',
---     'laugh',
---     'wow',
---     'sad',
---     'angry'
--- );
+CREATE TYPE PREACT AS ENUM (
+    'like',
+    'love',
+    'laugh',
+    'wow',
+    'sad',
+    'angry'
+);
 
 CREATE TABLE IF NOT EXISTS post_reactions (
     "type" PREACT NOT NULL,

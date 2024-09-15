@@ -95,6 +95,7 @@ impl Application {
             .route("/books/categories", get(routes::books::read_categories))
             .route("/books/metadata", get(routes::books::read_metadata))
             .route("/books/read", post(routes::books::create_tracker))
+            .route("/books/tracker/:book", get(routes::books::fetch_tracker))
             .route(
                 "/posts",
                 post(routes::posts::create)
