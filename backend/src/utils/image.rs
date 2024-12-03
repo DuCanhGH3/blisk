@@ -1,6 +1,6 @@
 use axum::{
     body::Body,
-    http::StatusCode,
+    http::{HeaderValue, StatusCode},
     response::{IntoResponse, Response},
 };
 
@@ -16,9 +16,14 @@ impl IntoResponse for Image {
             Self::File(filename, data) => {
                 let filename_header_value = format!("attachment; filename=\"{filename}\"");
 
+                let mime = mime_guess::from_path(filename)
+                    .first_raw()
+                    .map(HeaderValue::from_static)
+                    .unwrap_or(HeaderValue::from_static("application/octet-stream"));
+
                 Response::builder()
                     .header("Content-Disposition", filename_header_value)
-                    .header("Content-Type", "image/jpeg")
+                    .header("Content-Type", mime)
                     .body(Body::from(data))
                     .unwrap()
             }
