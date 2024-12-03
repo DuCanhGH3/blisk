@@ -87,7 +87,7 @@ pub async fn load<'c>(
 
     let res = s3
         .get_object()
-        .bucket("blisk")
+        .bucket("blisk-s3")
         .key(&path)
         .send()
         .await

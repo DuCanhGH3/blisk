@@ -128,7 +128,7 @@ export const getLoginUrl = (currentPath: string) =>
   isSafeRedirect(currentPath) ? `${base}/auth/login?redirectTo=${currentPath}` : `${base}/auth/login`;
 
 export const getImage = (image: Image | null, fallback: string) =>
-  image ? `${PUBLIC_BACKEND_URL}/assets/${image.owner}/${image.id}.${image.ext}` : fallback;
+  image ? `${PUBLIC_BACKEND_URL}/assets/${image.owner}-${image.id}.${image.ext}` : fallback;
 
 export const getProfilePicture = (profilePicture: Image | null) => getImage(profilePicture, "/no-avatar.webp");
 

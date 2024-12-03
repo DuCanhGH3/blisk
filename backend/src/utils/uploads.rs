@@ -1,6 +1,6 @@
 use crate::{
     // hdfs::AppHdfs,
-    utils::{constants::UPLOADS_DIRECTORY, errors::AppError, validators::path_is_valid},
+    utils::{errors::AppError, validators::path_is_valid},
 };
 use aws_sdk_s3::{
     error::SdkError,
@@ -58,7 +58,6 @@ pub async fn upload_file<'c>(
         .ok_or(UploadsError::InvalidName(file_name.clone()))?;
     let uid = validate_file_name(user_id)?;
 
-    // TODO: add `extension` column
     let fid = {
         if let Some(pid) = parent_id {
             sqlx::query_scalar!(
@@ -81,9 +80,7 @@ pub async fn upload_file<'c>(
     }
     .await?;
 
-    let path = Path::new(UPLOADS_DIRECTORY)
-        .join(uid.to_string())
-        .join(format!("{}.{}", fid, ext));
+    let path = format!("{}-{}.{}", uid, fid, ext);
 
     async {
         // let dir = path.parent().ok_or(UploadsError::Unexpected)?;
@@ -104,8 +101,8 @@ pub async fn upload_file<'c>(
         // std::io::copy(&mut file.contents.as_ref(), &mut file_stream)?;
 
         s3.put_object()
-            .bucket("blisk")
-            .key(&String::from(path.as_path().to_string_lossy()))
+            .bucket("blisk-s3")
+            .key(path)
             .body(file.contents.into())
             .send()
             .await?;
