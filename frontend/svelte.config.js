@@ -1,6 +1,6 @@
 // @ts-check
 import "dotenv/config";
-import adapter from "@sveltejs/adapter-node";
+import adapter from "@sveltejs/adapter-cloudflare";
 import { vitePreprocess } from "@sveltejs/vite-plugin-svelte";
 
 const publicBackend = /** @type {`https://${string}.${string}` | undefined} */ (process.env.PUBLIC_BACKEND_URL);
