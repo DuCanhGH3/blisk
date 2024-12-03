@@ -96,6 +96,8 @@ pub static SETTINGS: LazyLock<Settings> = LazyLock::new(|| {
         .try_into()
         .expect("Failed to parse APP_ENVIRONMENT");
 
+    println!("Starting app in {} mode.", environment.as_str());
+
     let environment_file = format!("{}.yaml", environment.as_str());
 
     let config = config::Config::builder()

@@ -23,4 +23,5 @@ WORKDIR /app
 RUN apt-get update && apt install -y openssl ca-certificates
 COPY settings/ ./settings
 COPY --from=builder /app/app ./app
+ENV APP_ENVIRONMENT=production
 ENTRYPOINT ["./app"]
