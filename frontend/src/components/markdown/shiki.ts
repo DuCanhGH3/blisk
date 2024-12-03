@@ -1,4 +1,4 @@
-import { createHighlighterCore } from "shiki";
+import { createHighlighterCore, createJavaScriptRegexEngine } from "shiki";
 
 const langAlias = [
   ["asm", ["assembly"]],
@@ -52,5 +52,5 @@ export const highlighter = await createHighlighterCore({
     import("shiki/langs/vue.mjs"),
   ],
   langAlias: Object.fromEntries(langAlias.flatMap(([original, aliases]) => aliases.map((alias) => [alias, original]))),
-  loadWasm: import("shiki/wasm"),
+  engine: createJavaScriptRegexEngine(),
 });
