@@ -6,6 +6,7 @@ build/
 .turbo/
 .svelte-kit/
 package/
+.direnv
 .env
 .env.*
 !.env.example
@@ -15,3 +16,6 @@ vite.config.ts.timestamp-*
 # local wrangler
 dev.db
 .wrangler
+
+# random stuff
+ets/
