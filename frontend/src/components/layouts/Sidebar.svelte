@@ -20,7 +20,7 @@
         { label: "Home", link: "/" },
         { label: "Books", link: "/books" },
         { label: "Posts", link: "/posts" },
-        ...($page.data.user ? [] : [{ label: "Login", link: "/login" }]),
+        ...($page.data.user ? [] : [{ label: "Login", link: "/auth/login" }]),
       ] satisfies SidebarLinkEntry[]
     ).map(({ link, ...rest }) => ({
       link,
