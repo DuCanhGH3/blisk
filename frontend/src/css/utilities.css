@@ -1,0 +1,190 @@
+@utility details-anim {
+  &details[open] > *:not(summary) {
+    @apply animate-fly;
+  }
+}
+
+@utility details-chevron {
+  details[open] > summary > & {
+    @apply rotate-90;
+  }
+}
+
+@utility box {
+  & {
+    @apply bg-wood-hor dark:bg-dark-wood-hor bg-wood-400 dark:bg-wood-915 border-border-light dark:border-border-dark w-full border;
+  }
+  &.hover {
+    @apply hover:bg-wood-300 dark:hover:bg-wood-800;
+  }
+  &.lg {
+    @apply rounded-3xl p-8 shadow-lg;
+  }
+  &.md {
+    @apply rounded-2xl p-4 shadow-md;
+  }
+  &.sm {
+    @apply rounded-xl p-2.5 shadow-md;
+  }
+  &.xs {
+    @apply rounded-lg p-2 shadow-md;
+  }
+}
+
+@utility container {
+  & {
+    @apply bg-wood-hor dark:bg-dark-wood-hor bg-wood-400 dark:bg-wood-915 border-border-light dark:border-border-dark w-full border;
+  }
+}
+
+@utility text-comment {
+  @apply text-[#242424] dark:text-[#bababa];
+}
+
+@utility link {
+  &:not(.no-color) {
+    @apply text-accent-light! dark:text-accent-dark!;
+  }
+  &:not(.no-color) > * {
+    @apply text-accent-light! dark:text-accent-dark!;
+  }
+  & {
+    @apply underline underline-offset-[5px];
+  }
+  & > * {
+    @apply underline underline-offset-[5px];
+  }
+  &.sm {
+    @apply underline-offset-4!;
+  }
+  &.sm > * {
+    @apply underline-offset-4!;
+  }
+}
+
+@utility list {
+  & {
+    @apply marker:text-wood-900 list-inside list-disc pl-4 break-words dark:marker:text-white;
+  }
+  & > li {
+    @apply mb-2;
+  }
+  & > li > & {
+    @apply mt-2;
+  }
+}
+
+@utility nav-button {
+  & {
+    @apply hover:bg-wood-200 dark:hover:bg-wood-800 flex cursor-pointer items-center justify-center rounded-full bg-transparent p-3 duration-100;
+  }
+  &.active {
+    @apply dark:bg-wood-800 bg-wood-300;
+  }
+}
+
+@utility datepicker {
+  & + .label {
+    @apply text-wood-800 dark:text-wood-300 top-0.5 translate-x-0 translate-y-0 text-xs;
+  }
+}
+
+@utility label {
+  .datepicker + & {
+    @apply text-wood-800 dark:text-wood-300 top-0.5 translate-x-0 translate-y-0 text-xs;
+  }
+
+  .input:placeholder-shown:focus + & {
+    @apply text-wood-800 dark:text-wood-300 top-0.5 translate-x-0 translate-y-0 text-xs;
+  }
+
+  .input:not(:placeholder-shown) + & {
+    @apply text-wood-800 dark:text-wood-300 top-0.5 translate-x-0 translate-y-0 text-xs;
+  }
+
+  .textarea:placeholder-shown:focus + & {
+    @apply text-wood-800 dark:text-wood-300 top-0.5 translate-x-0 translate-y-0 text-xs;
+  }
+
+  .textarea:not(:placeholder-shown) + & {
+    @apply text-wood-800 dark:text-wood-300 top-0.5 translate-x-0 translate-y-0 text-xs;
+  }
+  .input:placeholder-shown:not(:focus) + & {
+    @apply text-wood-900 dark:text-wood-200 top-1/2 -translate-y-1/2 translate-x-0 text-sm;
+  }
+  .textarea:placeholder-shown:not(:focus) + & {
+    @apply text-wood-900 dark:text-wood-200 top-[12px] translate-x-0 text-sm;
+  }
+}
+
+@utility input {
+  &:placeholder-shown:focus + .label {
+    @apply text-wood-800 dark:text-wood-300 top-0.5 translate-x-0 translate-y-0 text-xs;
+  }
+  &:not(:placeholder-shown) + .label {
+    @apply text-wood-800 dark:text-wood-300 top-0.5 translate-x-0 translate-y-0 text-xs;
+  }
+  &:placeholder-shown:not(:focus) + .label {
+    @apply text-wood-900 dark:text-wood-200 top-1/2 -translate-y-1/2 translate-x-0 text-sm;
+  }
+}
+
+@utility textarea {
+  &:placeholder-shown:focus + .label {
+    @apply text-wood-800 dark:text-wood-300 top-0.5 translate-x-0 translate-y-0 text-xs;
+  }
+  &:not(:placeholder-shown) + .label {
+    @apply text-wood-800 dark:text-wood-300 top-0.5 translate-x-0 translate-y-0 text-xs;
+  }
+  &:placeholder-shown:not(:focus) + .label {
+    @apply text-wood-900 dark:text-wood-200 top-[12px] translate-x-0 text-sm;
+  }
+}
+
+@utility react-button {
+  @apply relative size-9 max-w-24 transition-all duration-200;
+  flex: calc(0.5 + var(--lerp, 0) * 1.5);
+  :is(&:hover, &:active, &:focus-visible) {
+    --lerp: 1;
+  }
+  &:has(+ :is(&:hover, &:active, &:focus-visible)) {
+    --lerp: calc(sin(40deg));
+  }
+
+  :is(&:hover, &:active, &:focus-visible) + & {
+    --lerp: calc(sin(40deg));
+  }
+  &:has(+ & + :is(&:hover, &:active, &:focus-visible)) {
+    --lerp: calc(sin(30deg));
+  }
+
+  :is(&:hover, &:active, &:focus-visible) + & + & {
+    --lerp: calc(sin(30deg));
+  }
+  &:has(+ & + & + :is(&:hover, &:active, &:focus-visible)) {
+    --lerp: calc(sin(20deg));
+  }
+
+  :is(&:hover, &:active, &:focus-visible) + & + & + & {
+    --lerp: calc(sin(20deg));
+  }
+  &:has(+ & + & + & + :is(&:hover, &:active, &:focus-visible)) {
+    --lerp: calc(sin(10deg));
+  }
+
+  :is(&:hover, &:active, &:focus-visible) + & + & + & + & {
+    --lerp: calc(sin(10deg));
+  }
+}
+
+@utility visible-dark {
+  & {
+    @apply !invisible !hidden dark:!visible dark:!block;
+  }
+}
+
+@utility visible-light {
+  & {
+    @apply !visible !block dark:!invisible dark:!hidden;
+  }
+}

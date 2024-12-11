@@ -40,8 +40,8 @@
   <div class="absolute h-full w-full py-4" role="presentation">
     <button
       class={clsx(
-        "absolute left-4 top-1/2 z-10 flex -translate-y-1/2 active:!bg-neutral-400 dark:active:!bg-neutral-700",
-        "flex cursor-pointer items-center justify-center rounded-full bg-transparent [&>svg]:invisible [&>svg]:hover:visible",
+        "active:bg-neutral-400! dark:active:bg-neutral-700! absolute left-4 top-1/2 z-10 flex -translate-y-1/2",
+        "flex cursor-pointer items-center justify-center rounded-full bg-transparent [&>svg]:invisible hover:[&>svg]:visible",
         "hover:bg-neutral-250 p-3 transition-colors duration-100 dark:hover:bg-neutral-800"
       )}
       onclick={emblaPrev}
@@ -51,8 +51,8 @@
     </button>
     <button
       class={clsx(
-        "absolute right-4 top-1/2 z-10 flex -translate-y-1/2 active:!bg-neutral-400 dark:active:!bg-neutral-700",
-        "flex cursor-pointer items-center justify-center rounded-full bg-transparent [&>svg]:invisible [&>svg]:hover:visible",
+        "active:bg-neutral-400! dark:active:bg-neutral-700! absolute right-4 top-1/2 z-10 flex -translate-y-1/2",
+        "flex cursor-pointer items-center justify-center rounded-full bg-transparent [&>svg]:invisible hover:[&>svg]:visible",
         "hover:bg-neutral-250 p-3 transition-colors duration-100 dark:hover:bg-neutral-800"
       )}
       onclick={emblaNext}
@@ -77,15 +77,17 @@
         {#each category.books as book}
           <a
             href="/books/{book.name}?from-category={category.name}"
-            class="book-container z-[3] mr-10 shrink-0 select-none shadow-[5px_2px_20px_-1px_#000000] hover:z-[4]"
+            class="book-container z-3 hover:z-4 mr-10 shrink-0 select-none shadow-[5px_2px_20px_-1px_#000000]"
           >
             <img
               src={getImage(book.cover_image, "/test-cover.jpg")}
-              width="192"
-              height="288"
-              alt="Book: {book.title}"
               class="h-72 w-48 object-fill"
               style="view-transition-name:book-{category.name}-{book.name}"
+              width="192"
+              height="288"
+              loading="lazy"
+              decoding="async"
+              alt="Book: {book.title}"
             />
           </a>
         {/each}

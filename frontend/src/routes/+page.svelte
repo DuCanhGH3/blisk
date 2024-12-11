@@ -35,8 +35,8 @@
     <h2 class="sr-only">Books of the day</h2>
     <button
       class={clsx(
-        "absolute left-4 top-1/2 z-10 flex -translate-y-1/2 active:!bg-neutral-400 dark:active:!bg-neutral-700",
-        "flex cursor-pointer items-center justify-center rounded-full bg-transparent [&>svg]:invisible [&>svg]:hover:visible",
+        "active:bg-neutral-400! dark:active:bg-neutral-700! absolute left-4 top-1/2 z-10 flex -translate-y-1/2",
+        "flex cursor-pointer items-center justify-center rounded-full bg-transparent [&>svg]:invisible hover:[&>svg]:visible",
         "hover:bg-neutral-250 p-3 transition-colors duration-100 dark:hover:bg-neutral-800"
       )}
       onclick={emblaPrev}
@@ -46,8 +46,8 @@
     </button>
     <button
       class={clsx(
-        "absolute right-4 top-1/2 z-10 flex -translate-y-1/2 active:!bg-neutral-400 dark:active:!bg-neutral-700",
-        "flex cursor-pointer items-center justify-center rounded-full bg-transparent [&>svg]:invisible [&>svg]:hover:visible",
+        "active:bg-neutral-400! dark:active:bg-neutral-700! absolute right-4 top-1/2 z-10 flex -translate-y-1/2",
+        "flex cursor-pointer items-center justify-center rounded-full bg-transparent [&>svg]:invisible hover:[&>svg]:visible",
         "hover:bg-neutral-250 p-3 transition-colors duration-100 dark:hover:bg-neutral-800"
       )}
       onclick={emblaNext}
@@ -70,7 +70,15 @@
               <span class="text-comment text-2xl font-semibold" aria-hidden="true">book of the day</span>
               <h3 class="line-clamp-1 text-4xl font-semibold"><span class="sr-only">Book: </span>Lorem ipsum</h3>
             </span>
-            <img width={900} height={400} class="h-96 w-full rounded-md object-cover opacity-75 md:h-[600px]" src="/AGI2.webp" alt="" />
+            <img
+              src="/AGI2.webp"
+              class="h-96 w-full rounded-md object-cover opacity-75 md:h-[600px]"
+              width={900}
+              height={400}
+              loading="lazy"
+              decoding="async"
+              alt=""
+            />
           </a>
         {/each}
       </div>

@@ -46,20 +46,20 @@
 {#if data.books.length > 0}
   <Bookshelf books={data.books} />
 {:else}
-  <div class="flex flex-col gap-6 p-2 md:py-8">
+  <div class="flex flex-col gap-6 px-8 py-8 md:px-0">
     <h1 class="h2">No books found!</h1>
     <h2 class="h3">It's time to fill the bookshelf, isn't it?</h2>
   </div>
 {/if}
 <!-- {#if selectedBook}
   <div class="fixed left-0 top-0 z-50 flex h-full w-full items-center justify-center bg-black/80">
-    <div class="box lg relative flex w-[90dvw] max-w-screen-lg flex-col gap-4 !p-8 text-wood-900 lg:flex-row lg:gap-8 dark:text-white">
-      <Button as="button" variant="light" class="absolute right-4 top-4 z-[2] !p-2" onclick={() => history.back()}>
+    <div class="box lg relative flex w-[90dvw] max-w-(--breakpoint-lg) flex-col gap-4 p-8! text-wood-900 lg:flex-row lg:gap-8 dark:text-white">
+      <Button as="button" variant="light" class="absolute right-4 top-4 z-2 p-2!" onclick={() => history.back()}>
         <X {...rendererButtonAttributes} />
         <span class="sr-only">Go back</span>
       </Button>
       <img src="/test-cover.jpg" class="h-72 w-48 rounded-lg" width="192" height="288" alt="" />
-      <div class="z-[1] flex flex-1 flex-col gap-2 break-all">
+      <div class="z-1 flex flex-1 flex-col gap-2 break-all">
         <p class="h1 text-5xl lg:text-8xl">{selectedBook.title}</p>
         <p class="sr-only">About this book</p>
         <p class="text-comment text-3xl font-semibold leading-10 tracking-tight" aria-label="This book was written by Frank Herbert in 1965">

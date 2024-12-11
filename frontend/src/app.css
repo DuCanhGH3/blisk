@@ -1,6 +1,293 @@
-@import "./geist.css";
-@import "./base.css";
-@import "./utilities.css";
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "./css/theme.css";
+@import "./css/utilities.css";
+@import "./css/geist.css" layer(base);
+@import "tailwindcss";
+@source "app.html";
+@variant dark (&:is([data-theme='dark'] *));
+
+@layer base {
+  @view-transition {
+    navigation: auto;
+  }
+
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation-duration: 0.1s;
+  }
+
+  @media (prefers-reduced-motion) {
+    html {
+      @apply animate-none! scroll-auto! transition-none!;
+    }
+    html *,
+    html *:before,
+    html *:after {
+      @apply animate-[inherit]! transition-[inherit]!;
+    }
+    ::view-transition-group(*),
+    ::view-transition-old(*),
+    ::view-transition-new(*) {
+      @apply animate-none! scroll-auto! transition-none!;
+    }
+  }
+
+  li[aria-current="page"] {
+    @apply relative h-full before:hidden md:before:block;
+  }
+
+  li[aria-current="page"]::before {
+    view-transition-name: active-page;
+    @apply border-accent-light dark:border-accent-dark absolute bottom-0.5 left-1/2 z-10 h-0 w-[75%] -translate-x-1/2 rounded-md border-2 content-[''];
+  }
+  html[data-theme="dark"] .shiki,
+  html[data-theme="dark"] .shiki span:not([class^="twoslash-"]) {
+    color: var(--shiki-dark) !important;
+    background-color: var(--shiki-dark-bg) !important;
+    /* Optional, if you also want font styles */
+    font-style: var(--shiki-dark-font-style) !important;
+    font-weight: var(--shiki-dark-font-weight) !important;
+    text-decoration: var(--shiki-dark-text-decoration) !important;
+  }
+  *,
+  ::after,
+  ::before,
+  ::backdrop,
+  ::file-selector-button {
+    border-color: var(--color-gray-200, currentColor);
+  }
+  * {
+    @apply relative box-border min-w-0 border-solid;
+  }
+  button {
+    @apply cursor-pointer;
+  }
+  body {
+    @apply bg-wood-500 bg-wood dark:bg-dark-wood text-wood-900 dark:bg-wood-950 dark:text-wood-200 font-sans font-normal;
+  }
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6,
+  blockquote {
+    @apply text-balance break-words;
+  }
+  h1,
+  .h1 {
+    @apply text-[2.625rem] leading-10 font-semibold tracking-tight;
+  }
+  h2,
+  .h2 {
+    @apply text-4xl leading-10 font-semibold tracking-tight;
+  }
+  h3,
+  .h3 {
+    @apply text-3xl leading-10 font-semibold tracking-tight;
+  }
+  h4,
+  .h4 {
+    @apply text-2xl leading-5 font-medium tracking-tight;
+  }
+  h5,
+  .h5 {
+    @apply text-xl leading-5 font-medium tracking-tight;
+  }
+  h6,
+  .h6 {
+    @apply text-lg leading-5 font-normal tracking-tight;
+  }
+  details > summary {
+    @apply cursor-pointer list-none select-none;
+  }
+  details > summary::-webkit-details-marker {
+    @apply hidden;
+  }
+  dialog {
+    @apply absolute hidden scale-95 opacity-0 transition-all duration-200 ease-out;
+  }
+  dialog[open] {
+    @apply relative flex scale-100 opacity-100;
+  }
+  dialog[open]::backdrop {
+    @apply bg-black/80;
+  }
+
+  #root-container {
+    @apply relative m-0 flex h-fit min-h-screen w-full flex-col p-0;
+  }
+
+  #nav-mobile-menu[open] > summary {
+    @apply [&>:nth-child(1)]:translate-y-[0.7rem] [&>:nth-child(1)]:rotate-45 [&>:nth-child(2)]:opacity-0 [&>:nth-child(3)]:-translate-y-[0.7rem] [&>:nth-child(3)]:-rotate-45;
+  }
+
+  #nav-usermenu[open] > summary {
+    @apply dark:bg-wood-800 bg-wood-300;
+  }
+
+  #nav:popover-open {
+    @apply flex flex-col;
+    @starting-style {
+      @apply translate-y-full;
+    }
+  }
+
+  :root:has(:popover-open) #main-wrap {
+    @apply px-[3dvw] py-[3dvw] transition-[padding] duration-400;
+  }
+
+  .book {
+    @apply relative block h-72 w-12 shadow-md transition-transform duration-500 select-none;
+    transform-style: preserve-3d;
+  }
+
+  .book:hover {
+    transform: rotateX(-5deg) rotateY(-20deg) rotateZ(-15deg) translateX(-40px) translateY(-20px);
+  }
+
+  .book-side {
+    @apply absolute block rounded-xs border-2 border-black select-none;
+    transform-origin: left center;
+  }
+
+  .book-side.spine {
+    @apply relative block h-72 w-12;
+  }
+
+  .book-side.top {
+    @apply top-0 block h-[184px] w-12 bg-[#eee7d7];
+    transform: rotateX(90deg) translateZ(88px) translateY(-96px);
+  }
+
+  .book-side.back-cover {
+    @apply top-0 left-0 block h-72 w-48 bg-[#eee7d7];
+    transform: rotateY(90deg);
+  }
+
+  .book-side.cover {
+    @apply top-0 left-12 block h-72 w-48;
+    transform: rotateY(90deg);
+    view-transition-class: book-cover;
+  }
+
+  .book.front {
+    @apply h-72 w-48;
+    transform: unset !important;
+  }
+
+  .book.front .book-side.back-cover {
+    transform: rotateY(-180deg) translateX(-192px) translateZ(48px);
+  }
+
+  .book.front .book-side.spine {
+    @apply top-0 left-0;
+    transform: rotateY(-90deg) translateX(-48px);
+  }
+
+  .book.front .book-side.top {
+    transform: rotateX(90deg) rotateZ(-90deg) translateZ(88px) translateY(96px);
+  }
+
+  .book.front .book-side.cover {
+    @apply left-0;
+    transform: rotateY(0deg);
+  }
+
+  #wow-emoji * {
+    transform-box: fill-box;
+    transform-origin: center;
+  }
+
+  @keyframes eyes {
+    /* 17% and 8% */
+    13% {
+      transform: scaleY(0.01);
+    }
+    0%,
+    11%,
+    15% {
+      transform: scaleY(1);
+    }
+    25%,
+    33%,
+    37% {
+      transform: translateY(-1.75px);
+    }
+    35% {
+      transform: translateY(-1.75px) scaleY(0.01);
+    }
+    50%,
+    53%,
+    57% {
+      transform: translateX(2px) translateY(-1px) rotate(-7deg) scaleX(0.95) scaleY(1.02);
+    }
+    55% {
+      transform: translateX(2px) translateY(-1px) rotate(-7deg) scaleX(0.95) scaleY(0.01);
+    }
+    75%,
+    80% {
+      transform: translateX(-3.75px) translateY(1px) rotate(17deg) scaleX(0.95) scaleY(1.02);
+    }
+  }
+
+  @keyframes mouth {
+    0%,
+    11%,
+    13%,
+    15% {
+      transform: scaleY(1);
+    }
+    25% {
+      transform: translateY(-4px) scaleX(0.5) scaleY(0.5);
+    }
+    33%,
+    37% {
+      transform: translateY(-3px) scaleX(0.9) scaleY(0.9);
+    }
+    50%,
+    53%,
+    55%,
+    57% {
+      transform: translateX(2px) translateY(-1.5px) rotate(5deg) scaleX(0.9) scaleY(1.1);
+    }
+    80% {
+      transform: translateX(-5.25px) translateY(-1.5px) rotate(17deg) scaleX(0.45) scaleY(0.4);
+    }
+  }
+
+  @keyframes eyesbrow {
+    0%,
+    11%,
+    13%,
+    15% {
+      transform: scaleY(1.1);
+    }
+    25%,
+    33%,
+    37% {
+      transform: translateY(-1.5px) scaleY(1.1);
+    }
+    50%,
+    53%,
+    55%,
+    57% {
+      transform: translateX(1.75px) translateY(-0.5px) rotate(-7deg) scaleX(0.95) scaleY(1.02);
+    }
+    75%,
+    80% {
+      transform: translateX(-3px) translateY(1.5px) rotate(17deg) scaleX(0.9) scaleY(1.02);
+    }
+  }
+
+  .eyes-t {
+    @apply animate-[eyes_5s_cubic-bezier(0,1.03,1,1.03)_0.5s_infinite];
+  }
+
+  .mouth-t {
+    @apply animate-[mouth_5s_cubic-bezier(0,1.05,1,1.05)_0.5s_infinite];
+  }
+
+  .eyebrow-t {
+    @apply animate-[eyesbrow_5s_cubic-bezier(0,1,1,1)_0.5s_infinite];
+  }
+}

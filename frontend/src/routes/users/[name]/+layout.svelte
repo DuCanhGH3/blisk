@@ -15,9 +15,11 @@
   <div>
     <img
       src="/AGI2.webp"
-      alt=""
-      height={384}
       class="h-48 w-full select-none rounded-3xl object-cover shadow-lg transition-all duration-150 md:h-60 lg:h-96"
+      height={384}
+      loading="lazy"
+      decoding="async"
+      alt=""
     />
     <div class="flex flex-row flex-wrap items-center gap-8 px-8">
       <img
@@ -25,6 +27,8 @@
         class="border-border-light dark:border-border-dark -mt-8 h-[150px] w-[150px] select-none rounded-full border shadow-lg"
         width={150}
         height={150}
+        loading="lazy"
+        decoding="async"
         alt=""
       />
       <h1>
@@ -63,7 +67,7 @@
                 <tr class="h-10 md:h-[15px]">
                   <th class="relative" scope="row"><span class="absolute bottom-[-4px] left-0 font-normal">{days[day]}</span></th>
                   {#each Array.from({ length: 59 }) as _}
-                    <td class="w-10 rounded-md bg-green-800 md:w-[15px] md:rounded-sm dark:bg-green-400"></td>
+                    <td class="md:rounded-xs w-10 rounded-md bg-green-800 md:w-[15px] dark:bg-green-400"></td>
                   {/each}
                 </tr>
               {/each}
@@ -81,7 +85,7 @@
         <Link href={`${basePath}/dislikes`}>Dislikes</Link>
         <Link href={`${basePath}/books`}>Books</Link>
       </div>
-      <div class="w-full max-w-screen-md">
+      <div class="max-w-(--breakpoint-md) w-full">
         {@render children()}
       </div>
     </article>

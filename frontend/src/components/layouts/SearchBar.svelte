@@ -28,13 +28,13 @@
 
 <svelte:document bind:activeElement />
 
-<form action="/books" class="relative hidden md:block md:w-full">
+<form action="/books" class="relative block flex-1">
   <Input
     bind:self={input}
     id="search-bar-input"
     name="q"
     label="Search"
-    autocapitalize="false"
+    autocapitalize="off"
     autocomplete="off"
     oninput={(e) => loadDataDebounced(e.currentTarget.value)}
   />

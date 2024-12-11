@@ -24,6 +24,7 @@ impl IntoResponse for Image {
                 Response::builder()
                     .header("Content-Disposition", filename_header_value)
                     .header("Content-Type", mime)
+                    .header("Cache-Control", "public, max-age=31536000, immutable")
                     .body(Body::from(data))
                     .unwrap()
             }

@@ -20,7 +20,7 @@
   <div
     class={clsx(
       "datepicker block h-[44px] w-full rounded-lg px-2.5 pb-2.5 pt-4 text-sm shadow-md transition-opacity disabled:opacity-50",
-      "focus:border-accent-light dark:focus:border-accent-dark border-border-light dark:border-border-dark border focus:outline-none",
+      "focus:border-accent-light dark:focus:border-accent-dark border-border-light dark:border-border-dark border focus:outline-hidden",
       "bg-wood-300 dark:bg-wood-800 opacity-80"
     )}
   >

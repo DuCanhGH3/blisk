@@ -130,8 +130,8 @@
       />
       <Select id="create-book-category" legends={[{ name: "categories", label: "Categories", options: data.categories }]} />
       <div class="flex w-full flex-row-reverse items-center gap-4">
-        <Button as="button" class="!px-20 !py-3" type="submit" disabled={isLoading}>Create</Button>
-        <Button as="a" class="!px-20 !py-3" variant="light" href="/books">Cancel</Button>
+        <Button as="button" class="px-20! py-3!" type="submit" disabled={isLoading}>Create</Button>
+        <Button as="a" class="px-20! py-3!" variant="light" href="/books">Cancel</Button>
         {#if form?.error}
           <p class="text-error-light dark:text-error-dark" role="alert">{form.error}</p>
         {/if}

@@ -25,11 +25,13 @@
   <div class="flex w-full flex-col gap-4 lg:flex-row lg:gap-8">
     <img
       src={getImage(data.book.cover_image, "/test-cover.jpg")}
+      class="h-72 w-48 select-none shadow-[5px_2px_20px_-1px_#000000]"
+      style:view-transition-name="book{fromCategory ? `-${fromCategory}` : ''}{fromPost ? `-${fromPost}` : ''}-{data.book.name}"
       width="192"
       height="288"
+      loading="lazy"
+      decoding="async"
       alt=""
-      class="h-72 w-48 select-none shadow-[5px_2px_20px_-1px_#000000]"
-      style="view-transition-name:book{fromCategory ? `-${fromCategory}` : ''}{fromPost ? `-${fromPost}` : ''}-{data.book.name}"
     />
     <div
       class={clsx(
@@ -121,7 +123,7 @@
       </div>
     </section>
     <section id="reviews" class="basis-2/3">
-      <div class="flex w-full max-w-screen-md flex-col gap-4">
+      <div class="max-w-(--breakpoint-md) flex w-full flex-col gap-4">
         <h2>Reviews</h2>
         {#if reviews.length > 0}
           <VirtualScroller bind:items={reviews}>

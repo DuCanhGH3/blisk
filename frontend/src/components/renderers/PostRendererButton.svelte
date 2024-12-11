@@ -22,7 +22,7 @@
   this={as}
   class={clsx(
     "select-none items-center justify-center gap-1 rounded-full px-2 py-1 text-sm md:text-base shadow-md",
-    "border-border-light dark:border-border-dark flex h-10 flex-grow border transition-colors duration-100",
+    "border-border-light dark:border-border-dark flex h-10 grow border transition-colors duration-100",
     customColors
   )}
   {...props}

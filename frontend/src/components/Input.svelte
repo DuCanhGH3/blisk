@@ -25,7 +25,7 @@
     {id}
     class={clsx(
       "input block h-[44px] w-full text-sm shadow-md transition-opacity disabled:opacity-50",
-      "focus:border-accent-light dark:focus:border-accent-dark border-border-light dark:border-border-dark border focus:outline-none",
+      "focus:border-accent-light dark:focus:border-accent-dark border-border-light dark:border-border-dark border focus:outline-hidden",
       "bg-wood-300 dark:bg-wood-800 opacity-80",
       roundedFull ? "rounded-full px-4 pt-2.5" : "rounded-lg px-2.5 pt-2.5"
     )}

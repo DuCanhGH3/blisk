@@ -1,8 +1,9 @@
 import path from "node:path";
-import {  createContext, generateServiceWorker, main as mainPlugin } from "vite-plugin-serwist"
-import type { PluginOptions,  SerwistViteContext } from "vite-plugin-serwist";
+import { createContext, generateServiceWorker, main as mainPlugin } from "vite-plugin-serwist";
+import type { PluginOptions, SerwistViteContext } from "vite-plugin-serwist";
 import { enhancedImages } from "@sveltejs/enhanced-img";
 import { sveltekit } from "@sveltejs/kit/vite";
+import tailwindcss from "@tailwindcss/vite";
 import type { Plugin } from "vite";
 import { defineConfig } from "vite";
 import config from "./svelte.config";
@@ -144,5 +145,5 @@ export default defineConfig({
       target: "es2022",
     },
   },
-  plugins: [enhancedImages(), sveltekit(), serwist()],
+  plugins: [tailwindcss(), enhancedImages(), sveltekit(), serwist()],
 });

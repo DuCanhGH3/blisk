@@ -131,7 +131,7 @@
     <Button
       as="button"
       variant="light"
-      class="!rounded-full !p-2"
+      class="rounded-full! p-2!"
       type="button"
       onclick={() => (comment.is_editing = false)}
       disabled={comment.is_processing_edit}
@@ -139,7 +139,7 @@
       <X width={20} height={20} class="h-auto w-5" aria-hidden="true" tabindex={-1} />
       <span class="sr-only">Cancel</span>
     </Button>
-    <Button as="button" class="!rounded-full !p-2" type="submit" disabled={isCommentOptimistic || comment.is_processing_edit}>
+    <Button as="button" class="rounded-full! p-2!" type="submit" disabled={isCommentOptimistic || comment.is_processing_edit}>
       <CommentIcon width={20} height={20} class="h-auto w-5" aria-hidden="true" tabindex={-1} />
       <span class="sr-only">Edit</span>
     </Button>

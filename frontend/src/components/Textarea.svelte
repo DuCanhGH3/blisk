@@ -35,17 +35,6 @@
     errorRenderer,
     ...rest
   }: TextareaProps = $props();
-
-  const updateHeight = (element: HTMLTextAreaElement) => {
-    element.style.height = `${Math.max(128, element.offsetHeight, element.scrollHeight)}px`;
-  };
-
-  $effect(() => {
-    value;
-    if (thisRef) {
-      updateHeight(thisRef);
-    }
-  });
 </script>
 
 <div class="box w-full rounded-[15px] p-2 pt-0 shadow-md">
@@ -78,9 +67,9 @@
       bind:this={thisRef}
       bind:value
       class={clsx(
-        "textarea block min-h-[128px] w-full overflow-hidden rounded-lg px-2.5 pb-2.5 pt-4 text-sm shadow-sm transition-opacity disabled:opacity-50",
-        "focus:border-accent-light dark:focus:border-accent-dark border-border-light dark:border-border-dark border focus:outline-none",
-        "bg-wood-300 dark:bg-wood-800 opacity-80",
+        "textarea shadow-xs block min-h-[128px] w-full overflow-hidden rounded-lg px-2.5 pb-2.5 pt-4 text-sm transition-opacity disabled:opacity-50",
+        "focus:border-accent-light dark:focus:border-accent-dark border-border-light dark:border-border-dark focus:outline-hidden border",
+        "bg-wood-300 dark:bg-wood-800 field-sizing-content opacity-80",
         className
       )}
       aria-invalid={!!errorText}

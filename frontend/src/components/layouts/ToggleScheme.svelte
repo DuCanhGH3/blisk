@@ -5,7 +5,7 @@
   import { toggleColorScheme } from "$lib/stores/colorScheme";
 </script>
 
-<button class="nav-button flex-shrink-0" onclick={() => toggleColorScheme()}>
+<button class="nav-button shrink-0" onclick={() => toggleColorScheme()}>
   <span class="visible-dark">
     <MoonStars {...svgIconAttrs} />
   </span>

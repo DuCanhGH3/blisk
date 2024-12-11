@@ -8,10 +8,12 @@
   <div class="flex w-full flex-col gap-4 lg:flex-row lg:gap-8">
     <img
       src={getImage(data.data.book_cover, "/test-cover.jpg")}
+      class="h-72 w-48 select-none shadow-[5px_2px_20px_-1px_#000000]"
       width="192"
       height="288"
+      loading="lazy"
+      decoding="async"
       alt=""
-      class="h-72 w-48 select-none shadow-[5px_2px_20px_-1px_#000000]"
     />
     <h1 class="pt-4 text-5xl lg:text-8xl">{data.data.book_title}</h1>
   </div>

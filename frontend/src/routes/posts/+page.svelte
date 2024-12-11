@@ -16,7 +16,7 @@
   });
 </script>
 
-<div class="mx-auto flex w-full max-w-screen-md flex-col gap-8 p-4 md:p-10">
+<div class="max-w-(--breakpoint-md) mx-auto flex w-full flex-col gap-8 p-4 md:p-10">
   {#if $page.data.user}
     <div class="box flex flex-row gap-2 rounded-[29px] p-2.5 shadow-md">
       <a href="/users/{$page.data.user.name}">
@@ -25,6 +25,8 @@
           class="border-border-light dark:border-border-dark size-10 select-none rounded-full border shadow-lg"
           width={40}
           height={40}
+          loading="lazy"
+          decoding="async"
           alt="Your profile"
         />
       </a>

@@ -46,6 +46,8 @@
       class="border-border-light dark:border-border-dark size-10 select-none rounded-full border shadow-lg"
       width={40}
       height={40}
+      loading="lazy"
+      decoding="async"
       alt=""
     />
     <div>
@@ -61,7 +63,15 @@
           <TooltipHover tooltipId="post-{post.id}-book-tooltip">
             {#snippet content()}
               <div class="flex flex-col gap-4 overflow-y-auto p-2">
-                <img src={getImage(post.book_cover, "/test-cover.jpg")} class="h-48 w-32 select-none rounded-[5px]" alt="" width={128} height={192} />
+                <img
+                  src={getImage(post.book_cover, "/test-cover.jpg")}
+                  class="h-48 w-32 select-none rounded-[5px]"
+                  width={128}
+                  height={192}
+                  loading="lazy"
+                  decoding="async"
+                  alt=""
+                />
                 <div class="flex flex-col gap-2">
                   <span class="h3">{title}</span>
                   <MarkdownRenderer source={summary} startingHeading={7} />
@@ -125,17 +135,17 @@
   {/if}
   <div class="order-1 -m-1 flex flex-row flex-wrap gap-1 md:gap-3">
     {#if isLoggedIn}
-      <details bind:this={reactionBar} class="relative flex-grow">
+      <details bind:this={reactionBar} class="relative grow">
         {#if !post.user_reaction}
           <PostRendererButton as="summary" aria-describedby="post-{post.id}-reaction-bar">
             <ThumbUp {...svgIconAttrs} class="h-5 w-auto md:h-6" />
-            <span class="md:mb-[-1px] select-none">Like</span>
+            <span class="select-none md:mb-[-1px]">Like</span>
           </PostRendererButton>
         {:else}
           {@const { icon: Icon, label, colors } = reactionRender[post.user_reaction]}
           <PostRendererButton customColors={colors} as="summary" aria-describedby="post-{post.id}-reaction-bar">
             <Icon animatable={false} {...svgIconAttrs} class="h-5 w-auto md:h-6" />
-            <span class="md:mb-[-1px] select-none">{label}</span>
+            <span class="select-none md:mb-[-1px]">{label}</span>
           </PostRendererButton>
         {/if}
         <ReactionBar
@@ -160,7 +170,7 @@
     {:else}
       <PostRendererButton as="a" href={loginUrl}>
         <ThumbUp {...svgIconAttrs} class="h-5 w-auto md:h-6" />
-        <span class="md:mb-[-1px] select-none">Like</span>
+        <span class="select-none md:mb-[-1px]">Like</span>
       </PostRendererButton>
     {/if}
     <PostRendererButton as="a" href="/posts/{post.id}#comments">

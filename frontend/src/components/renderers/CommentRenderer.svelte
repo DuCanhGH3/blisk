@@ -122,6 +122,8 @@
         class="border-border-light dark:border-border-dark size-10 select-none rounded-full border shadow-lg"
         width={40}
         height={40}
+        loading="lazy"
+        decoding="async"
         alt=""
       />
       <span class="flex flex-col gap-1">

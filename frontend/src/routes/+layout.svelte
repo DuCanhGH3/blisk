@@ -9,16 +9,15 @@
   import { dev } from "$app/environment";
   import { page } from "$app/stores";
   import GlobalSvgDefs from "$components/icons/index.svelte";
-  import VerticalNavbar from "$components/layouts/VerticalNavbar.svelte";
   import { isColorScheme } from "$lib/isColorScheme";
   import { colorScheme } from "$lib/stores/colorScheme";
   import { PUBLIC_CANONICAL_URL } from "$env/static/public";
   import Dialog from "$components/layouts/Dialog.svelte";
   import Tooltip from "$components/layouts/Tooltip.svelte";
+  import Sidebar from "$components/layouts/Sidebar.svelte";
+  import SidebarTrigger from "$components/layouts/SidebarTrigger.svelte";
 
   const { children } = $props();
-
-  let navbarHeight = $state(65);
 
   const isDark = $derived($colorScheme === "dark");
   const title = $derived($page.data.title ? `${$page.data.title} - blisk` : "blisk");
@@ -78,15 +77,14 @@
   <meta name="theme-color" content={isDark ? "#000000" : "#FFFFFF"} />
 </svelte:head>
 
-<a class="text-wood-900 absolute -top-full z-[100] underline focus:top-0 dark:text-white" href="#main-content">Skip to main content</a>
+<a class="text-wood-900 absolute -top-full z-100 underline focus:top-0 dark:text-white" href="#main-content">Skip to main content</a>
 <GlobalSvgDefs />
 <Dialog />
 <div class="flex flex-1 flex-col md:flex-row">
-  <VerticalNavbar bind:height={navbarHeight} />
-  <div class="flex w-full flex-1 flex-col pb-[--nav-height] md:pb-0 xl:flex-row xl:justify-between" style="--nav-height:{navbarHeight}px">
-    <!-- <aside class="top-0 shrink-0 px-4 pt-4 transition-all duration-100 xl:sticky xl:order-last xl:max-h-dvh print:hidden"> -->
-    <!-- </aside> -->
+  <Sidebar />
+  <div id="main-wrap" class="flex w-full flex-1 flex-col md:pb-0 xl:flex-row xl:justify-between">
     <main id="main-content" class="flex w-full flex-1 px-4 py-4">
+      <SidebarTrigger />
       {@render children()}
     </main>
   </div>

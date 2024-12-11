@@ -119,7 +119,7 @@ const githubLight: ThemeRegistrationRaw = Object.freeze({
     "progressBar.background": "#2188ff",
     "quickInput.background": "#fafbfc",
     "quickInput.foreground": "#2f363d",
-    "scrollbar.shadow": "#6a737d33",
+    "scrollbar.shadow-sm": "#6a737d33",
     "scrollbarSlider.activeBackground": "#959da588",
     "scrollbarSlider.background": "#959da533",
     "scrollbarSlider.hoverBackground": "#959da544",

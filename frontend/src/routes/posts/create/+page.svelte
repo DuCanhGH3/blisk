@@ -14,7 +14,7 @@
   let isLoading = $state(false);
 </script>
 
-<div class="flex w-full max-w-screen-md flex-col gap-6 rounded-lg p-8 shadow-xl">
+<div class="max-w-(--breakpoint-md) flex w-full flex-col gap-6 rounded-lg p-8 shadow-xl">
   <h1>Post</h1>
   <form
     method="POST"
@@ -79,7 +79,16 @@
           {#each imageFiles as file}
             {@const url = URL.createObjectURL(file)}
             <li class="border-border-light dark:border-border-dark dark:bg-neutral-915 flex flex-row gap-2 rounded-full border bg-white p-1">
-              <img class="h-6 w-6 rounded-full object-cover" src={url} alt={file.name} title={file.name} width="24" height="24" />
+              <img
+                src={url}
+                class="h-6 w-6 rounded-full object-cover"
+                title={file.name}
+                width="24"
+                height="24"
+                loading="lazy"
+                decoding="async"
+                alt={file.name}
+              />
               <p class="line-clamp-1 max-w-32 pr-1">{file.name}</p>
             </li>
           {/each}

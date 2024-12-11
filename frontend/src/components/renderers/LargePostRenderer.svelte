@@ -55,6 +55,8 @@
       <img
         src={getProfilePicture(post.author_picture)}
         class="border-border-light dark:border-border-dark size-12 select-none rounded-full border shadow-lg"
+        loading="lazy"
+        decoding="async"
         alt=""
       />
       <div>

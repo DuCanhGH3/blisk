@@ -26,7 +26,7 @@
 {#if dialog.state}
   <dialog
     bind:this={dialogElement}
-    class={clsx("box md text-wood-900 flex w-[90dvw] max-w-[500px] flex-col gap-6 !p-8 dark:text-white", className)}
+    class={clsx("box md text-wood-900 flex w-[90dvw] max-w-[500px] flex-col gap-6 p-8! dark:text-white", className)}
     aria-labelledby="dialog-title"
     aria-describedby="dialog-desc"
     {...props}

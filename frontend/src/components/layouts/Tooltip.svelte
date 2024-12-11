@@ -50,7 +50,7 @@
       "bg-wood-hor dark:bg-dark-wood-hor absolute z-50 inline-flex select-none flex-col overflow-auto rounded-xl border",
       "border-border-light dark:border-border-dark dark:bg-wood-800 bg-wood-300 text-left",
       "shadow-[rgb(0_0_0/0.08)_0px_1px_4px] duration-100",
-      "translate-x-[--offset] px-2 py-1.5 hover:select-auto"
+      "translate-x-(--offset) px-2 py-1.5 hover:select-auto"
     )}
     style="{right ? 'right' : 'left'}:{x}px;{bottom ? 'bottom' : 'top'}:{y}px"
     style:max-width="{window.innerWidth - x}px"
