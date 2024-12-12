@@ -3,11 +3,11 @@
   import { clsx } from "$lib/clsx";
   import type { HTMLAnchorAttributes } from "svelte/elements";
 
-  interface LinkProps extends Omit<HTMLAnchorAttributes, "class"> {
+  interface LinkBoxProps extends Omit<HTMLAnchorAttributes, "class"> {
     href: `/${string}`;
   }
 
-  const { href, children, ...props }: LinkProps = $props();
+  const { href, children, ...props }: LinkBoxProps = $props();
 </script>
 
 <a

@@ -77,6 +77,15 @@ export interface BookCategory {
   name: string;
 }
 
+export interface BookLanguage {
+  code: string;
+  name: string;
+}
+
+export interface BookCategoryWithBooks extends BookCategory {
+  books: Pick<Book, "title" | "name" | "cover_image" | "spine_image">[];
+}
+
 export interface Book {
   title: string;
   name: string;
@@ -90,8 +99,30 @@ export interface Book {
   reviews: Post[];
 }
 
-export interface BookCategoryWithBooks extends BookCategory {
-  books: Pick<Book, "title" | "name" | "cover_image" | "spine_image">[];
+export interface BookVolume {
+  id: number;
+  name: string;
+}
+
+export interface BookEntry {
+  id: number;
+  name: string;
+  language: string;
+  created_at: string;
+}
+
+export interface BookVolumeWithEntries extends BookVolume {
+  entries: BookEntry[];
+}
+
+export interface BookMetadata {
+  volumes: BookVolume[];
+}
+
+export interface BooksMetadata {
+  authors: BookAuthor[];
+  categories: BookCategory[];
+  languages: BookLanguage[];
 }
 
 export interface ReadingTracker {

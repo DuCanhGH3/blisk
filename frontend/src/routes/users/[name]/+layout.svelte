@@ -1,8 +1,8 @@
 <script lang="ts">
   import { base } from "$app/paths";
   import { page } from "$app/stores";
+  import LinkBox from "$components/LinkBox.svelte";
   import { getProfilePicture } from "$lib/utils";
-  import Link from "./Link.svelte";
 
   const { data, children } = $props();
 
@@ -79,11 +79,11 @@
     <article class="flex basis-2/3 flex-col gap-4">
       <h2>Recent activities</h2>
       <div class="flex h-max w-full flex-row flex-wrap justify-stretch gap-2">
-        <Link href={basePath}>Reviews</Link>
-        <Link href={`${basePath}/comments`}>Comments</Link>
-        <Link href={`${basePath}/likes`}>Likes</Link>
-        <Link href={`${basePath}/dislikes`}>Dislikes</Link>
-        <Link href={`${basePath}/books`}>Books</Link>
+        <LinkBox href={basePath}>Reviews</LinkBox>
+        <LinkBox href={`${basePath}/comments`}>Comments</LinkBox>
+        <LinkBox href={`${basePath}/likes`}>Likes</LinkBox>
+        <LinkBox href={`${basePath}/dislikes`}>Dislikes</LinkBox>
+        <LinkBox href={`${basePath}/books`}>Books</LinkBox>
       </div>
       <div class="max-w-(--breakpoint-md) w-full">
         {@render children()}

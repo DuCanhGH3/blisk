@@ -38,15 +38,17 @@
 }
 
 @utility text-comment {
-  @apply text-[#242424] dark:text-[#bababa];
+  & {
+    @apply text-[#242424] dark:text-[#bababa];
+  }
 }
 
 @utility link {
   &:not(.no-color) {
-    @apply text-accent-light! dark:text-accent-dark!;
+    @apply text-wood-900! dark:text-wood-200!;
   }
   &:not(.no-color) > * {
-    @apply text-accent-light! dark:text-accent-dark!;
+    @apply text-wood-900! dark:text-wood-200!;
   }
   & {
     @apply underline underline-offset-[5px];

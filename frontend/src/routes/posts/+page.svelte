@@ -1,11 +1,9 @@
 <script lang="ts">
-  import { page } from "$app/stores";
   import PostRenderer from "$components/renderers/PostRenderer.svelte";
   import VirtualScroller from "$components/renderers/VirtualScroller.svelte";
   import { fetchBackend } from "$lib/backend.client.js";
-  import { clsx } from "$lib/clsx";
   import type { Post, Ref } from "$lib/types";
-  import { getProfilePicture } from "$lib/utils";
+  import ReviewButton from "./ReviewButton.svelte";
 
   const { data } = $props();
 
@@ -17,30 +15,7 @@
 </script>
 
 <div class="max-w-(--breakpoint-md) mx-auto flex w-full flex-col gap-8 p-4 md:p-10">
-  {#if $page.data.user}
-    <div class="box flex flex-row gap-2 rounded-[29px] p-2.5 shadow-md">
-      <a href="/users/{$page.data.user.name}">
-        <img
-          src={getProfilePicture($page.data.user.picture ?? null)}
-          class="border-border-light dark:border-border-dark size-10 select-none rounded-full border shadow-lg"
-          width={40}
-          height={40}
-          loading="lazy"
-          decoding="async"
-          alt="Your profile"
-        />
-      </a>
-      <a
-        href="/posts/create"
-        class={clsx(
-          "text-comment flex h-10 w-full items-center rounded-[20px] border px-2.5 transition-colors duration-100",
-          "border-border-light dark:border-border-dark dark:bg-wood-800 bg-wood-300 hover:bg-wood-200 dark:hover:bg-wood-750"
-        )}
-      >
-        Reviewing a book?
-      </a>
-    </div>
-  {/if}
+  <ReviewButton />
   <section id="posts">
     <VirtualScroller
       bind:items={posts}

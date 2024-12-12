@@ -2,12 +2,10 @@ import { fetchBackend } from "$lib/backend";
 import type { ReadingTracker } from "$lib/types.js";
 import { error } from "@sveltejs/kit";
 
-export const load = async ({ params, cookies, fetch, setHeaders }) => {
-  const res = await fetchBackend<ReadingTracker>(`/books/tracker/${params.id}`, {
+export const load = async (event) => {
+  const res = await fetchBackend<ReadingTracker>(`/books/tracker/${event.params.id}`, {
     authz: true,
-    cookies,
-    fetch,
-    setHeaders,
+    event,
   });
 
   if (!res.ok) {

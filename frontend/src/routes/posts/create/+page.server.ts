@@ -15,35 +15,31 @@ const postSchema = z.object({
 });
 
 export const actions: Actions = {
-  async default({ cookies, fetch, setHeaders, request, url }) {
-    const data = await postSchema.spa(convertFormData(await request.formData()));
+  async default(event) {
+    const data = await postSchema.spa(convertFormData(await event.request.formData()));
     if (!data.success) {
       return fail(400, { validationError: data.error.flatten().fieldErrors });
     }
     const backendResponse = await fetchBackend<{ id: number }>("/posts", {
       authz: true,
-      cookies,
-      fetch,
-      setHeaders,
+      event,
       method: "POST",
       body: JSON.stringify(data.data),
     });
     if (!backendResponse.ok) {
       return fail(backendResponse.status, { error: backendResponse.error });
     }
-    redirect(307, safeRedirect(url.searchParams.get("redirectTo"), `${base}/posts/${backendResponse.data.id}`));
+    redirect(307, safeRedirect(event.url.searchParams.get("redirectTo"), `${base}/posts/${backendResponse.data.id}`));
   },
 };
 
-export const load = async ({ cookies, fetch, locals, setHeaders, url }) => {
-  if (!locals.user) {
-    redirect(307, safeRedirect(url.searchParams.get("redirectTo"), `${base}/`));
+export const load = async (event) => {
+  if (!event.locals.user) {
+    redirect(307, safeRedirect(event.url.searchParams.get("redirectTo"), `${base}/`));
   }
-  const metadata = await fetchBackend<UserMetadata>(`/users/${locals.user.name}/metadata`, {
+  const metadata = await fetchBackend<UserMetadata>(`/users/${event.locals.user.name}/metadata`, {
     authz: "optional",
-    cookies,
-    fetch,
-    setHeaders,
+    event,
   });
   if (!metadata.ok) {
     error(metadata.status, metadata.error);

@@ -19,18 +19,16 @@ export const load: PageServerLoad = ({ locals, url }) => {
 };
 
 export const actions: Actions = {
-  async login({ cookies, fetch, request, setHeaders, url }) {
+  async login(event) {
     try {
-      const data = await loginSchema.spa(convertFormData(await request.formData()));
+      const data = await loginSchema.spa(convertFormData(await event.request.formData()));
       if (!data.success) {
         return fail(400, { validationError: data.error.flatten().fieldErrors });
       }
       const res = await fetchBackend<{ token: string; expires_in: number }>("/auth/login", {
         authz: false,
         type: "url-encoded",
-        cookies,
-        fetch,
-        setHeaders,
+        event,
         method: "POST",
         body: new URLSearchParams(data.data),
         signal: AbortSignal.timeout(10000),
@@ -45,12 +43,12 @@ export const actions: Actions = {
         path: "/",
         maxAge: res.data.expires_in,
       } as const;
-      cookies.set("token", res.data.token, cookiesOptions);
+      event.cookies.set("token", res.data.token, cookiesOptions);
     } catch (err) {
       console.error(err);
       return fail(500, { error: "Internal Server Error" });
     }
-    redirect(303, safeRedirect(url.searchParams.get("redirectTo")));
+    redirect(303, safeRedirect(event.url.searchParams.get("redirectTo")));
   },
   logout({ cookies, locals, url }) {
     const cookiesOptions = {

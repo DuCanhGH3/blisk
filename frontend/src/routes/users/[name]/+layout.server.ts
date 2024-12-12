@@ -2,12 +2,10 @@ import { fetchBackend } from "$lib/backend.js";
 import type { UserMetadata } from "$lib/types.js";
 import { error } from "@sveltejs/kit";
 
-export const load = async ({ cookies, fetch, params, setHeaders }) => {
-  const data = await fetchBackend<UserMetadata>(`/users/${params.name}/metadata`, {
+export const load = async (event) => {
+  const data = await fetchBackend<UserMetadata>(`/users/${event.params.name}/metadata`, {
     authz: false,
-    cookies,
-    fetch,
-    setHeaders,
+    event,
   });
   if (!data.ok) {
     error(data.status, data.error);

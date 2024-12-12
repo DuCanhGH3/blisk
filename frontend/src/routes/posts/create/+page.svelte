@@ -1,5 +1,6 @@
 <script lang="ts">
   import { enhance } from "$app/forms";
+  import { page } from "$app/stores";
   import Button from "$components/Button.svelte";
   import FilePicker from "$components/FilePicker.svelte";
   import Input from "$components/Input.svelte";
@@ -12,6 +13,8 @@
   let imageFiles = $state<FileList | null | undefined>(undefined);
   let videoFiles = $state<FileList | null | undefined>(undefined);
   let isLoading = $state(false);
+
+  const bookName = $derived($page.url.searchParams.get("book"));
 </script>
 
 <div class="max-w-(--breakpoint-md) flex w-full flex-col gap-6 rounded-lg p-8 shadow-xl">
@@ -37,7 +40,13 @@
       required
     />
     <!-- TODO: implement searching -->
-    <SelectNative name="book" id="create-post-book" label="Book" values={data.books.map(({ name, title }) => [name, title])} />
+    <SelectNative
+      name="book"
+      id="create-post-book"
+      label="Book"
+      values={data.books.map(({ name, title }) => [name, title])}
+      initialValue={bookName && data.books.some(({ name }) => name === bookName) ? bookName : undefined}
+    />
     <Select
       id="create-post-book-reaction"
       multiple={false}

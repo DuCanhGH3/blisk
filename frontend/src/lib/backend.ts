@@ -1,6 +1,6 @@
 import { BACKEND_URL } from "$env/static/private";
-import { fail, redirect, type Cookies } from "@sveltejs/kit";
-import type { ReactionType, SetHeaders } from "./types";
+import { fail, redirect, type RequestEvent } from "@sveltejs/kit";
+import type { ReactionType } from "./types";
 import { commentSchema, editCommentSchema, errorSchema, reactionSchema } from "./schemas";
 import { convertFormData } from "./utils";
 
@@ -11,9 +11,7 @@ export type RequestType = "json" | "multipart" | "url-encoded";
 export interface BackendInit extends RequestInit {
   authz: Authz;
   type?: RequestType;
-  cookies: Cookies;
-  fetch: typeof globalThis.fetch;
-  setHeaders: SetHeaders;
+  event: RequestEvent;
   noSuccessContent?: boolean;
 }
 
@@ -28,7 +26,7 @@ export type BackendResult<T> = { ok: true; data: T } | { ok: false; status: numb
  */
 export const fetchBackend = async <T>(
   url: URL | `/${string}`,
-  { authz, type = "json", cookies, fetch, setHeaders, noSuccessContent, ...init }: BackendInit
+  { authz, type = "json", event, noSuccessContent, ...init }: BackendInit
 ): Promise<BackendResult<T>> => {
   const requestType = type === "json" ? "application/json" : type === "url-encoded" ? "application/x-www-form-urlencoded" : null;
   const headers = new Headers({
@@ -37,11 +35,11 @@ export const fetchBackend = async <T>(
     ...init.headers,
   });
   if (authz) {
-    const token = cookies.get("token");
+    const token = event.cookies.get("token");
     if (token) {
       headers.set("Authorization", `Bearer ${token}`);
     } else if (authz !== "optional") {
-      setHeaders({
+      event.setHeaders({
         "WWW-Authenticate":
           'Bearer realm="A protected resource requiring authorization", error="invalid_token", error_description="The access token is invalid."',
       });
@@ -50,7 +48,7 @@ export const fetchBackend = async <T>(
   }
   let res: Response;
   try {
-    res = await fetch(url instanceof URL ? url : `${BACKEND_URL}${url}`, {
+    res = await event.fetch(url instanceof URL ? url : `${BACKEND_URL}${url}`, {
       ...init,
       headers,
     });
@@ -88,7 +86,9 @@ export const fetchBackend = async <T>(
   return { ok: true, data: await res.json() };
 };
 
-export const createReaction = async (formData: FormData, fetch: typeof globalThis.fetch, cookies: Cookies, setHeaders: SetHeaders) => {
+export const createReaction = async (event: RequestEvent) => {
+  const formData = await event.request.formData();
+
   const data = await reactionSchema.spa(convertFormData(formData));
 
   if (!data.success) {
@@ -98,9 +98,7 @@ export const createReaction = async (formData: FormData, fetch: typeof globalThi
   if (data.data.reaction_type === "cancel") {
     const res = await fetchBackend("/reactions", {
       authz: true,
-      cookies,
-      fetch,
-      setHeaders,
+      event,
       noSuccessContent: true,
       method: "DELETE",
       body: JSON.stringify({
@@ -116,9 +114,7 @@ export const createReaction = async (formData: FormData, fetch: typeof globalThi
   } else {
     const res = await fetchBackend<{ reaction_type: ReactionType }>("/reactions", {
       authz: true,
-      cookies,
-      fetch,
-      setHeaders,
+      event,
       method: "POST",
       body: JSON.stringify(data.data),
       signal: AbortSignal.timeout(10000),
@@ -132,14 +128,9 @@ export const createReaction = async (formData: FormData, fetch: typeof globalThi
   }
 };
 
-export const createComment = async (
-  postId: string,
-  parentId: string | null,
-  formData: FormData,
-  fetch: typeof globalThis.fetch,
-  cookies: Cookies,
-  setHeaders: SetHeaders
-) => {
+export const createComment = async (postId: string, parentId: string | null, event: RequestEvent) => {
+  const formData = await event.request.formData();
+
   const data = await commentSchema.spa({
     post_id: postId,
     parent_id: parentId,
@@ -152,9 +143,7 @@ export const createComment = async (
 
   const res = await fetchBackend<{ id: number }>("/comments", {
     authz: true,
-    cookies,
-    fetch,
-    setHeaders,
+    event,
     method: "POST",
     body: JSON.stringify(data.data),
     signal: AbortSignal.timeout(10000),
@@ -167,7 +156,9 @@ export const createComment = async (
   return { id: res.data.id };
 };
 
-export const editComment = async (formData: FormData, fetch: typeof globalThis.fetch, cookies: Cookies, setHeaders: SetHeaders) => {
+export const editComment = async (event: RequestEvent) => {
+  const formData = await event.request.formData();
+
   const data = await editCommentSchema.spa(convertFormData(formData));
 
   if (!data.success) {
@@ -176,9 +167,7 @@ export const editComment = async (formData: FormData, fetch: typeof globalThis.f
 
   const res = await fetchBackend("/comments", {
     authz: true,
-    cookies,
-    fetch,
-    setHeaders,
+    event,
     noSuccessContent: true,
     method: "PATCH",
     body: JSON.stringify(data.data),

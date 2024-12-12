@@ -20,17 +20,78 @@ use axum::{
     response::Response,
 };
 use axum_typed_multipart::{FieldData, TryFromMultipart};
-use chrono::NaiveDate;
+use chrono::{NaiveDate, NaiveDateTime};
+use serde::{Deserialize, Serialize};
+use sqlx::types::Json as SqlxJson;
 use tracing::instrument;
 use validator::{Validate, ValidationError};
 
-#[derive(serde::Serialize)]
-pub struct BooksMetadata {
-    authors: sqlx::types::Json<Vec<BookAuthor>>,
-    categories: sqlx::types::Json<Vec<BookCategory>>,
+#[derive(Serialize, Deserialize)]
+pub struct BookAuthor {
+    id: i64,
+    name: String,
 }
 
-#[derive(serde::Serialize, serde::Deserialize)]
+#[derive(Serialize, Deserialize)]
+pub struct BookCategory {
+    pub id: i64,
+    pub name: String,
+}
+
+#[derive(Serialize, Deserialize)]
+pub struct BookLanguage {
+    pub code: String,
+    pub name: String,
+}
+
+#[derive(Serialize, Deserialize, sqlx::FromRow)]
+pub struct Book {
+    pub title: String,
+    pub name: String,
+    pub summary: String,
+    pub language: String,
+    pub cover_image: SqlxJson<AppImage>,
+    pub spine_image: SqlxJson<AppImage>,
+    pub authors: SqlxJson<Vec<BookAuthor>>,
+    pub categories: SqlxJson<Vec<BookCategory>>,
+    pub reactions: Option<SqlxJson<BookReactionMetadata>>,
+    pub reviews: Option<SqlxJson<Vec<Post>>>,
+}
+
+#[derive(Serialize, Deserialize)]
+pub struct BookEntry {
+    id: i64,
+    name: String,
+    language: String,
+    created_at: NaiveDateTime,
+}
+
+#[derive(Serialize, Deserialize)]
+pub struct BookVolume {
+    id: i64,
+    name: String,
+}
+
+#[derive(Serialize)]
+pub struct BookVolumeWithEntries {
+    id: i64,
+    name: String,
+    entries: SqlxJson<Vec<BookEntry>>,
+}
+
+#[derive(Serialize)]
+pub struct BookMetadata {
+    volumes: SqlxJson<Vec<BookVolume>>,
+}
+
+#[derive(Serialize)]
+pub struct BooksMetadata {
+    authors: SqlxJson<Vec<BookAuthor>>,
+    categories: SqlxJson<Vec<BookCategory>>,
+    languages: SqlxJson<Vec<BookLanguage>>,
+}
+
+#[derive(Serialize, Deserialize)]
 pub struct BookReactionMetadata {
     total: i64,
     like: i64,
@@ -132,33 +193,7 @@ pub async fn create(
     Ok(created(format!("{}/books/{}", SETTINGS.frontend.url, slug)))
 }
 
-#[derive(serde::Serialize, serde::Deserialize)]
-pub struct BookAuthor {
-    id: i64,
-    name: String,
-}
-
-#[derive(serde::Serialize, serde::Deserialize)]
-pub struct BookCategory {
-    pub id: i64,
-    pub name: String,
-}
-
-#[derive(serde::Serialize, serde::Deserialize, sqlx::FromRow)]
-pub struct Book {
-    pub title: String,
-    pub name: String,
-    pub summary: String,
-    pub language: String,
-    pub cover_image: sqlx::types::Json<AppImage>,
-    pub spine_image: sqlx::types::Json<AppImage>,
-    pub authors: sqlx::types::Json<Vec<BookAuthor>>,
-    pub categories: sqlx::types::Json<Vec<BookCategory>>,
-    pub reactions: Option<sqlx::types::Json<BookReactionMetadata>>,
-    pub reviews: Option<sqlx::types::Json<Vec<Post>>>,
-}
-
-#[derive(serde::Deserialize, Validate)]
+#[derive(Deserialize, Validate)]
 pub struct ReadQuery {
     /// Whether reviews should be included with books.
     include_reviews: Option<bool>,
@@ -255,6 +290,7 @@ pub async fn read(
     Ok(response(StatusCode::OK, None, AppJson(books_list)))
 }
 
+#[instrument(name = "Fetching book info...", skip(pool, claims))]
 pub async fn read_slug(
     State(AppState { pool, .. }): State<AppState>,
     OptionalUserClaims(claims): OptionalUserClaims,
@@ -274,7 +310,7 @@ pub async fn read_slug(
             b.authors AS "authors!: _",
             b.categories AS "categories!: _",
             b.reactions AS "reactions?: _",
-            coalesce(jsonb_agg(rv) FILTER (WHERE rv.id IS NOT NULL), '[]'::JSONB) AS "reviews!: sqlx::types::Json<Vec<Post>>"
+            coalesce(jsonb_agg(rv) FILTER (WHERE rv.id IS NOT NULL), '[]'::JSONB) AS "reviews!: SqlxJson<Vec<Post>>"
         FROM books_view b
         LEFT JOIN LATERAL (
             SELECT *
@@ -299,20 +335,74 @@ pub async fn read_slug(
     Ok(response(StatusCode::OK, None, AppJson(book)))
 }
 
-#[derive(serde::Serialize, serde::Deserialize)]
+#[instrument(name = "Fetching book metadata...", skip(pool))]
+pub async fn read_slug_metadata(
+    State(AppState { pool, .. }): State<AppState>,
+    Path(slug): Path<String>,
+) -> Result<Response, AppError> {
+    let mut tx = pool.begin().await?;
+    let metadata = sqlx::query_as!(
+        BookMetadata,
+        r#"WITH bv AS (
+            SELECT bv.id, bv.name
+            FROM book_volumes bv
+            JOIN books b ON bv.book_id = b.id
+            WHERE b.name = $1
+        )
+        SELECT coalesce(jsonb_agg(bv) FILTER (WHERE bv.id IS NOT NULL), '[]'::JSONB) as "volumes!: _" FROM bv"#,
+        &slug
+    )
+    .fetch_one(&mut *tx)
+    .await?;
+    tx.commit().await?;
+    Ok(response(StatusCode::OK, None, AppJson(metadata)))
+}
+
+#[instrument(name = "Fetching book volumes...", skip(pool))]
+pub async fn read_slug_volumes(
+    State(AppState { pool, .. }): State<AppState>,
+    Path(book): Path<String>,
+) -> Result<Response, AppError> {
+    let mut tx = pool.begin().await?;
+    let entries = sqlx::query_as!(
+        BookVolumeWithEntries,
+        r#"WITH book AS (SELECT id FROM books WHERE name = $1)
+        SELECT
+            bv.id,
+            bv.name,
+            coalesce(jsonb_agg(be) FILTER (WHERE be.id IS NOT NULL), '[]'::JSONB) AS "entries!: _"
+        FROM book_volumes bv, book
+        LEFT JOIN LATERAL (
+            SELECT be.id, be.name, be.language, be.created_at
+            FROM book_entries be
+            WHERE be.volume_id = bv.id
+            ORDER BY be.id DESC
+        ) be ON TRUE
+        WHERE bv.book_id = book.id
+        GROUP BY bv.id, bv.name"#,
+        &book
+    )
+    .fetch_all(&mut *tx)
+    .await?;
+    tx.commit().await?;
+    Ok(response(StatusCode::OK, None, AppJson(entries)))
+}
+
+#[derive(Serialize, Deserialize)]
 pub struct ReadCategoriesBook {
     title: String,
     name: String,
     cover_image: Option<AppImage>,
     spine_image: Option<AppImage>,
 }
-#[derive(serde::Serialize)]
+#[derive(Serialize)]
 pub struct ReadCategoriesResponse {
     id: i64,
     name: String,
-    books: sqlx::types::Json<Vec<ReadCategoriesBook>>,
+    books: SqlxJson<Vec<ReadCategoriesBook>>,
 }
 
+#[instrument(name = "Fetching book categories...", skip(pool))]
 pub async fn read_categories(
     State(AppState { pool, .. }): State<AppState>,
 ) -> Result<Response, AppError> {
@@ -351,23 +441,20 @@ pub async fn read_categories(
     Ok(response(StatusCode::OK, None, AppJson(categories)))
 }
 
+#[instrument(name = "Reading books metadata...", skip(pool))]
 pub async fn read_metadata(
     State(AppState { pool, .. }): State<AppState>,
 ) -> Result<Response, AppError> {
     let mut transaction = pool.begin().await?;
     let metadata = sqlx::query_as!(
         BooksMetadata,
-        r#"SELECT
-            (
-                SELECT coalesce(jsonb_agg(ba) FILTER (WHERE ba.id IS NOT NULL), '[]'::JSONB)
-                FROM (SELECT id, name FROM book_authors) ba
-            )
-            AS "authors!: _",
-            (
-                SELECT coalesce(jsonb_agg(bc) FILTER (WHERE bc.id IS NOT NULL), '[]'::JSONB)
-                FROM (SELECT id, name FROM book_categories) bc
-            )
-            AS "categories!: _"
+        r#"WITH bc AS (SELECT id, name FROM book_categories),
+            ba AS (SELECT id, name FROM book_authors),
+            bl AS (SELECT code, name FROM book_languages)
+        SELECT
+            (SELECT coalesce(jsonb_agg(ba) FILTER (WHERE ba.id IS NOT NULL), '[]'::JSONB) FROM ba) AS "authors!: _",
+            (SELECT coalesce(jsonb_agg(bc) FILTER (WHERE bc.id IS NOT NULL), '[]'::JSONB) FROM bc) AS "categories!: _",
+            (SELECT coalesce(jsonb_agg(bl) FILTER (WHERE bl.code IS NOT NULL), '[]'::JSONB) FROM bl) AS "languages!: _"
         "#
     )
     .fetch_one(&mut *transaction)
@@ -376,7 +463,45 @@ pub async fn read_metadata(
     Ok(response(StatusCode::OK, None, AppJson(metadata)))
 }
 
-#[derive(serde::Deserialize, Validate)]
+#[derive(Deserialize, Validate)]
+pub struct UploadChapterPayload {
+    #[validate(range(min = 1, message = "Invalid volume!"))]
+    volume: i64,
+    #[validate(length(min = 1, message = "Invalid language!"))]
+    language: String,
+    #[validate(length(min = 1, message = "Invalid name!"))]
+    name: String,
+    #[validate(length(min = 1, message = "Invalid content!"))]
+    content: String,
+}
+
+#[instrument(name = "Uploading new chapter...", skip(pool, claims, content), fields(uid = %claims.sub))]
+pub async fn upload_chapter(
+    State(AppState { pool, .. }): State<AppState>,
+    claims: UserClaims,
+    AppForm(UploadChapterPayload {
+        volume,
+        language,
+        name,
+        content,
+    }): AppForm<UploadChapterPayload>,
+) -> Result<Response, AppError> {
+    let mut tx = pool.begin().await?;
+    sqlx::query!(
+        "INSERT INTO book_entries (uploader_id, volume_id, language, name, content) VALUES ($1, $2, $3, $4, $5)",
+        &claims.sub,
+        &volume,
+        &language,
+        &name,
+        &content
+    )
+    .execute(&mut *tx)
+    .await?;
+    tx.commit().await?;
+    Ok(created(format!("{}/", SETTINGS.frontend.url)))
+}
+
+#[derive(Deserialize, Validate)]
 #[validate(schema(function = "validate_create_tracker_payload"))]
 pub struct CreateTrackerPayload {
     #[validate(length(min = 0, message = "`book_name` must point to a valid book!"))]
@@ -399,7 +524,7 @@ fn validate_create_tracker_payload(payload: &CreateTrackerPayload) -> Result<(),
     Ok(())
 }
 
-#[instrument(name = "Adding a reading tracker for user", skip(pool, claims), fields(uid = %claims.sub))]
+#[instrument(name = "Adding a reading tracker for user...", skip(pool, claims), fields(uid = %claims.sub))]
 pub async fn create_tracker(
     State(AppState { pool, .. }): State<AppState>,
     claims: UserClaims,
@@ -443,11 +568,11 @@ pub async fn create_tracker(
     )))
 }
 
-#[derive(serde::Serialize)]
+#[derive(Serialize)]
 pub struct ReadingTracker {
     book_title: String,
-    book_cover: Option<sqlx::types::Json<AppImage>>,
-    book_spine: Option<sqlx::types::Json<AppImage>>,
+    book_cover: Option<SqlxJson<AppImage>>,
+    book_spine: Option<SqlxJson<AppImage>>,
     starts_at: NaiveDate,
     ends_at: NaiveDate,
     pages_read: i64,
@@ -461,7 +586,6 @@ pub async fn fetch_tracker(
     Path(book): Path<String>,
 ) -> Result<Response, AppError> {
     let mut tx = pool.begin().await?;
-
     let tracker = sqlx::query_as!(
         ReadingTracker,
         r#"SELECT
@@ -483,10 +607,6 @@ pub async fn fetch_tracker(
     )
     .fetch_one(&mut *tx)
     .await?;
-
-    Ok(response(
-        StatusCode::OK,
-        None,
-        AppJson(tracker),
-    ))
+    tx.commit().await?;
+    Ok(response(StatusCode::OK, None, AppJson(tracker)))
 }

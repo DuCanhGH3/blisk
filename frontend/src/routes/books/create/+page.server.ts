@@ -2,7 +2,7 @@ import { z } from "zod";
 import type { Actions, PageServerLoad } from "./$types";
 import { error, fail, redirect } from "@sveltejs/kit";
 import { fetchBackend } from "$lib/backend";
-import type { BookAuthor, BookCategory } from "$lib/types";
+import type { BooksMetadata } from "$lib/types";
 import { bookCategoryIdSchema } from "$lib/schemas";
 import { base } from "$app/paths";
 import { convertFormData } from "$lib/utils";
@@ -26,8 +26,8 @@ const createSchema = z.object({
 });
 
 export const actions: Actions = {
-  async default({ cookies, fetch, setHeaders, request }) {
-    const formData = await request.formData();
+  async default(event) {
+    const formData = await event.request.formData();
     const data = await createSchema.spa(convertFormData(formData));
     if (!data.success) {
       return fail(400, { validationError: data.error.flatten().fieldErrors });
@@ -37,9 +37,7 @@ export const actions: Actions = {
     const backendResponse = await fetchBackend("/books", {
       authz: true,
       type: "multipart",
-      cookies,
-      fetch,
-      setHeaders,
+      event,
       noSuccessContent: true,
       method: "POST",
       body: formData,
@@ -51,12 +49,10 @@ export const actions: Actions = {
   },
 };
 
-export const load: PageServerLoad = async ({ cookies, fetch, setHeaders }) => {
-  const res = await fetchBackend<{ authors: BookAuthor[]; categories: BookCategory[] }>("/books/metadata", {
+export const load: PageServerLoad = async (event) => {
+  const res = await fetchBackend<BooksMetadata>("/books/metadata", {
     authz: false,
-    cookies,
-    fetch,
-    setHeaders,
+    event,
   });
   if (!res.ok) {
     error(res.status, res.error);

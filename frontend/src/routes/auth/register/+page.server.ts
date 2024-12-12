@@ -21,8 +21,8 @@ export const load: PageServerLoad = ({ locals }) => {
 };
 
 export const actions: Actions = {
-  async default({ cookies, fetch, request, setHeaders }) {
-    const formData = await request.formData();
+  async default(event) {
+    const formData = await event.request.formData();
     const validation = await registerSchema.spa(Object.fromEntries(formData.entries()));
     if (!validation.success) {
       return fail(400, { validationError: validation.error.flatten().fieldErrors });
@@ -30,9 +30,7 @@ export const actions: Actions = {
     const res = await fetchBackend("/auth/register", {
       authz: false,
       type: "multipart",
-      cookies,
-      fetch,
-      setHeaders,
+      event,
       method: "POST",
       body: formData,
       signal: AbortSignal.timeout(10000),

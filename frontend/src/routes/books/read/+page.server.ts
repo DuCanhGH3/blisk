@@ -33,8 +33,8 @@ const readSchema = z
   });
 
 export const actions = {
-  async default({ cookies, fetch, request, setHeaders }) {
-    const data = await readSchema.spa(convertFormData(await request.formData()));
+  async default(event) {
+    const data = await readSchema.spa(convertFormData(await event.request.formData()));
 
     if (!data.success) {
       const flattenedErrors = data.error.flatten();
@@ -44,9 +44,7 @@ export const actions = {
     const res = await fetchBackend("/books/read", {
       authz: true,
       type: "url-encoded",
-      cookies,
-      fetch,
-      setHeaders,
+      event,
       noSuccessContent: true,
       method: "POST",
       body: new URLSearchParams(data.data),
@@ -60,12 +58,10 @@ export const actions = {
   },
 };
 
-export const load = async ({ cookies, fetch, setHeaders }) => {
+export const load = async (event) => {
   const books = await fetchBackend<Omit<Book, "reviews">[]>("/books?include_reviews=false", {
     authz: false,
-    cookies,
-    fetch,
-    setHeaders,
+    event,
   });
   if (!books.ok) {
     error(books.status, books.error);

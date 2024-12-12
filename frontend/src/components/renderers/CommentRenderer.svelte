@@ -116,7 +116,7 @@
 <article>
   <h3 class="sr-only">A comment from user {comment.author_name}</h3>
   <div class="box flex flex-col gap-2 rounded-[21px] p-2.5 shadow-md">
-    <div class="flex flex-row items-center gap-2">
+    <div class="flex flex-row items-center gap-2 font-semibold">
       <img
         src={getProfilePicture(comment.author_picture)}
         class="border-border-light dark:border-border-dark size-10 select-none rounded-full border shadow-lg"

@@ -9,9 +9,7 @@ export const handle: Handle = async ({ event, resolve }) => {
   if (event.request.method === "GET" && token) {
     const res = await fetchBackend<User>("/auth/authenticate", {
       authz: true,
-      cookies: event.cookies,
-      fetch: event.fetch,
-      setHeaders: event.setHeaders,
+      event,
       method: "POST",
       signal: AbortSignal.timeout(5000),
     });

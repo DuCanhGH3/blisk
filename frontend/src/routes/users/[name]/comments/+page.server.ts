@@ -4,23 +4,21 @@ import type { Actions, PageServerLoad } from "./$types";
 import type { Comment } from "$lib/types";
 
 export const actions: Actions = {
-  async react({ cookies, fetch, request, setHeaders }) {
-    return await createReaction(await request.formData(), fetch, cookies, setHeaders);
+  async react(event) {
+    return await createReaction(event);
   },
-  async editComment({ cookies, fetch, request, setHeaders }) {
-    return await editComment(await request.formData(), fetch, cookies, setHeaders);
+  async editComment(event) {
+    return await editComment(event);
   },
 };
 
-export const load: PageServerLoad = async ({ cookies, fetch, params, setHeaders }) => {
-  const user = await fetchBackend<Comment[]>(`/comments?user=${params.name}`, {
+export const load: PageServerLoad = async (event) => {
+  const user = await fetchBackend<Comment[]>(`/comments?user=${event.params.name}`, {
     authz: "optional",
-    cookies,
-    fetch,
-    setHeaders,
+    event,
   });
   if (!user.ok) {
     error(user.status, user.error);
   }
-  return { title: `${params.name}'s comments`, comments: user.data };
+  return { title: `${event.params.name}'s comments`, comments: user.data };
 };

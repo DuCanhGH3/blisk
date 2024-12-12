@@ -4,20 +4,18 @@ import { error } from "@sveltejs/kit";
 import type { Actions, PageServerLoad } from "./$types";
 
 export const actions: Actions = {
-  async react({ cookies, fetch, request, setHeaders }) {
-    return await createReaction(await request.formData(), fetch, cookies, setHeaders);
+  async react(event) {
+    return await createReaction(event);
   },
 };
 
-export const load: PageServerLoad = async ({ cookies, fetch, params, setHeaders }) => {
-  const user = await fetchBackend<Post[]>(`/posts?user=${params.name}`, {
+export const load: PageServerLoad = async (event) => {
+  const user = await fetchBackend<Post[]>(`/posts?user=${event.params.name}`, {
     authz: "optional",
-    cookies,
-    fetch,
-    setHeaders,
+    event,
   });
   if (!user.ok) {
     error(user.status, user.error);
   }
-  return { title: `${params.name}'s posts`, posts: user.data };
+  return { title: `${event.params.name}'s posts`, posts: user.data };
 };

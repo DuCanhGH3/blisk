@@ -86,9 +86,15 @@ impl Application {
                 post(routes::books::create).get(routes::books::read),
             )
             .route("/books/:slug", get(routes::books::read_slug))
+            .route(
+                "/books/:slug/metadata",
+                get(routes::books::read_slug_metadata),
+            )
+            .route("/books/:slug/volumes", get(routes::books::read_slug_volumes))
             .route("/books/categories", get(routes::books::read_categories))
             .route("/books/metadata", get(routes::books::read_metadata))
             .route("/books/read", post(routes::books::create_tracker))
+            .route("/books/chapters", post(routes::books::upload_chapter))
             .route("/books/tracker/:book", get(routes::books::fetch_tracker))
             .route(
                 "/posts",

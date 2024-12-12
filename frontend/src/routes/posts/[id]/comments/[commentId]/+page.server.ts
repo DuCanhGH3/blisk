@@ -4,23 +4,21 @@ import { createComment, createReaction, editComment, fetchBackend } from "$lib/b
 import type { Actions } from "./$types";
 
 export const actions: Actions = {
-  async react({ cookies, fetch, request, setHeaders }) {
-    return await createReaction(await request.formData(), fetch, cookies, setHeaders);
+  async react(event) {
+    return await createReaction(event);
   },
-  async comment({ cookies, fetch, params, request, setHeaders, url }) {
-    return await createComment(params.id, url.searchParams.get("parentId"), await request.formData(), fetch, cookies, setHeaders);
+  async comment(event) {
+    return await createComment(event.params.id, event.url.searchParams.get("parentId"), event);
   },
-  async editComment({ cookies, fetch, request, setHeaders }) {
-    return await editComment(await request.formData(), fetch, cookies, setHeaders);
+  async editComment(event) {
+    return await editComment(event);
   },
 };
 
-export const load = async ({ cookies, fetch, params, setHeaders }) => {
-  const res = await fetchBackend<RequireFields<Post, "comments">>(`/posts/${params.id}?comment_id=${params.commentId}`, {
+export const load = async (event) => {
+  const res = await fetchBackend<RequireFields<Post, "comments">>(`/posts/${event.params.id}?comment_id=${event.params.commentId}`, {
     authz: "optional",
-    cookies,
-    fetch,
-    setHeaders,
+    event,
     signal: AbortSignal.timeout(2000),
   });
   if (!res.ok) {
