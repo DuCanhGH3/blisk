@@ -6,9 +6,6 @@ module.exports = {
     return !filteredDependencies.includes(dependencyName);
   },
   target(dependencyName) {
-    if (dependencyName === "tailwindcss" || dependencyName === "@tailwindcss/vite") {
-      return "@next";
-    }
     if (dependencyName.includes("serwist")) {
       return "@preview";
     }
