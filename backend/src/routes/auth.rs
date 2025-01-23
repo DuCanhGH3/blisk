@@ -413,13 +413,15 @@ pub struct RegisterPayload {
 
 #[instrument(
     name = "Registering a new user",
-    skip(pool, redis_client, email, password, username, picture)
+    skip(pool, s3,
+    // redis_client,
+    email, password, username, picture)
 )]
 pub async fn register(
     State(AppState {
         pool,
         s3,
-        redis_client,
+        // redis_client,
         ..
     }): State<AppState>,
     AppMultipart(RegisterPayload {
@@ -461,16 +463,17 @@ pub async fn register(
     .await?;
     transaction.commit().await?;
     let location = format!("{}/users/{}", SETTINGS.frontend.url, username);
-    let mut redis_con = redis_client.get_connection()?;
-    send_confirmation_email(
-        &mut redis_con,
-        "blisk - Confirmation email".to_owned(),
-        uid.to_string(),
-        username,
-        email,
-        false,
-    )
-    .await?;
+    // TODO(ducanhgh): confirmation email
+    // let mut redis_con = redis_client.get_connection()?;
+    // send_confirmation_email(
+    //     &mut redis_con,
+    //     "blisk - Confirmation email".to_owned(),
+    //     uid.to_string(),
+    //     username,
+    //     email,
+    //     false,
+    // )
+    // .await?;
     Ok(created(location))
 }
 

@@ -31,6 +31,7 @@ export const actions: Actions = {
       authz: false,
       type: "multipart",
       event,
+      noSuccessContent: true,
       method: "POST",
       body: formData,
       signal: AbortSignal.timeout(10000),

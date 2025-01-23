@@ -14,6 +14,8 @@ use axum_typed_multipart::FieldData;
 use sqlx::Postgres;
 use std::{ffi::OsStr, path::Path};
 
+use super::constants::ALLOWED_FILE_EXTENSIONS;
+
 #[derive(Debug, thiserror::Error)]
 pub enum UploadsError {
     #[error("received an invalid filename: {0}")]
@@ -56,8 +58,10 @@ pub async fn upload_file<'c>(
         .extension()
         .and_then(OsStr::to_str)
         .ok_or(UploadsError::InvalidName(file_name.clone()))?;
+    if !ALLOWED_FILE_EXTENSIONS.contains(&ext) {
+        return Err(UploadsError::InvalidName(file_name.clone()))?;
+    }
     let uid = validate_file_name(user_id)?;
-
     let fid = {
         if let Some(pid) = parent_id {
             sqlx::query_scalar!(
